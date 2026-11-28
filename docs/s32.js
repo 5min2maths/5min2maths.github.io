@@ -68,6 +68,7 @@ const sq = (P, Q, outward) => { const dx = Q[0] - P[0], dy = Q[1] - P[1], n = ou
 const d2 = (P, Q) => (P[0] - Q[0]) ** 2 + (P[1] - Q[1]) ** 2;
 let lastC = null;
 const right = (C) => near((A[0] - C[0]) * (B[0] - C[0]) + (A[1] - C[1]) * (B[1] - C[1]), 0);
+let PYCFG;
 ACTIVE.pyth = {
 
 retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). L'égalité n'est vraie que pour un angle droit : si l'angle est obtus, \\(c^2 > a^2 + b^2\\). Pour trouver une cathète, on soustrait : \\(b^2 = c^2 - a^2\\).", exemple: ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\).", "Hypoténuse 13, cathète 5 : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\)."] },
@@ -75,7 +76,7 @@ retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle dr
 plus: [{ d: "Triangle rectangle : l'hypoténuse mesure 13 cm et une cathète 5 cm. Longueur de l'autre cathète, en cm ?", ans: 12, ok: "Le carré de l'hypoténuse est la somme des deux autres : b² = 13² − 5² = 169 − 25 = 144, donc b = 12 cm.", no: "Cette fois, on soustrait : 13² − 5², puis la racine carrée." }],
 predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. Ce sont les carrés qui s'additionnent, pas les côtés : tu vas le voir avec les aires des carrés." },
 defis: ["Déplace le sommet C pour que l'angle en C soit droit. Compare l'aire du grand carré à celle des deux autres.", "Trouve une autre position de C où l'angle en C est droit.", "Place C pour que l'angle en C soit plus grand qu'un angle droit (obtus). Que devient l'égalité ?"],
-play: manip({ W: 320, H: 300,
+play: manip(PYCFG = { W: 320, H: 300,
 note: "Glisse le point C. On vérifie quand tu le lâches.",
 init: (s) => ({ C: s === 2 ? [2.5, 3.5] : [3, 3] }),
 handles: (st) => [{ x: X(st.C[0]), y: Y(st.C[1]), label: "sommet C", text: "C" }],
@@ -102,6 +103,20 @@ ask: [
 { q: "Un triangle a des côtés 5, 7 et 9. Est-il rectangle ? Tape 1 pour oui, 0 pour non.", ans: 0, ok: "25 + 49 = 74, différent de 81 : pas d'égalité, donc pas rectangle (réciproque de Pythagore).", no: "Compare 5² + 7² et 9²." },
 ] }),
 };
+
+
+
+{
+const P11 = ACTIVE.pyth, g = PYCFG.goal;
+const P10 = Object.assign({}, P11, {
+retiens: Object.assign({}, P11.retiens, { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). Le théorème ne s'applique que dans un triangle rectangle. Pour trouver une cathète, on soustrait : \\(b^2 = c^2 - a^2\\)." }),
+play: manip(Object.assign({}, PYCFG, {
+goal: [g[0], g[1], (st) => ((A[0] - st.C[0]) * (B[0] - st.C[0]) + (A[1] - st.C[1]) * (B[1] - st.C[1]) < -1e-9 ? "Angle obtus : la somme des deux petits carrés n'est plus égale au grand. Le théorème de Pythagore ne s'applique que dans un triangle rectangle." : "")],
+ask: [PYCFG.ask[0], PYCFG.ask[1], { q: "Un triangle rectangle a une hypoténuse de 10 et une cathète de 6. Combien mesure l'autre cathète ?", ans: 8, ok: "Pour une cathète, on soustrait : 10² − 6² = 100 − 36 = 64, et √64 = 8.", no: "L'hypoténuse est le plus grand côté : 10² − 6², puis la racine." }] })),
+});
+const co10 = () => typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10;
+Object.defineProperty(ACTIVE, "pyth", { get: () => (co10() ? P10 : P11), set: () => {}, enumerable: true, configurable: true });
+}
 }
 
 
@@ -321,13 +336,26 @@ c.on = true; st.msg = ""; }
 const D1 = [{ top: ["x", "1", "1"], left: ["1", "1", "1"], txt: "3(x + 2)", msg: "Le 3 multiplie le x ET le 2 : 3 barres x et 6 unités." },
 { top: ["x", "1", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)(x + 3)", msg: "Quatre morceaux : x², 3x, 2x et 6, qu'on réduit en x² + 5x + 6." },
 { top: ["x", "1", "1", "1"], left: ["x", "x"], txt: "2x(x + 3)", msg: "2x · x = 2x² et 2x · 3 = 6x." }];
-set("distrib", {
+
+
+
+const D10 = [D1[0], { top: ["x", "x", "1"], left: ["1", "1"], txt: "2(2x + 1)", msg: "Le 2 multiplie 2x ET 1 : 4 barres x et 2 unités, 4x + 2." }, D1[2]];
+const o10 = {
+retiens: { regle: "Le facteur devant la parenthèse multiplie chaque terme de la parenthèse : \\(k(a + b) = ka + kb\\). Dans le rectangle, chaque case est un produit : l'aire totale est la somme des cases.",
+exemple: ["\\(3(x + 2) = 3x + 6\\).", "\\(2(2x + 1) = 4x + 2\\).", "\\(2x(x + 3) = 2x^2 + 6x\\)."], piege: "\\(3(x + 2)\\) n'est pas \\(3x + 2\\) : le 3 multiplie aussi le 2 (six unités dans le rectangle)." },
+predict: { q: "3(2x + 5) = ?", choices: ["6x + 5", "6x + 15", "5x + 8"], good: 1, why: "Le 3 multiplie les deux termes : 3 · 2x = 6x et 3 · 5 = 15. Comme l'aire d'un rectangle coupé en deux." },
+defis: ["Remplis le rectangle 3 sur (x + 2) avec des tuiles : quelle est son aire ?", "Remplis le rectangle 2 sur (2x + 1).", "Remplis le rectangle 2x sur (x + 3)."],
+play: mk(D10, [null, { q: "Sans la figure : −2(4x − 3) = −8x + … Tape le nombre qui manque.", ans: 6, ok: "−2 · (−3) = +6 : moins par moins donne plus, −2(4x − 3) = −8x + 6.", no: "Le −2 multiplie aussi le −3 : −2 · (−3) = ?" }, null]),
+};
+const o11 = {
 
 retiens: { exemple: ["\\(3(x + 2) = 3x + 6\\).", "\\((x + 2)(x + 3) = x^2 + 3x + 2x + 6 = x^2 + 5x + 6\\).", "\\(2x(x + 3) = 2x^2 + 6x\\)."], piege: "Dans \\((x + 2)(x + 3)\\), il y a 4 produits (4 morceaux du rectangle) : n'oublie pas les produits « croisés »." },
 predict: { q: "3(2x + 5) = ?", choices: ["6x + 5", "6x + 15", "5x + 8"], good: 1, why: "Le 3 multiplie les deux termes : 3 · 2x = 6x et 3 · 5 = 15. Comme l'aire d'un rectangle coupé en deux." },
 defis: ["Remplis le rectangle 3 sur (x + 2) avec des tuiles : quelle est son aire ?", "Remplis le rectangle (x + 2) sur (x + 3).", "Remplis le rectangle 2x sur (x + 3)."],
 play: mk(D1, [null, { q: "Développe (x + 4)(x + 1) et réduis : tape le coefficient de x.", ans: 5, ok: "(x + 4)(x + 1) = x² + x + 4x + 4 = x² + 5x + 4.", no: "Quatre produits : x · x, x · 1, 4 · x et 4 · 1 ; puis regroupe les x." }, null]),
-});
+};
+const co10 = () => typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10;
+Object.defineProperty(ACTIVE, "distrib", { get: () => (co10() ? o10 : o11), set: () => {}, enumerable: true, configurable: true });
 const D2 = [{ top: ["x", "1"], left: ["x", "1"], txt: "(x + 1)²", msg: "Un carré x², deux barres x et une unité : x² + 2x + 1." },
 { top: ["x", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)²", msg: "Deux rectangles de 2x (le double produit 4x), plus 2² = 4 : x² + 4x + 4." },
 { top: ["x", "1", "1", "1"], left: ["x", "1", "1", "1"], txt: "(x + 3)²", msg: "x² + 6x + 9 : sans les deux rectangles 3x, il manquerait le double produit." }];

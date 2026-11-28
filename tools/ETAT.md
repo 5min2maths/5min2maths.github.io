@@ -35,6 +35,10 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
 ## File d'attente (28.11)
 
 **EN TÊTE (demain 29.11, décisions 28.11)** :
+0. **`/entretien poids`** : le contenu propre à une classe (defis_sec2 : grands problèmes 11e / 1C ; variantes.js : formes de
+   10e ; riche_10.js, riche_9.js) est chargé par TOUS au premier chargement (nouvel élève 722 → 773 Ko gzip le 28.11) :
+   le ranger dans les segments de classe (build.py), puis redescendre les plafonds de tests/poids.html (relevés le 28.11
+   au soir pour publier le contenu validé du jour). À montrer à l'enseignant (son accord avant de démarrer).
 1. **Factorisation 11e** (testée par l'enseignant : il n'a vu que de la mise en évidence) : niveaux = difficulté, pas type
    de technique ; chaque niveau mélange mise en évidence, identités (x² − 16, carrés parfaits), puis au maximum / trinômes
    / « trouve l'erreur » ; question « quelle méthode ? » ; même vérification pour toutes les notions de 11e.

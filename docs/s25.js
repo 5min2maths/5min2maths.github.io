@@ -719,6 +719,182 @@ bet: { q: "Quel nombre célèbre se cache dans ce rectangle ?", choices: ["π �
 calc: { label: "Calcule le rapport largeur ÷ hauteur du rectangle (au centième)", value: Math.round((w / h) * 100) / 100, round: 0.01 },
 reveal: M(N(w, 1) + " \\div " + h + " \\approx " + N(w / h, 3)) + " : c'est le <b>nombre d'or</b> " + M("\\varphi = \\frac{1 + \\sqrt{5}}{2} \\approx 1{,}618") + ". Un rectangle dont la largeur vaut " + M("\\varphi") + " fois la hauteur est un <b>rectangle d'or</b> : si on en retire un carré, il reste un rectangle d'or plus petit. En recommençant, et en traçant un quart de cercle dans chaque carré, on obtient la <b>spirale d'or</b>… regarde bien le reflet de la pépite !" };
 } });
+
+
+
+
+add({ key: "carre50", fam: "enigme", uses: ["idrem"], outil: "les identités remarquables : (a − b)² = a² − 2ab + b² et (a + b)² = a² + 2ab + b², avec un a « rond ».",
+make() {
+const a = pk([30, 50, 70, 100]), d = pk([1, 2, 3]), s = pk([-1, 1]), n = a + s * d, v = n * n;
+const sg = s < 0 ? "-" : "+";
+return { titre: "Plus vite que la calculatrice", q: "Ton voisin parie qu'il calcule " + M(n + "^2") + " de tête avant que tu aies sorti ta calculatrice. Son secret : " + M(n + " = " + a + " " + sg + " " + d) + ".",
+bet: { q: "Quelle astuce utilise-t-il ?", choices: [M("(" + a + " " + sg + " " + d + ")^2 = " + a + "^2 " + sg + " " + 2 * d + " \\cdot " + a + " + " + d * d), M("(" + a + " " + sg + " " + d + ")^2 = " + a + "^2 " + sg + " " + d * d), "Il connaît par cœur tous les carrés jusqu'à " + (a + 10)], good: 0 },
+calc: { label: "À toi : calcule " + M(n + "^2") + " avec son astuce", value: v },
+reveal: M("(" + a + " " + sg + " " + d + ")^2 = " + N(a * a) + " " + sg + " " + N(2 * d * a) + " + " + d * d + " = " + N(v)) + ". Le piège : oublier le double produit " + M("2 \\cdot " + a + " \\cdot " + d) + " et écrire " + M(N(a * a) + " " + sg + " " + d * d + " = " + N(a * a + s * d * d)) + "." };
+} });
+add({ key: "ballon", fam: "quotidien", uses: ["eq2"], outil: "l'équation produit nul : h = t(v − 5t) = 0 donne t = 0 (le départ) ou t = v ÷ 5 (le retour au sol).",
+make() {
+const v = pk([10, 15, 20, 25]), t = v / 5, H = (v * v) / 20, [what, pr] = pk([["un ballon", "le"], ["une balle de tennis", "la"], ["une balle de jonglage", "la"]]);
+return { titre: "Combien de temps en l'air ?", q: "Tu lances " + what + " verticalement vers le haut, à " + M(v + "\\ \\text{m/s}") + ". Sans le frottement de l'air, sa hauteur (en m) au-dessus de ta main après " + M("t") + " secondes vaut " + M("h = " + v + "t - 5t^2") + ".",
+bet: { q: "Si tu " + pr + " lançais deux fois plus vite, " + (pr === "le" ? "il" : "elle") + " resterait en l'air…", choices: ["deux fois plus longtemps", "quatre fois plus longtemps", "à peine plus longtemps"], good: 0 },
+calc: { label: "Au bout de combien de secondes revient-" + (pr === "le" ? "il" : "elle") + " à la hauteur de ta main ?", value: t },
+reveal: M(v + "t - 5t^2 = t(" + v + " - 5t) = 0") + " : produit nul, donc " + M("t = 0") + " (le départ) ou " + M(v + " - 5t = 0") + ", soit " + M("t = " + N(t)) + " s. Deux fois plus vite : " + M("t = " + N(2 * t)) + " s, deux fois plus longtemps. Mais " + (pr === "le" ? "il" : "elle") + " monte <b>quatre</b> fois plus haut (" + M(N(H)) + " m, puis " + M(N(4 * H)) + " m) : la hauteur dépend du carré de la vitesse." };
+} });
+add({ key: "pattes", fam: "enigme", uses: ["sys2"], outil: "les systèmes de deux équations : une équation pour les têtes (ou les objets), une pour les pattes (ou les roues).",
+make() {
+const w = pk([{ a: "poules", b: "lapins", ka: 2, kb: 4, u: "têtes", p: "pattes", lieu: "Dans la cour d'une ferme" }, { a: "motos", b: "voitures", ka: 2, kb: 4, u: "véhicules", p: "roues", lieu: "Sur un parking" },
+{ a: "tabourets à 3 pieds", b: "chaises à 4 pieds", ka: 3, kb: 4, u: "sièges", p: "pieds", lieu: "Dans une salle de spectacle" }]);
+let A, B; do { A = R.int(8, 30); B = R.int(5, 25); } while (A === B || Math.abs(A - B) < 3);
+const H = A + B, P = w.ka * A + w.kb * B;
+return { titre: "Têtes et pattes", q: w.lieu + ", il y a des " + w.a + " et des " + w.b + ". On compte " + M(H) + " " + w.u + " et " + M(P) + " " + w.p + ".",
+bet: { q: "Y a-t-il plus de " + w.a + " ou de " + w.b + " ?", choices: ["Plus de " + w.a, "Plus de " + w.b, "Autant des deux"], good: A > B ? 0 : 1 },
+calc: { label: "Combien y a-t-il de " + w.b + " ?", value: B },
+reveal: "Avec " + M("x") + " " + w.a + " et " + M("y") + " " + w.b + " : " + M("x + y = " + H) + " et " + M(w.ka + "x + " + w.kb + "y = " + P) + ". On multiplie la première par " + w.ka + " et on soustrait : " + M((w.kb - w.ka === 1 ? "" : w.kb - w.ka) + "y = " + P + " - " + w.ka * H + " = " + (P - w.ka * H)) + (w.kb - w.ka === 1 ? "" : ", donc " + M("y = " + B)) + " et " + M("x = " + A) + ". L'astuce cachée : si tous étaient des " + w.a + ", il n'y aurait que " + M(w.ka * H) + " " + w.p + " ; chaque " + w.b.split(" ")[0].replace(/s$/, "") + " en ajoute " + (w.kb - w.ka) + "." };
+} });
+add({ key: "geant", fam: "paradoxe", uses: ["simil"], outil: "les similitudes : quand les longueurs sont multipliées par k, les aires le sont par k² et les volumes (donc les masses) par k³.",
+make() {
+const k = pk([2, 3, 4, 5]), m = pk([50, 55, 60, 65]), t = pk([1.6, 1.65, 1.7]), Mg = m * k ** 3;
+return { titre: "Pourquoi les géants n'existent pas", q: "Imagine un géant " + M(k) + " fois plus grand que toi, exactement avec tes proportions : toutes ses longueurs sont multipliées par " + M(k) + " (il mesure " + M(N(t * k) + "\\ \\text{m}") + "). Tu pèses " + M(m + "\\ \\text{kg}") + ".",
+bet: { q: "Sa masse est…", choices: [M(k) + " fois la tienne", M(k * k) + " fois la tienne", M(k ** 3) + " fois la tienne"], good: 2 },
+calc: { label: "Quelle est la masse du géant (en kg) ?", value: Mg },
+reveal: "Le volume est multiplié par " + M(k + "^3 = " + k ** 3) + " : " + M(m + " \\cdot " + k ** 3 + " = " + N(Mg)) + " kg. Mais la section de ses os n'est multipliée que par " + M(k + "^2 = " + k * k) + " : chaque cm² d'os porte " + M(k) + " fois plus de poids que chez toi, et ses jambes se briseraient. Galilée l'a expliqué en 1638 : c'est pour cela que les grands animaux ont des os bien plus épais, en proportion." };
+} });
+add({ key: "equerre", fam: "enigme", uses: ["cercthales"], outil: "le cercle de Thalès : si C est sur le cercle de diamètre [AB], l'angle en C est droit ; puis Pythagore dans le triangle ABC.",
+make() {
+const [d, a, b] = pk([[10, 6, 8], [13, 5, 12], [25, 7, 24], [17, 8, 15], [15, 9, 12], [26, 10, 24], [20, 12, 16]]), [x, y] = R.int(0, 1) ? [a, b] : [b, a];
+const ctx = pk(["Sur ta feuille, tu traces", "Dans la cour, avec une corde et un piquet, tu traces", "Sur une planche, tu traces"]), u = ctx.includes("cour") ? "m" : "cm";
+return { titre: "Un angle droit sans équerre", q: ctx + " un cercle de diamètre " + M("AB = " + d + "\\ \\text{" + u + "}") + ", puis tu choisis un point " + M("C") + " sur le cercle, à " + M(x + "\\ \\text{" + u + "}") + " de " + M("A") + ".",
+bet: { q: "L'angle " + M("\\widehat{ACB}") + " mesure…", choices: ["cela dépend de l'endroit où l'on met C", "toujours 90°", "toujours 60°"], good: 1 },
+calc: { label: "Longueur " + M("BC") + " (en " + u + ")", value: y },
+reveal: "C est sur le cercle de diamètre [AB] : le triangle ABC est rectangle en C (cercle de Thalès), où que soit C. Pythagore : " + M("BC^2 = " + d + "^2 - " + x + "^2 = " + (d * d - x * x)) + ", donc " + M("BC = " + y) + " " + u + ". Un cercle, un diamètre et un point suffisent à faire un angle droit parfait." };
+} });
+add({ key: "mouche", fam: "enigme", uses: ["repere3d"], outil: "les coordonnées dans l'espace : la distance de O(0 ; 0 ; 0) à P(x ; y ; z) vaut √(x² + y² + z²) (Pythagore deux fois).",
+make() {
+let L, l, h, d; do { L = pk([4, 4.5, 5, 5.5, 6]); l = pk([3, 3.5, 4]); h = pk([2.4, 2.5, 2.6]); d = Math.sqrt(L * L + l * l + h * h); } while (Math.abs(d - 6) < 0.08 || Math.abs(d - 7) < 0.08);
+return { titre: "La mouche dans la chambre", q: "Une chambre en forme de pavé mesure " + M(N(L) + "\\ \\text{m}") + " sur " + M(N(l) + "\\ \\text{m}") + ", avec " + M(N(h) + "\\ \\text{m}") + " de hauteur. On place un repère dans un coin du sol : O(0 ; 0 ; 0). Une mouche part de O et vole en ligne droite jusqu'au coin opposé du plafond, " + M("P(" + N(L) + "\\,;\\," + N(l) + "\\,;\\," + N(h) + ")") + ".",
+bet: { q: "Quelle distance parcourt-elle ?", choices: ["moins de 6 m", "entre 6 et 7 m", "plus de 7 m"], good: d < 6 ? 0 : d < 7 ? 1 : 2 },
+calc: { label: "Distance OP (en m, au centième)", value: Math.round(d * 100) / 100, round: 0.01 },
+reveal: "Au sol, la diagonale vaut " + M("\\sqrt{" + N(L) + "^2 + " + N(l) + "^2}") + " ; avec la hauteur, Pythagore une deuxième fois : " + M("OP = \\sqrt{" + N(L) + "^2 + " + N(l) + "^2 + " + N(h) + "^2} = \\sqrt{" + N(L * L + l * l + h * h) + "} \\approx " + N(d, 2)) + " m. C'est la plus longue ligne droite qui tienne dans la pièce." };
+} });
+add({ key: "magie", fam: "enigme", uses: ["idrem", "parenth"], outil: "le calcul littéral : avec x à la place du nombre choisi, (x + a)² − x(x + 2a) se réduit à a² : x disparaît.",
+make() {
+const a = pk([3, 4, 5, 6, 7, 8]), x = R.int(12, 39);
+return { titre: "Le tour de magie", q: "« Pense à un nombre. Ajoute " + a + ", puis élève le résultat au carré. Ensuite, calcule ton nombre multiplié par (ton nombre + " + 2 * a + "), et soustrais-le du carré. Je devine ton résultat ! »",
+bet: { q: "Comment le magicien peut-il deviner ?", choices: ["Il ne peut pas : chacun trouve un résultat différent", "Tout le monde trouve le même résultat", "Il devine seulement si le nombre est pair"], good: 1 },
+calc: { label: "Fais le tour avec le nombre " + x + " : quel résultat trouves-tu ?", value: a * a },
+reveal: M("(" + x + " + " + a + ")^2 - " + x + " \\cdot " + (x + 2 * a) + " = " + N((x + a) ** 2) + " - " + N(x * (x + 2 * a)) + " = " + a * a) + ". Avec " + M("x") + " : " + M("(x + " + a + ")^2 - x(x + " + 2 * a + ") = x^2 + " + 2 * a + "x + " + a * a + " - x^2 - " + 2 * a + "x = " + a * a) + ". Le nombre choisi disparaît : le résultat est toujours " + a * a + "." };
+} });
+add({ key: "cadre", fam: "paradoxe", uses: ["probeq2"], outil: "un problème du 2e degré : (L + 2x)(l + 2x) = 2 · L · l, puis la formule (ou la factorisation).",
+make() {
+const [l, L] = pk([[12, 18], [16, 24], [20, 30], [24, 36], [28, 42]]), x = l / 4, b = (L + l) / 2, c = (L * l) / 4;
+return { titre: "Le cadre aussi grand que la photo", q: "Tu encadres une photo de " + M(l + "\\ \\text{cm}") + " sur " + M(L + "\\ \\text{cm}") + " avec un cadre de même largeur " + M("x") + " tout autour. Tu veux que le cadre seul ait la même aire que la photo.",
+bet: { q: "Quelle largeur faut-il ?", choices: ["à peu près la moitié du petit côté", "le quart du petit côté", "un dixième du petit côté"], good: 1 },
+calc: { label: "Largeur " + M("x") + " du cadre (en cm)", value: x },
+reveal: "Photo et cadre ensemble : " + M("(" + L + " + 2x)(" + l + " + 2x) = 2 \\cdot " + L * l) + ". En développant : " + M("4x^2 + " + 2 * (L + l) + "x - " + L * l + " = 0") + ", soit " + M("x^2 + " + b + "x - " + c + " = 0") + ", donc " + M("(x - " + N(x) + ")(x + " + N(b + x) + ") = 0") + " : " + M("x = " + N(x)) + " cm (l'autre solution est négative). Un cadre étroit suffit, car il fait tout le tour." };
+} });
+add({ key: "cornet", fam: "paradoxe", uses: ["volcone", "simil"], outil: "le volume du cône, V = π · r² · h ÷ 3, et les similitudes : à mi-hauteur, le petit cône est une réduction de rapport 1/2, donc de volume (1/2)³ = 1/8.",
+make() {
+const [r, h] = pk([[3, 9], [4, 12], [4, 10], [5, 12], [3, 10]]), V = (Math.PI * r * r * h) / 3, v = V / 8, what = pk(["Un verre à cocktail", "Un gobelet conique en papier", "Une flûte conique"]);
+return { titre: "À moitié plein ?", q: what + " a la forme d'un cône pointe en bas : rayon " + M(r + "\\ \\text{cm}") + " en haut, profondeur " + M(h + "\\ \\text{cm}") + ". On le remplit jusqu'à la moitié de sa profondeur.",
+bet: { q: "Quelle part du volume est remplie ?", choices: ["la moitié", "un quart", "un huitième"], good: 2 },
+calc: { label: "Volume rempli (en cm³, au dixième)", value: Math.round(v * 10) / 10, round: 0.1 },
+reveal: "Le liquide forme un petit cône de rayon " + M(N(r / 2)) + " cm et de hauteur " + M(N(h / 2)) + " cm : " + M("\\frac{\\pi \\cdot " + N(r / 2) + "^2 \\cdot " + N(h / 2) + "}{3} \\approx " + N(v, 1)) + " cm³, sur " + M(N(V, 1)) + " cm³ en tout : un huitième ! Toutes les longueurs sont divisées par 2, le volume par " + M("2^3 = 8") + ". Rempli « à mi-hauteur », un verre conique est presque vide." };
+} });
+
+add({ key: "billet", fam: "quotidien", uses: ["optim"], outil: "l'optimisation : la recette R(x) = (p + x)(N − kx) est une fonction du 2e degré ; son maximum est au sommet de la parabole.",
+make() {
+const p = pk([12, 15, 18, 20]), k = pk([8, 10, 15, 20]), x = R.int(3, 8), Nn = k * (p + 2 * x), what = pk(["un concert de l'école", "une pièce de théâtre", "un festival de cinéma en plein air"]);
+return { titre: "Le prix qui rapporte le plus", q: "Pour " + what + ", le billet coûte " + chf(p) + " et " + M(N(Nn)) + " spectateurs viennent. Une enquête montre que chaque hausse de " + chf(1) + " fait perdre " + M(k) + " spectateurs.",
+bet: { q: "Augmenter le prix…", choices: ["fait toujours perdre de l'argent", "rapporte plus, mais seulement jusqu'à un certain prix", "rapporte toujours plus"], good: 1 },
+calc: { label: "Quel prix du billet rapporte la plus grande recette ? (en CHF)", value: p + x },
+reveal: "Avec une hausse de " + M("x") + " CHF : " + M("R(x) = (" + p + " + x)(" + Nn + " - " + k + "x)") + ". Ses zéros sont " + M("x = -" + p) + " et " + M("x = " + (p + 2 * x)) + " ; le sommet est au milieu : " + M("x = " + x) + ". Billet à " + chf(p + x) + " : recette " + chf((p + x) * (Nn - k * x)) + ", contre " + chf(p * Nn) + " au départ." };
+} });
+add({ key: "euler41", fam: "paradoxe", uses: ["contrex"], outil: "le contre-exemple : beaucoup d'exemples ne prouvent rien ; un seul contre-exemple suffit à réfuter une affirmation.",
+make() {
+const [e, n0, s] = pk([["n^2 + n + 41", 40, "+"], ["n^2 - n + 41", 41, "-"]]), k = R.int(2, 9), vk = k * k + (s === "+" ? k : -k) + 41;
+return { titre: "La formule à nombres premiers", q: "Euler a signalé en 1772 que " + M(e) + " donne un nombre premier pour " + M("n = 1, 2, 3") + "… Par exemple, pour " + M("n = " + k) + ", on obtient " + M(vk) + ", qui est premier. On l'a vérifié pour les 30 premières valeurs de " + M("n") + ".",
+bet: { q: "Cette formule donne-t-elle toujours un nombre premier ?", choices: ["Oui, 30 exemples le prouvent", "Non, il existe un n pour lequel elle échoue", "On ne pourra jamais le savoir"], good: 1 },
+calc: { label: "Calcule la valeur pour " + M("n = " + n0), value: 1681 },
+reveal: "Pour " + M("n = " + n0) + " : " + M(n0 + "^2 " + s + " " + n0 + " + 41 = 1\\text{'}681 = 41^2") + ", qui n'est pas premier. La formule marche pour 40 valeurs de suite, puis échoue : des dizaines d'exemples ne remplacent pas une démonstration." };
+} });
+add({ key: "consecutifs", fam: "enigme", uses: ["demoalg"], outil: "la démonstration algébrique : n + (n + 1) + (n + 2) = 3(n + 1), toujours un multiple de 3, et le nombre du milieu vaut la somme ÷ 3.",
+make() {
+const m = R.int(24, 95), S = 3 * m;
+return { titre: "Le calcul de tête de Léa", q: "Léa propose : « Donne-moi la somme de trois nombres entiers consécutifs, je te dis tout de suite les trois nombres. » Tom annonce " + M(S) + ".",
+bet: { q: "Peut-on obtenir n'importe quelle somme avec trois entiers consécutifs ?", choices: ["Oui, n'importe quel entier", "Non, seulement des multiples de 3", "Non, seulement des nombres pairs"], good: 1 },
+calc: { label: "Quel est le plus petit des trois nombres de Tom ?", value: m - 1 },
+reveal: M("n + (n + 1) + (n + 2) = 3n + 3 = 3(n + 1)") + " : la somme est toujours un multiple de 3, et " + M("n + 1") + ", le nombre du milieu, vaut la somme divisée par 3. Ici " + M(S + " \\div 3 = " + m) + " : les nombres sont " + (m - 1) + ", " + m + " et " + (m + 1) + ". Si Tom annonce " + (S + 1) + ", Léa sait qu'il triche." };
+} });
+add({ key: "rdv", fam: "enigme", uses: ["absval"], outil: "la valeur absolue : la distance entre x et a vaut |x − a| ; la somme des distances est la plus petite à la médiane des positions.",
+make() {
+let p, mean; do { p = [...new Set([...Array(5)].map(() => R.int(0, 24)))].sort((a, b) => a - b); mean = p.length === 5 ? p.reduce((s, v) => s + v, 0) / 5 : 0; } while (p.length < 5 || Math.abs(mean - p[2]) < 1.5 || Math.abs((p[0] + p[4]) / 2 - p[2]) < 1.5);
+const tot = p[4] - p[0] + p[3] - p[1], noms = ["Ana", "Ben", "Chloé", "Dario", "Emma"];
+return { titre: "Le point de rendez-vous", q: "Cinq amis habitent le long d'une même route. Leurs maisons sont aux bornes " + p.map((v, i) => noms[i] + " " + M(v)).join(", ") + " (en km). Ils veulent se retrouver en un point de la route en marchant le moins possible au total.",
+bet: { q: "Où se retrouver ?", choices: ["au milieu, entre les deux maisons extrêmes", "à la moyenne des cinq positions", "chez " + noms[2] + ", la maison du milieu"], good: 2 },
+calc: { label: "Distance totale parcourue par les cinq, au meilleur point (en km)", value: tot },
+reveal: "En un point " + M("x") + ", la marche totale vaut " + M(p.map((v) => "|x - " + v + "|").join(" + ")) + ". Si l'on s'éloigne de la maison du milieu, on se rapproche de deux amis mais on s'éloigne de trois : le minimum est en " + M("x = " + p[2]) + " (la <b>médiane</b>). Total : " + M((p[4] - p[0]) + " + " + (p[3] - p[1]) + " + 0 = " + tot) + " km. À la moyenne (" + M(N(mean, 1)) + "), on marcherait " + M(N(p.reduce((s, v) => s + Math.abs(mean - v), 0), 1)) + " km." };
+} });
+add({ key: "colline", fam: "quotidien", uses: ["inter"], outil: "l'intersection de deux graphes : on égalise les deux expressions, bx − cx² = mx, et on résout.",
+make() {
+const [b, c, m] = pk([[1, 0.05, 0.25], [1, 0.05, 0.2], [1, 0.05, 0.4], [1, 0.04, 0.2], [1, 0.04, 0.4], [0.8, 0.04, 0.2]]), x = Math.round(((b - m) / c) * 1e6) / 1e6, xf = Math.round((b / c) * 1e6) / 1e6;
+const who = pk(["Un footballeur", "Une joueuse de rugby", "Un gardien de but"]);
+return { titre: "Le ballon et la colline", q: who + " tape dans le ballon au pied d'une colline. Sa trajectoire : " + M("y = " + (b === 1 ? "" : N(b)) + "x - " + N(c) + "x^2") + " ; la pente de la colline : " + M("y = " + N(m) + "x") + " (" + M("x") + " et " + M("y") + " en mètres).",
+bet: { q: "Par rapport à un terrain plat, le ballon retombe…", choices: ["plus près", "au même endroit", "plus loin"], good: 0 },
+calc: { label: "À quelle distance horizontale " + M("x") + " (en m) touche-t-il la colline ?", value: x },
+reveal: M((b === 1 ? "" : N(b)) + "x - " + N(c) + "x^2 = " + N(m) + "x") + " donne " + M("x(" + N(r6(b - m)) + " - " + N(c) + "x) = 0") + " : " + M("x = 0") + " (le départ) ou " + M("x = " + N(r6(b - m)) + " \\div " + N(c) + " = " + N(x)) + " m. Sur terrain plat (" + M("y = 0") + "), il irait jusqu'à " + M(N(xf)) + " m : la colline l'arrête plus tôt." };
+} });
+add({ key: "nuages", fam: "fermi", uses: ["trigo"], outil: "la trigonométrie du triangle rectangle : hauteur = distance · tan(angle).",
+make() {
+const d = pk([300, 400, 500, 600]), a = pk([55, 60, 65, 70]), h = d * Math.tan((a * Math.PI) / 180);
+return { titre: "La hauteur des nuages", q: "Avant les appareils laser, on mesurait la nuit la base des nuages sur les aérodromes avec un projecteur : il éclaire verticalement, et la tache de lumière se voit sur les nuages. Un observateur, à " + M(d + "\\ \\text{m}") + " du projecteur, voit la tache sous un angle de " + M(a + "°") + " au-dessus de l'horizontale.",
+bet: { q: "La base des nuages est…", choices: ["à moins de 500 m", "entre 500 m et 2 km", "à plus de 2 km"], good: h < 500 ? 0 : h <= 2000 ? 1 : 2 },
+calc: { label: "Hauteur de la base des nuages (en m)", value: Math.round(h), range: [h * 0.97, h * 1.03] },
+reveal: "Projecteur, observateur et tache forment un triangle rectangle : " + M("\\tan " + a + "° = \\frac{h}{" + d + "}") + ", donc " + M("h = " + d + " \\cdot \\tan " + a + "° \\approx " + N(Math.round(h))) + " m. Une seule distance et un seul angle suffisent." };
+} });
+add({ key: "taxis", fam: "quotidien", uses: ["modaff"], outil: "la modélisation par des fonctions du premier degré : prix = prise en charge + prix au km · distance ; les deux droites se coupent au prix égal.",
+make() {
+const [A0, pA, B0, pB] = pk([[10, 3, 4, 3.5], [9, 3.2, 5, 3.7], [13, 2.8, 6, 3.3], [8, 3, 5, 3.5], [11, 2.9, 5, 3.5]]), d = r6((A0 - B0) / (pB - pA));
+let D; do D = R.int(3, 20); while (Math.abs(D - d) < 2);
+return { titre: "Deux taxis", q: "Taxi Éclair : " + chf(A0) + " de prise en charge, puis " + chf(pA) + " par km. Taxi Express : " + chf(B0) + " de prise en charge, puis " + chf(pB) + " par km. Tu dois faire " + M(D + "\\ \\text{km}") + ".",
+bet: { q: "Lequel choisir pour ce trajet ?", choices: ["Éclair", "Express", "C'est le même prix"], good: D > d ? 0 : 1 },
+calc: { label: "À partir de quelle distance (en km) les deux taxis coûtent-ils le même prix ?", value: d },
+reveal: "Éclair : " + M("f(x) = " + N(A0) + " + " + N(pA) + "x") + " ; Express : " + M("g(x) = " + N(B0) + " + " + N(pB) + "x") + ". Égalité : " + M(N(A0 - B0) + " = " + N(r6(pB - pA)) + "x") + ", donc " + M("x = " + N(d)) + " km. En dessous, Express (prise en charge plus basse) gagne ; au-dessus, Éclair (km moins cher). Pour " + D + " km : Éclair " + chf(r6(A0 + pA * D)) + ", Express " + chf(r6(B0 + pB * D)) + "." };
+} });
+add({ key: "periode", fam: "enigme", uses: ["ensembles"], outil: "les nombres rationnels : un développement décimal périodique est une fraction ; avec x = 0,abab…, 100x − x = ab.",
+make() {
+const ab = pk([18, 27, 36, 45, 54, 63, 72, 12, 15, 21, 24, 42, 51, 57]), g = gcd(ab, 99), den = 99 / g, s = String(ab).padStart(2, "0");
+return { titre: "Le nombre qui se répète", q: "En divisant deux entiers, tu obtiens " + M("0{,}" + s + s + s + s + "\\ldots") + " : les chiffres " + s + " se répètent sans fin.",
+bet: { q: "Ce nombre est-il une fraction (un quotient de deux entiers) ?", choices: ["Non : il a une infinité de décimales", "Oui, c'est une fraction", "Seulement si on l'arrondit"], good: 1 },
+calc: { label: "Écris-le comme une fraction irréductible : quel est son dénominateur ?", value: den },
+reveal: "Avec " + M("x = 0{,}" + s + s + "\\ldots") + " : " + M("100x = " + ab + "{,}" + s + s + "\\ldots") + ". En soustrayant, les décimales s'annulent : " + M("99x = " + ab) + ", donc " + M("x = \\frac{" + ab + "}{99} = \\frac{" + ab / g + "}{" + den + "}") + ". Tout nombre décimal périodique est rationnel. La même astuce montre que " + M("0{,}999\\ldots = 1") + " !" };
+} });
+
+add({ key: "chiffres2", fam: "enigme", uses: ["log"], outil: "le logarithme décimal : un entier N a ⌊log N⌋ + 1 chiffres, et log 2ⁿ = n · log 2 ≈ n · 0,30103.",
+make() {
+const [n, ctx] = pk([[64, "le nombre de clés possibles d'un code secret de 64 bits"], [128, "le nombre d'adresses IPv6 possibles sur Internet"], [256, "le nombre de clés d'un chiffrement AES-256"], [100, "le nombre de façons de répondre à un QCM de 100 questions vrai-faux"]]), L = n * Math.log10(2), dg = Math.floor(L) + 1;
+return { titre: "Combien de chiffres ?", q: M("2^{" + n + "}") + " : c'est " + ctx + ". Aucune calculatrice ordinaire ne l'affiche en entier.",
+bet: { q: "Écrit en entier, ce nombre a environ…", choices: [Math.round(n / 10) + " chiffres", Math.round(n / 3) + " chiffres", Math.round(n / 2) + " chiffres"], good: 1 },
+calc: { label: "Combien de chiffres a exactement " + M("2^{" + n + "}") + " ?", value: dg },
+reveal: M("\\log 2^{" + n + "} = " + n + " \\cdot \\log 2 \\approx " + n + " \\cdot 0{,}30103 \\approx " + N(L, 2)) + ". Donc " + M("10^{" + Math.floor(L) + "} \\leq 2^{" + n + "} < 10^{" + (Math.floor(L) + 1) + "}") + " : " + dg + " chiffres. Chaque doublement ajoute environ 0,3 chiffre : 10 doublements ajoutent 3 chiffres (" + M("2^{10} = 1\\text{'}024") + ")." };
+} });
+add({ key: "gps", fam: "quotidien", uses: ["cercle"], outil: "les équations de cercles : soustraire les équations de deux cercles fait disparaître x² et y², et il reste une équation du premier degré.",
+make() {
+let P, d, r2; for (let t = 0; t < 200; t++) { P = pk([[3, 4], [4, 3], [6, 8], [8, 6], [5, 12], [12, 5], [9, 12], [12, 9], [8, 15], [15, 8]]); d = R.int(5, 30); const q = (d - P[0]) ** 2 + P[1] ** 2, s = Math.round(Math.sqrt(q)); if (s * s === q && d !== P[0]) { r2 = s; break; } }
+if (!r2) { P = [6, 8]; d = 12; r2 = 10; }
+const r1 = Math.hypot(...P);
+return { titre: "Se situer comme un GPS", q: "Deux antennes sont placées en A(0 ; 0) et B(" + d + " ; 0) (en km). Ton téléphone mesure qu'il est à " + M(r1 + "\\ \\text{km}") + " de A et à " + M(r2 + "\\ \\text{km}") + " de B. Tu es au nord de la route AB (y > 0).",
+bet: { q: "Avec deux distances seulement, sans « au nord », combien de positions seraient possibles ?", choices: ["une seule", "deux", "une infinité"], good: 1 },
+calc: { label: "Abscisse " + M("x") + " de ta position (en km)", value: P[0] },
+reveal: "Cercles : " + M("x^2 + y^2 = " + r1 * r1) + " et " + M("(x - " + d + ")^2 + y^2 = " + r2 * r2) + ". En soustrayant : " + M(2 * d + "x - " + d * d + " = " + (r1 * r1 - r2 * r2)) + ", donc " + M("x = " + P[0]) + ", puis " + M("y^2 = " + (r1 * r1 - P[0] * P[0])) + " et " + M("y = " + P[1]) + ". Deux cercles se coupent en deux points : il faut une troisième information. Le GPS fait de même avec des sphères autour des satellites (et un satellite de plus pour corriger l'horloge du récepteur)." };
+} });
+add({ key: "cafeine", fam: "quotidien", uses: ["expo"], outil: "la décroissance exponentielle : avec une demi-vie de 5 h, la quantité restante vaut m₀ · (1/2)^(t/5).",
+make() {
+const [D, what] = pk([[80, "un expresso"], [80, "une canette de boisson énergisante (25 cL)"], [160, "deux expressos"], [90, "une grande tasse de café filtre"]]), H = pk([15, 16, 17]), t = 22 - H, m = D * 0.5 ** (t / 5);
+return { titre: "Le café de l'après-midi", q: "À " + H + " h, un adulte boit " + what + ", soit environ " + M(D + "\\ \\text{mg}") + " de caféine. Le corps en élimine la moitié en 5 heures environ (la demi-vie varie de 3 à 7 heures selon les personnes). Il se couche à 22 h.",
+bet: { q: "Au coucher, il lui reste…", choices: ["presque rien (moins de 10 %)", "entre un tiers et la moitié", "presque tout"], good: 1 },
+calc: { label: "Quantité de caféine restante à 22 h (en mg, à l'unité)", value: Math.round(m), round: 1 },
+reveal: M("t = " + t) + " h : " + M(D + " \\cdot \\left(\\frac{1}{2}\\right)^{" + t + "/5} \\approx " + D + " \\cdot " + N(0.5 ** (t / 5), 3) + " \\approx " + Math.round(m)) + " mg, soit " + pc(100 * 0.5 ** (t / 5), 0) + " de la dose. Il faut environ 5 demi-vies (25 h) pour en éliminer 97 % : le café de 16 h est encore là à minuit." };
+} });
 CURIEUX.forEach((c) => { const n = (id) => NOTIONS.find((x) => x.id === id); c.uses = c.uses.filter(n); });
 })();
 
@@ -1081,6 +1257,102 @@ fig: () => svg(300, 120, `<line x1="20" y1="100" x2="280" y2="100" class="f-line
 ex: () => { const a = pk([4, 6, 8, 10]);
 return { q: `La courbe d'Agnesi : \\(f(x) = \\dfrac{${a ** 3}}{x^2 + ${a * a}}\\) (ici \\(a = ${a}\\)). Calcule \\(f(${a})\\).`, value: a / 2,
 sol: `\\(f(${a}) = \\dfrac{${a ** 3}}{${a * a} + ${a * a}} = \\dfrac{${a ** 3}}{${2 * a * a}} = ${a / 2}\\).` }; } },
+
+
+{ t: "Événement", titre: "Une équation du 2e degré il y a 3800 ans", lien: "Équations du 2e degré", ids: ["eq2disc", "eq2fact", "eq2"], need: ["eq2disc", "eq2fact"],
+txt: "Une tablette d'argile conservée au British Museum (BM 13901), écrite en Mésopotamie vers 1800 av. J.-C., commence ainsi : « J'ai additionné la surface et le côté de mon carré : 45. » Les scribes comptaient en base 60 : ce « 45 » vaut 45/60, soit 3/4. En langage moderne : x² + x = 3/4. La tablette donne la recette : prends la moitié de 1, soit 1/2 ; multiplie-la par elle-même : 1/4 ; ajoute-la à 3/4 : 1 ; la racine de 1 est 1 ; enlève le 1/2 : le côté vaut 1/2. C'est notre « complétion du carré », plus de 3000 ans avant les lettres de l'algèbre.",
+fig: () => svg(300, 130, `<rect x="70" y="20" width="90" height="90" class="f-shape"/>${T(115, 70, "x²")}<rect x="160" y="20" width="22" height="90" class="f-fill2"/><rect x="182" y="20" width="22" height="90" class="f-fill2"/>${T(182, 124, "x · 1", 'font-size="12"')}${T(115, 124, "x", 'font-size="12"')}${T(250, 70, "= 3/4", 'font-size="14"')}`, "un carré et une bande de largeur 1 coupée en deux"),
+ex: () => { const x = ri(4, 12), c = x * x + x;
+return { q: `Applique la recette du scribe à \\(x^2 + x = ${c}\\) (avec \\(x\\) positif) : ajoute \\(\\frac{1}{4}\\), prends la racine, enlève \\(\\frac{1}{2}\\). Que vaut \\(x\\) ?`, value: x,
+sol: `\\(${c} + \\frac{1}{4} = ${dec(c + 0.25)} = ${dec(x + 0.5, 1)}^2\\), donc \\(x + \\frac{1}{2} = ${dec(x + 0.5, 1)}\\) et \\(x = ${x}\\). Vérification : \\(${x * x} + ${x} = ${c}\\).` }; } },
+{ t: "Portrait", titre: "Viète met des lettres dans les calculs", lien: "Transformer une formule", ids: ["formule", "tradalg"], need: ["formule"],
+txt: "Jusqu'à la fin du XVI<sup>e</sup> siècle, les problèmes d'algèbre s'écrivaient en phrases, avec des nombres précis. En 1591, dans son <i>Introduction à l'art analytique</i> (<i>In artem analyticem isagoge</i>, publiée à Tours), le Français François Viète, juriste et conseiller du roi, a une idée simple et puissante : désigner les quantités inconnues par des voyelles (A, E…) et les quantités connues par des consonnes (B, C, D…). On peut alors écrire une règle valable pour tous les nombres à la fois : une formule. Viète était aussi un as du déchiffrement : pour le roi Henri IV, il a décodé des lettres secrètes espagnoles.",
+fig: () => svg(300, 110, `${[["A", "f-fill2"], ["E", "f-fill2"], ["B", "f-soft"], ["C", "f-soft"], ["D", "f-soft"]].map(([l, c], i) => `<rect x="${22 + i * 54}" y="22" width="44" height="44" rx="8" class="${c}"/>${T(44 + i * 54, 51, l, 'font-size="20"')}`).join("")}${T(71, 92, "inconnues", 'font-size="12"')}${T(179, 92, "connues", 'font-size="12"')}`, "voyelles pour les inconnues, consonnes pour les quantités connues"),
+ex: () => { const B = ri(8, 14), b = ri(4, 7), h = ri(3, 9), A = ((B + b) * h) / 2;
+return { q: `L'aire d'un trapèze est donnée par la formule \\(A = \\frac{(B + b) \\cdot h}{2}\\), valable pour tous les trapèzes. Un trapèze a une aire de \\(${dec(A, 1)}\\) cm², et ses bases mesurent \\(B = ${B}\\) cm et \\(b = ${b}\\) cm. Quelle est sa hauteur \\(h\\), en cm ?`, value: h,
+sol: `On isole \\(h\\) : \\(h = \\frac{2A}{B + b} = \\frac{${dec(2 * A, 1)}}{${B + b}} = ${h}\\) cm.` }; } },
+{ t: "Anecdote", titre: "La sphère et le cylindre sur la tombe d'Archimède", lien: "Volumes : cône, boule", ids: ["volcone"], need: ["volcone"],
+txt: "Archimède (vers 287–212 av. J.-C.) était si fier d'une de ses découvertes qu'il voulait la voir sur sa tombe : une boule enfermée dans un cylindre qui la touche de partout a exactement les deux tiers du volume de ce cylindre. En 75 av. J.-C., Cicéron, alors questeur en Sicile, cherche cette tombe à Syracuse ; les habitants affirment qu'elle n'existe pas. Il la retrouve dans les broussailles, près d'une porte de la ville, grâce à une petite colonne surmontée d'une sphère et d'un cylindre. Il le raconte dans ses <i>Tusculanes</i>.",
+fig: () => svg(300, 140, `<rect x="95" y="15" width="110" height="110" class="f-soft"/><ellipse cx="150" cy="15" rx="55" ry="8" class="f-line" fill="none"/><ellipse cx="150" cy="125" rx="55" ry="8" class="f-line" fill="none"/><circle cx="150" cy="70" r="55" class="f-fill2"/>${T(255, 60, "boule", 'font-size="12"')}${T(255, 78, "= 2/3", 'font-size="12"')}${T(255, 96, "du cylindre", 'font-size="12"')}`, "boule inscrite dans un cylindre"),
+ex: () => { const r = pk([3, 6, 9]), Vc = 2 * r ** 3, Vb = (4 * r ** 3) / 3;
+return { q: `Une boule de rayon ${r} cm est enfermée dans un cylindre de même rayon et de hauteur ${2 * r} cm. Le volume du cylindre vaut \\(${tm(Vc)}\\pi\\) cm³. Le volume de la boule vaut \\(k\\pi\\) cm³ : que vaut \\(k\\) ?`, value: Vb,
+sol: `Boule : \\(\\frac{4}{3}\\pi \\cdot ${r}^3 = ${tm(Vb)}\\pi\\) cm³. Et \\(${tm(Vb)} \\div ${tm(Vc)} = \\frac{2}{3}\\) : la découverte d'Archimède.` }; } },
+{ t: "Événement", titre: "La planche de Galton", lien: "Probabilités et dénombrement", ids: ["proba", "denombr"], need: ["proba", "denombr"],
+txt: "En 1873, le savant anglais Francis Galton fait construire une curieuse machine : une planche inclinée, hérissée de clous en quinconce. Des billes tombent du haut ; à chaque clou, elles partent à gauche ou à droite, au hasard. Le trajet de chaque bille est imprévisible, et pourtant le tas de billes en bas prend toujours la même forme de cloche : peu de billes sur les bords, beaucoup au milieu. Galton la décrit en 1889 dans son livre <i>Natural Inheritance</i>, sous le nom de « quincunx ». La raison : beaucoup plus de chemins mènent au milieu qu'aux bords.",
+fig: () => { let g = ""; for (let r = 0; r < 5; r++) for (let k = 0; k <= r; k++) g += `<circle cx="${150 + (k - r / 2) * 26}" cy="${18 + r * 17}" r="3.5" class="f-head"/>`;
+[1, 4, 6, 4, 1].forEach((n, i) => (g += `<rect x="${92 + i * 24}" y="${132 - n * 6}" width="18" height="${n * 6}" class="f-fill2"/>`));
+return svg(300, 140, g, "planche de Galton : clous en triangle et tas de billes en cloche"); },
+ex: () => { const n = pk([4, 5, 6, 7]), c = 2 ** n;
+return { q: `Une planche de Galton a ${n} rangées de clous : à chaque rangée, la bille va à gauche ou à droite. Combien de chemins différents une bille peut-elle suivre ?`, value: c,
+sol: `2 choix à chacune des ${n} rangées : \\(2^{${n}} = ${c}\\) chemins. Un seul mène tout à gauche : probabilité \\(\\frac{1}{${c}}\\). Bien plus de chemins mènent au milieu.` }; } },
+{ t: "Événement", titre: "Tartaglia, Cardan et le duel du 3e degré", lien: "Équations de degré 3", ids: ["eq3"], need: ["eq3"],
+txt: "Au début du XVI<sup>e</sup> siècle, à Bologne, Scipione del Ferro découvre comment résoudre certaines équations du 3<sup>e</sup> degré, mais garde le secret. Son élève Fior s'en sert pour défier Niccolò Tartaglia en 1535 : chacun propose 30 problèmes à l'autre. Tartaglia trouve une méthode juste avant l'échéance et résout tous les problèmes de Fior, qui ne résout aucun des siens. En 1539, Jérôme Cardan obtient la méthode de Tartaglia en jurant de ne pas la publier. Mais après avoir vu les papiers de del Ferro, il la publie en 1545 dans son <i>Ars magna</i>, en citant del Ferro et Tartaglia. Tartaglia ne le lui pardonnera jamais. Un exemple de l'<i>Ars magna</i> : x³ + 6x = 20.",
+fig: () => svg(300, 110, `<rect x="40" y="35" width="50" height="50" class="f-fill2"/><path d="M40 35 l18 -16 h50 l-18 16 z M90 35 l18 -16 v50 l-18 16 z" class="f-soft"/>${T(65, 64, "x³")}${T(130, 64, "+ 6x", 'font-size="15"')}${T(200, 64, "= 20", 'font-size="15"')}${T(150, 104, "Ars magna, 1545", 'font-size="12" font-style="italic"')}`, "un cube et l'équation de Cardan"),
+ex: () => { const r = pk([2, 3, 4, 5]), p = pk([3, 6, 9, 12]), q = r ** 3 + p * r;
+return { q: `Comme Cardan, cherche une solution entière de \\(x^3 + ${p}x = ${q}\\) (essaie \\(x = 2, 3, 4\\)…). Que vaut \\(x\\) ?`, value: r,
+sol: `\\(${r}^3 + ${p} \\cdot ${r} = ${r ** 3} + ${p * r} = ${q}\\). C'est la seule solution réelle : \\(x^3 + ${p}x\\) augmente toujours quand \\(x\\) augmente.` }; } },
+{ t: "Anecdote", titre: "√2, le nombre qui n'est pas une fraction", lien: "Racines et nombres irrationnels", ids: ["ratden", "contrex", "ensembles"], need: ["ratden", "ensembles"],
+txt: "Pour les pythagoriciens (VI<sup>e</sup>–V<sup>e</sup> siècle av. J.-C.), « tout est nombre » : toute longueur devait pouvoir s'écrire comme un rapport de deux entiers. Or la diagonale d'un carré de côté 1 mesure √2, et l'on démontre que √2 n'est pas une fraction : si √2 = p/q, alors p² = 2q² ; mais p² contient un nombre pair de facteurs 2, et 2q² un nombre impair. Contradiction ! Une légende, rapportée bien plus tard (notamment par Jamblique, vers 300 apr. J.-C.), raconte que le pythagoricien Hippase de Métaponte aurait divulgué ce secret et péri en mer en punition. Rien ne permet de dire si c'est vrai. Aujourd'hui, on préfère écrire 1/√2 sous la forme √2/2, sans racine au dénominateur.",
+fig: () => svg(300, 140, `<rect x="95" y="20" width="100" height="100" class="f-fill2"/><line x1="95" y1="120" x2="195" y2="20" class="f-accent" stroke-width="2.5"/>${T(145, 136, "1", 'font-size="13"')}${T(84, 74, "1", 'font-size="13"')}${T(160, 64, "√2", 'font-size="15" class="f-accent f-txt"')}`, "carré de côté 1 et sa diagonale"),
+ex: () => { const a = pk([6, 10, 14, 18, 22]);
+return { q: `Écris \\(\\dfrac{${a}}{\\sqrt{2}}\\) sans racine au dénominateur, sous la forme \\(k\\sqrt{2}\\). Que vaut \\(k\\) ?`, value: a / 2,
+sol: `On multiplie en haut et en bas par \\(\\sqrt{2}\\) : \\(\\dfrac{${a}\\sqrt{2}}{2} = ${a / 2}\\sqrt{2}\\).` }; } },
+{ t: "Portrait", titre: "Nicole Oresme dessine le mouvement", lien: "Lire un graphique", ids: ["lectgraph", "fimg"], need: ["lectgraph", "fimg"],
+txt: "Au milieu du XIV<sup>e</sup> siècle (vers 1350–1360), le Normand Nicole Oresme, maître à l'université de Paris et plus tard évêque de Lisieux, a l'idée de représenter par un dessin une grandeur qui varie : à l'horizontale, le temps (sa « longitude »), à la verticale, la vitesse (sa « latitude »). C'est un des ancêtres de nos graphiques. Il remarque que l'aire de la figure représente la distance parcourue. Pour un mobile dont la vitesse augmente régulièrement, la figure est un trapèze : la distance est la même que s'il avait avancé tout le temps à sa vitesse moyenne.",
+fig: () => svg(300, 130, `<line x1="40" y1="110" x2="280" y2="110" class="f-line"/><line x1="40" y1="120" x2="40" y2="10" class="f-line"/><polygon points="60,110 60,80 240,30 240,110" class="f-fill2"/><line x1="60" y1="80" x2="240" y2="30" class="f-blue" stroke-width="2"/>${T(150, 124, "temps", 'font-size="11"')}${T(25, 20, "v", 'font-size="12"')}${T(150, 92, "aire = distance", 'font-size="12"')}`, "vitesse croissante et aire du trapèze"),
+ex: () => { const v1 = pk([2, 4, 6]), v2 = pk([10, 12, 14, 16]), t = pk([5, 8, 10, 15]), d = ((v1 + v2) / 2) * t;
+return { q: `Un vélo accélère régulièrement de ${v1} m/s à ${v2} m/s en ${t} secondes. Sur le graphique d'Oresme (vitesse en fonction du temps), l'aire du trapèze donne la distance. Quelle distance parcourt-il, en m ?`, value: d,
+sol: `Vitesse moyenne : \\((${v1} + ${v2}) \\div 2 = ${(v1 + v2) / 2}\\) m/s ; distance : \\(${(v1 + v2) / 2} \\cdot ${t} = ${d}\\) m (l'aire du trapèze).` }; } },
+{ t: "Portrait", titre: "Fermat cherche le maximum", lien: "Optimisation", ids: ["optim", "f2"], need: ["optim"],
+txt: "Vers 1636, bien avant l'invention des dérivées, le Toulousain Pierre de Fermat décrit une méthode pour trouver les maximums et les minimums (<i>Methodus ad disquirendam maximam et minimam</i>), qu'il fait circuler par lettres. Son premier exemple : partager un segment en deux parties dont le produit (l'aire du rectangle qu'elles forment) soit le plus grand possible. Il compare le produit obtenu avec une partie x et avec une partie à peine différente : au maximum, les deux produits sont presque égaux. Réponse : couper le segment en son milieu. Pour Fermat, les mathématiques étaient un loisir : il était conseiller au parlement de Toulouse.",
+fig: () => svg(300, 120, `<rect x="50" y="20" width="120" height="70" class="f-fill2"/><line x1="50" y1="105" x2="260" y2="105" class="f-line" stroke-width="2"/><line x1="170" y1="99" x2="170" y2="111" class="f-accent" stroke-width="2"/>${T(110, 60, "x · (L − x)", 'font-size="12"')}${T(110, 118, "x", 'font-size="12"')}${T(215, 118, "L − x", 'font-size="12"')}`, "segment coupé en deux et rectangle formé par les parties"),
+ex: () => { const L = pk([10, 14, 18, 22, 26]);
+return { q: `On coupe un segment de ${L} cm en deux parties \\(x\\) et \\(${L} - x\\). Quelle est la plus grande aire possible du rectangle de côtés \\(x\\) et \\(${L} - x\\), en cm² ?`, value: (L / 2) ** 2,
+sol: `\\(A(x) = x(${L} - x)\\) : ses zéros sont 0 et ${L}, son sommet est au milieu, en \\(x = ${L / 2}\\). Aire maximale : \\(${L / 2} \\cdot ${L / 2} = ${(L / 2) ** 2}\\) cm² (un carré).` }; } },
+{ t: "Portrait", titre: "Hipparque et la première table de trigonométrie", lien: "Trigonométrie", ids: ["trigo", "trigexact"], need: ["trigo"],
+txt: "Au II<sup>e</sup> siècle av. J.-C., l'astronome grec Hipparque, qui observait le ciel depuis l'île de Rhodes, veut calculer des longueurs qu'on ne peut pas mesurer, dans des triangles formés par la Terre, la Lune et le Soleil. Il dresse une table des « cordes » : pour chaque angle au centre d'un cercle, la longueur de la corde correspondante. Selon Théon d'Alexandrie, il y consacra un traité en douze livres. Ce traité est perdu : on le connaît surtout par l'<i>Almageste</i> de Ptolémée (II<sup>e</sup> siècle apr. J.-C.), qui donne sa propre table. Une corde, c'est deux fois notre sinus de la moitié de l'angle : corde = 2 · r · sin(α/2).",
+fig: () => { const a = 1.2, x1 = 150 + 55 * Math.cos(-a / 2 - 1.57), y1 = 70 + 55 * Math.sin(-a / 2 - 1.57), x2 = 150 + 55 * Math.cos(a / 2 - 1.57), y2 = 70 + 55 * Math.sin(a / 2 - 1.57);
+return svg(300, 140, `<circle cx="150" cy="70" r="55" class="f-line" fill="none"/><line x1="150" y1="70" x2="${f1(x1)}" y2="${f1(y1)}" class="f-line"/><line x1="150" y1="70" x2="${f1(x2)}" y2="${f1(y2)}" class="f-line"/><line x1="${f1(x1)}" y1="${f1(y1)}" x2="${f1(x2)}" y2="${f1(y2)}" class="f-accent" stroke-width="2.5"/>${T(150, 58, "α", 'font-size="13"')}${T(150, 30, "corde", 'font-size="11"')}${T(150, 138, "r", 'font-size="12"')}`, "angle au centre et corde d'un cercle"); },
+ex: () => { const R0 = pk([5, 8, 10, 12]), a = pk([40, 50, 70, 80, 100]), c = r2(2 * R0 * Math.sin((a * Math.PI) / 360), 1);
+return { q: `Dans un cercle de rayon ${R0} cm, quelle est la longueur de la corde qui correspond à un angle au centre de ${a}° ? Arrondis au dixième.`, value: c,
+sol: `Le triangle isocèle se coupe en deux triangles rectangles : demi-corde \\(= ${R0} \\cdot \\sin ${a / 2}°\\). Corde \\(= 2 \\cdot ${R0} \\cdot \\sin ${a / 2}° \\approx ${dec(c, 1)}\\) cm.` }; } },
+{ t: "Anecdote", titre: "Thalès et le triangle dans le demi-cercle", lien: "Cercle de Thalès", ids: ["cercthales"], need: ["cercthales"],
+txt: "Dans ses <i>Vies des philosophes</i> (III<sup>e</sup> siècle apr. J.-C.), Diogène Laërce rapporte, d'après l'écrivaine Pamphila, que Thalès de Milet (VI<sup>e</sup> siècle av. J.-C.) fut le premier à inscrire un triangle rectangle dans un cercle, et qu'il sacrifia un bœuf pour fêter sa découverte. D'autres auteurs racontent la même histoire de bœuf à propos de Pythagore : c'est une anecdote, pas un fait établi. La propriété, elle, est sûre, et Euclide la démontre vers 300 av. J.-C. (<i>Éléments</i>, livre III) : si C est sur le cercle de diamètre [AB], l'angle en C est droit. D'où le nom de « cercle de Thalès ».",
+fig: () => svg(300, 130, `<path d="M60 110 A90 90 0 0 1 240 110" class="f-line" fill="none"/><line x1="60" y1="110" x2="240" y2="110" class="f-line"/><polyline points="60,110 105,32 240,110" class="f-fill2"/><path d="M111 43 l10 6 l-6 10" class="f-accent" fill="none" stroke-width="1.6"/>${T(52, 124, "A", 'font-size="12"')}${T(248, 124, "B", 'font-size="12"')}${T(100, 24, "C", 'font-size="12"')}`, "triangle inscrit dans un demi-cercle, angle droit en C"),
+ex: () => { let a; do a = ri(22, 68); while (a === 45);
+return { q: `Le triangle ABC est inscrit dans un demi-cercle de diamètre [AB]. L'angle en A mesure ${a}°. Combien mesure l'angle en B, en degrés ?`, value: 90 - a,
+sol: `L'angle en C est droit (cercle de Thalès). Somme des angles : \\(180° - 90° - ${a}° = ${90 - a}°\\).` }; } },
+{ t: "Événement", titre: "Les identités remarquables d'Euclide", lien: "Identités remarquables", ids: ["idrem", "factor"], need: ["idrem"],
+txt: "Vers 300 av. J.-C., à Alexandrie, Euclide rassemble dans les <i>Éléments</i> les mathématiques de son temps. Il n'y a ni lettres ni signe « = » : tout se dit avec des figures. La proposition 4 du livre II affirme : « Si une droite est coupée au hasard, le carré construit sur la droite entière est égal aux carrés construits sur les deux parties, plus deux fois le rectangle formé par les deux parties. » C'est notre identité (a + b)² = a² + 2ab + b², lue sur un dessin : un grand carré découpé en deux carrés et deux rectangles. Pendant près de deux mille ans, on a appris l'algèbre ainsi, par la géométrie.",
+fig: () => svg(300, 140, `<rect x="80" y="15" width="80" height="80" class="f-shape"/><rect x="160" y="15" width="35" height="80" class="f-fill2"/><rect x="80" y="95" width="80" height="35" class="f-fill2"/><rect x="160" y="95" width="35" height="35" class="f-soft"/>${T(120, 60, "a²")}${T(177, 60, "ab", 'font-size="12"')}${T(120, 117, "ab", 'font-size="12"')}${T(177, 117, "b²", 'font-size="12"')}`, "carré de côté a + b découpé en a², b² et deux rectangles ab"),
+ex: () => { const b = pk([4, 5, 6, 7, 8, 9]);
+return { q: `Par quel nombre \\(k\\) positif faut-il remplacer le trou pour que \\(x^2 + kx + ${b * b}\\) soit le carré \\((x + ${b})^2\\), comme dans la figure d'Euclide ?`, value: 2 * b,
+sol: `\\((x + ${b})^2 = x^2 + 2 \\cdot ${b} \\cdot x + ${b * b}\\) : les deux rectangles valent ensemble \\(${2 * b}x\\), donc \\(k = ${2 * b}\\).` }; } },
+{ t: "Anecdote", titre: "Euclide construit une racine carrée", lien: "Théorème de la hauteur", ids: ["euclide"], need: ["euclide"],
+txt: "Comment dessiner un segment de longueur √(a · b) avec une règle et un compas ? Euclide l'explique dans les <i>Éléments</i> (livre VI, proposition 13) : on met bout à bout deux segments de longueurs a et b, on trace le demi-cercle qui a leur somme pour diamètre, puis la perpendiculaire au point de jonction. La hauteur h obtenue vérifie h² = a · b : c'est le théorème de la hauteur, qui découle des triangles semblables (livre VI, proposition 8). Avec a = 1, on construit √b ; et les Grecs pouvaient ainsi transformer n'importe quel rectangle en un carré de même aire.",
+fig: () => svg(300, 130, `<path d="M50 110 A100 100 0 0 1 250 110" class="f-line" fill="none"/><line x1="50" y1="110" x2="250" y2="110" class="f-line"/><line x1="110" y1="110" x2="110" y2="${f1(110 - Math.sqrt(60 * 140))}" class="f-accent" stroke-width="2.5"/>${T(80, 124, "a", 'font-size="12"')}${T(180, 124, "b", 'font-size="12"')}${T(122, 70, "h", 'font-size="13"')}`, "demi-cercle et hauteur au point de jonction"),
+ex: () => { const [p, q] = pk([[4, 9], [2, 8], [3, 12], [4, 16], [5, 20], [9, 16], [8, 18], [2, 18]]), h = Math.sqrt(p * q);
+return { q: `On met bout à bout deux segments de ${p} cm et ${q} cm, et l'on trace le demi-cercle d'Euclide. Quelle est la hauteur \\(h\\) au point de jonction, en cm ?`, value: h,
+sol: `Théorème de la hauteur : \\(h^2 = ${p} \\cdot ${q} = ${p * q}\\), donc \\(h = \\sqrt{${p * q}} = ${h}\\) cm.` }; } },
+{ t: "Portrait", titre: "Henry Briggs et les logarithmes décimaux", lien: "Logarithmes", ids: ["log", "logbase"], need: ["log"],
+txt: "En 1614, l'Écossais John Napier publie les premiers logarithmes, qui transforment les multiplications en additions. Henry Briggs, professeur à Londres, est enthousiasmé : il fait le voyage jusqu'en Écosse pour le rencontrer en 1615, et les deux hommes conviennent qu'une base 10 serait bien plus pratique, avec log 1 = 0 et log 10 = 1. Briggs calcule alors à la main les logarithmes décimaux des nombres de 1 à 20'000 et de 90'000 à 100'000, avec 14 décimales, et les publie en 1624 dans son <i>Arithmetica logarithmica</i>. Le Hollandais Adriaan Vlacq comble le trou en 1628. Ces tables ont servi aux astronomes, aux navigateurs et aux ingénieurs pendant plus de trois siècles.",
+fig: () => svg(300, 120, `<rect x="70" y="12" width="160" height="96" rx="6" class="f-soft"/>${[["2", "0,30103"], ["3", "0,47712"], ["5", "0,69897"], ["7", "0,84510"]].map(([n, l], i) => T(110, 36 + i * 21, n, 'font-size="13"') + T(180, 36 + i * 21, l, 'font-size="13"')).join("")}<line x1="140" y1="18" x2="140" y2="102" class="f-line"/>`, "extrait d'une table de logarithmes décimaux"),
+ex: () => { const [a, b, n] = pk([[1, 1, 6], [2, 1, 12], [1, 2, 18], [3, 1, 24], [2, 2, 36], [4, 1, 48]]), v = r2(a * 0.30103 + b * 0.47712, 5);
+return { q: `Avec la table de Briggs : \\(\\log 2 \\approx 0{,}30103\\) et \\(\\log 3 \\approx 0{,}47712\\). Sans calculatrice, que vaut \\(\\log ${n}\\) (avec ces valeurs, 5 décimales) ?`, value: v,
+sol: `\\(${n} = ${[a > 1 ? "2^" + a : "2", b > 1 ? "3^" + b : "3"].join(" \\cdot ")}\\), donc \\(\\log ${n} = ${a > 1 ? a + " \\cdot " : ""}\\log 2 + ${b > 1 ? b + " \\cdot " : ""}\\log 3 \\approx ${dec(v, 5)}\\). Une multiplication devient une addition.` }; } },
+{ t: "Portrait", titre: "Willard Libby date le passé au carbone 14", lien: "Exponentielles", ids: ["expo", "modexp", "log"], need: ["expo", "modexp"],
+txt: "Tous les êtres vivants contiennent un peu de carbone 14, un carbone radioactif. À leur mort, ils cessent d'en absorber, et celui qu'ils contiennent disparaît lentement : la moitié en environ 5'730 ans (sa demi-vie). En mesurant ce qui reste dans un os ou un morceau de bois, on calcule depuis quand l'organisme est mort. Le chimiste américain Willard Libby et son équipe mettent au point cette méthode à l'université de Chicago à la fin des années 1940 (premiers résultats publiés en 1949) et la vérifient sur des objets d'âge connu, comme du bois de tombes égyptiennes. Libby reçoit le prix Nobel de chimie en 1960. Il utilisait une demi-vie de 5'568 ans, corrigée plus tard à 5'730 ans.",
+fig: () => svg(300, 120, `${[1, 0.5, 0.25, 0.125, 0.0625].map((f, i) => `<rect x="${30 + i * 50}" y="${100 - f * 80}" width="34" height="${f * 80}" class="f-fill2"/>${T(47 + i * 50, 114, i === 0 ? "0" : i + "×", 'font-size="11"')}`).join("")}${T(200, 24, "demi-vie : 5'730 ans", 'font-size="12"')}`, "carbone 14 restant après 0 à 4 demi-vies"),
+ex: () => { const k = pk([1, 2, 3, 4]), p = 100 / 2 ** k, age = 5730 * k;
+return { q: `Un morceau de bois ancien ne contient plus que ${String(p).replace(".", ",")} % du carbone 14 qu'il avait à sa mort. Avec une demi-vie de 5'730 ans, quel est son âge, en années ?`, value: age,
+sol: `\\(${dec(p, 2)}\\,\\% = 100\\,\\% \\cdot \\left(\\frac{1}{2}\\right)^{${k}}\\) : ${k} demi-vie${k > 1 ? "s" : ""}, soit \\(${k} \\cdot 5\\text{'}730 = ${tm(age)}\\) ans.` }; } },
+{ t: "Portrait", titre: "Joseph Fourier : tout est somme de sinus", lien: "Fonctions trigonométriques", ids: ["trigfn"], need: ["trigfn"],
+txt: "Joseph Fourier, fils d'un tailleur d'Auxerre, devenu préfet de l'Isère sous Napoléon, étudie à Grenoble la propagation de la chaleur. Le 21 décembre 1807, il présente à l'Institut, à Paris, un mémoire qui affirme une chose étonnante : une fonction, même avec des angles ou des sauts, peut s'écrire comme une somme (infinie) de sinus et de cosinus. Lagrange et Laplace doutent ; le travail n'est publié qu'en 1822, dans sa <i>Théorie analytique de la chaleur</i>. Aujourd'hui, ces « séries de Fourier » et leurs descendantes sont partout : analyse des sons et des vibrations, compression de la musique et des images.",
+fig: () => { const p = (f) => [...Array(61)].map((_, i) => { const x = (i / 60) * 2 * Math.PI; return f1(30 + i * 4) + "," + f1(60 - 30 * f(x)); }).join(" ");
+return svg(300, 120, `<line x1="30" y1="60" x2="270" y2="60" class="f-line"/><polyline points="${p((x) => Math.sin(x))}" class="f-line" fill="none" stroke-dasharray="3 3"/><polyline points="${p((x) => Math.sin(x) + Math.sin(3 * x) / 3 + Math.sin(5 * x) / 5)}" class="f-blue" stroke-width="2" fill="none"/>${T(150, 112, "sin x + sin 3x / 3 + sin 5x / 5 : presque un créneau", 'font-size="11"')}`, "somme de sinus qui approche un signal en créneau"); },
+ex: () => { const a = pk([2, 4, 6, 8]), b = ri(2, 5);
+return { q: `Un son est modélisé par \\(f(x) = ${a}\\sin(x) + ${b}\\sin(3x)\\). Calcule \\(f\\left(\\frac{\\pi}{6}\\right)\\).`, value: a / 2 + b,
+sol: `\\(\\sin\\frac{\\pi}{6} = \\frac{1}{2}\\) et \\(\\sin\\left(3 \\cdot \\frac{\\pi}{6}\\right) = \\sin\\frac{\\pi}{2} = 1\\), donc \\(f\\left(\\frac{\\pi}{6}\\right) = ${a} \\cdot \\frac{1}{2} + ${b} \\cdot 1 = ${a / 2 + b}\\).` }; } },
 ];
 
 

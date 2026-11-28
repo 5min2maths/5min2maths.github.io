@@ -222,6 +222,8 @@ b, pr: s.prep || null, nw: s.now || null, a: s.a11y && (s.a11y.fs !== 1 || s.a11
 ...(s.gradeNo && Object.keys(s.gradeNo).length ? { gn: s.gradeNo } : {}),
 ...(this.flags(s) ? { f: this.flags(s) } : {}),
 ...(s.weeklyDone ? { wd: s.weeklyDone } : {}),
+
+...(Array.isArray(s.weeklyHist) && s.weeklyHist.some((e) => e.c) ? { wh: s.weeklyHist.filter((e) => e.c).slice(-20).map((e) => [e.w, e.c, e.done ? 1 : 0]) } : {}),
 ...(s.prep && s.autotest && s.autotest.key === (s.prep.ids || []).join() ? { at: [s.autotest.avant || {}, (s.autotest.runs || []).map((x) => [x.date, x.r])] } : {}),
 ...(s.prep && s.mock && s.mock.items ? { mk: s.mock } : {}),
 };
@@ -270,6 +272,7 @@ if (o.yp.length > 4) { s.yp.d = on(o.yp[4]); s.yp.dp = +o.yp[5] || 0; s.yp.ds = 
 if (o.gn && typeof o.gn === "object") s.gradeNo = { ...o.gn };
 if (o.f) this.setFlags(s, +o.f);
 if (typeof o.wd === "string") s.weeklyDone = o.wd;
+if (Array.isArray(o.wh)) s.weeklyHist = o.wh.filter((x) => Array.isArray(x) && typeof x[1] === "string").map(([w, c, d]) => ({ w: String(w), id: c.split("-")[0], c, g: null, done: !!d }));
 if (s.prep && Array.isArray(s.prep.ids) && Array.isArray(o.at)) s.autotest = { key: s.prep.ids.join(), rows: null, avant: o.at[0] || {}, runs: (o.at[1] || []).map(([date, r]) => ({ date, r: r || {} })) };
 if (s.prep && o.mk && Array.isArray(o.mk.items)) s.mock = o.mk;
 if (o.a) s.a11y = { fs: +o.a.fs || 1, font: o.a.font ? 1 : 0, hc: o.a.hc ? 1 : 0 };

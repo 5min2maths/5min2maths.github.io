@@ -2157,7 +2157,7 @@ traps: [TR(f, "C'est le nombre d'issues favorables ; divise par le nombre d'issu
 () => { const c = { rouges: R.int(2, 7), bleues: R.int(2, 7), vertes: R.int(1, 5) }, col = pk(["rouges", "bleues", "vertes"]), n = c.rouges + c.bleues + c.vertes, f = c[col];
 return QF("Un sac contient " + M(c.rouges) + " billes rouges, " + M(c.bleues) + " bleues et " + M(c.vertes) + (c.vertes > 1 ? " vertes" : " verte") + ", indiscernables au toucher. On tire une bille au hasard. Quelle est la probabilité qu'elle soit " + col.slice(0, -1) + " ? (fraction acceptée)", f / n,
 "Chaque bille a la même chance d'être tirée : " + M(n) + " issues, dont " + M(f) + " favorables. " + M("P = \\frac{" + f + "}{" + n + "}" + (g2(f, n) > 1 ? " = " + F(f / n) : "")) + ".",
-{ ctx: "sac", fig: FIG.urn(c), guide: [GR("Nombre de billes en tout ?", n, M(n) + "."), GR("Probabilité ?", f / n, M(F(f / n)) + ".")],
+{ ctx: "sac", guide: [GR("Nombre de billes en tout ?", n, M(n) + "."), GR("Probabilité ?", f / n, M(F(f / n)) + ".")],
 traps: [TR(f / (n - f), "On divise par le nombre total de billes, pas par le nombre des autres."), TR(1 / 3, "Il y a 3 couleurs, mais pas le même nombre de billes de chaque couleur.")] }); },
 () => { const n = pk([6, 8, 10, 12]), k = R.int(2, n - 2), cols = Array.from({ length: n }, (_, i) => i < k); for (let i = n - 1; i > 0; i--) { const j = Math.floor(R.rand() * (i + 1)); [cols[i], cols[j]] = [cols[j], cols[i]]; }
 return QF("La roue de loterie est partagée en " + M(n) + " secteurs de même taille ; on gagne si la flèche s'arrête sur un secteur colorié. Quelle est la probabilité de gagner ? (fraction acceptée)", k / n,
@@ -2190,7 +2190,7 @@ for (let k = 1; k <= 30; k++) if ((r + k) * t[1] === (r + b + k) * t[0]) { add =
 if (!add) return null;
 return QN("Une urne contient " + M(r) + " boules rouges et " + M(b) + " boules bleues. Combien de boules rouges faut-il ajouter pour que la probabilité de tirer une rouge soit égale à " + M("\\frac{" + t[0] + "}{" + t[1] + "}") + " ?", add,
 "Avec " + M(add) + " rouges de plus : " + M(r + add) + " rouges sur " + M(r + b + add) + " boules, et " + M("\\frac{" + (r + add) + "}{" + (r + b + add) + "} = \\frac{" + t[0] + "}{" + t[1] + "}") + ".",
-{ ctx: "ajouter-" + t.join("-"), fig: FIG.urn({ rouges: r, bleues: b }), guide: [GR("Probabilité de tirer une rouge maintenant ?", r / (r + b), M(F(r / (r + b))) + "."), GR("Nombre de rouges à ajouter ?", add, "On essaie : " + M(r + add) + " rouges sur " + M(r + b + add) + " boules.")],
+{ ctx: "ajouter-" + t.join("-"), guide: [GR("Probabilité de tirer une rouge maintenant ?", r / (r + b), M(F(r / (r + b))) + "."), GR("Nombre de rouges à ajouter ?", add, "On essaie : " + M(r + add) + " rouges sur " + M(r + b + add) + " boules.")],
 traps: [TR(b, "Teste ta réponse : avec ce nombre de rouges en plus, calcule la nouvelle probabilité."), TR(add + 1, "Vérifie : la probabilité dépasse alors " + t[0] + "/" + t[1] + ".")] }); },
 () => { const n = pk([120, 300, 360, 600, 900]), E = pk([["un 6", 1], ["un nombre pair", 3], ["un nombre supérieur ou égal à 5", 2], ["un multiple de 3", 2]]), v = (n * E[1]) / 6;
 return QN("On lance " + M(n) + " fois un dé équilibré à six faces. Environ combien de fois peut-on s'attendre à obtenir " + E[0] + " ?", v,

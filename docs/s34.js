@@ -613,8 +613,40 @@ affine: ["f-sup-g-droites"],
 pythfig: ["conehaut", "conegen"],
 echelle: [/\baires?\b|volume|cube|m³|dm³/],
 vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/],
+
+
+litconv: ["equiv-double"],
+valnum: ["aire", "perim", "trapeze"],
+
+
+litelab: [/nombre entier qui suit/],
 },
 };
+
+
+
+
+
+const TXT_CO = {
+10: {
+distrib: {
+ex: "-3(2x - 5) = -6x + 15",
+hint: "Le facteur devant la parenthèse multiplie CHAQUE terme de la parenthèse : 3(2x − 5) = 6x − 15. Un facteur négatif change tous les signes : −2(x − 4) = −2x + 8. Puis réduis.",
+lesson: {
+regle: "Simple distributivité : \\(k(a + b) = ka + kb\\) et \\(k(a - b) = ka - kb\\). Le facteur devant la parenthèse multiplie chaque terme de la parenthèse. Un facteur négatif change le signe de chaque terme : \\(-3(2x - 5) = -6x + 15\\). Avec plusieurs parenthèses, on développe chacune, puis on réduit.",
+exemple: ["\\(3(2x - 5) = 6x - 15\\).", "\\(-2(4x - 3) = -8x + 6\\).", "\\(2x(4x^2 + x - 3) = 8x^3 + 2x^2 - 6x\\).", "\\(3(x + 2) - 2(x - 4) = 3x + 6 - 2x + 8 = x + 14\\)."],
+piege: "Le facteur multiplie tous les termes : \\(3(2x + 5)\\) n'est pas \\(6x + 5\\). Et devant une parenthèse, \\(-2(x - 4) = -2x + 8\\) : moins par moins donne plus.",
+},
+},
+
+
+eq1: { lesson: {
+exemple: ["\\(6x - 7 = 2x + 5\\), \\(4x = 12\\), \\(x = 3\\). Contrôle : \\(11 = 11\\).", "\\(x + 7 = 4(2x + 1) - (4x + 6)\\) : \\(x + 7 = 4x - 2\\), \\(-3x = -9\\), \\(x = 3\\).", "\\(4x + 1 = 2x + 8\\), \\(2x = 7\\), \\(x = \\frac{7}{2}\\) : la solution peut être une fraction.", "\\(3(x + 2) - x = 2x + 5\\) donne \\(6 = 5\\), faux : aucune solution ; \\(2(x - 1) = 2x - 2\\) donne \\(0 = 0\\) : tous les nombres sont solutions."],
+piege: "Un terme qui « change de côté » change de signe : c'est parce qu'on l'a soustrait (ou ajouté) des deux côtés. Un « − » devant une parenthèse change le signe de chaque terme : \\(-(4x + 6) = -4x - 6\\).",
+} },
+},
+};
+function txtCO(profile, id) { const p = profile; return p && p.system === "CH" && p.track !== "mp" && TXT_CO[p.grade] && TXT_CO[p.grade][id] || null; }
 
 
 
@@ -685,6 +717,37 @@ un(q.spec); (q.guide || []).forEach((g) => { un(g.spec); if (g.ask) g.ask = g.as
 if (q.q) q.q = q.q.replace(/écris par exemple \\\(3\\sqrt\{5\}\\\)/g, "écris par exemple \\(\\sqrt{13}\\)");
 return q;
 }
+
+
+
+
+const RAC10 = ["pyth", "pythfig"];
+function racine10(id, q) {
+if (!q || !RAC10.includes(id)) return q;
+const t = (s) => typeof s !== "string" ? s : s
+.replace(/\\sqrt\{(\d+)\}\s*=\s*\d+\s*\\sqrt\{\d+\}/g, "\\sqrt{$1}")
+.replace(/(^|[^\d}^{_.,])(\d+)\s*\\sqrt\{(\d+)\}/g, (m, b, k, n) => b + "\\sqrt{" + k * k * n + "}")
+.replace(/\\sqrt\{(\d+)\}\s*=\s*\\sqrt\{\1\}/g, "\\sqrt{$1}")
+.replace(/\s*\((?:simplifiée|simplifie la racine)\)/g, "")
+.replace(/\s+simplifiée\s*\?/g, " = ?")
+.replace(/\s*(?:<br>⁣?)?\s*:?\s*[Ss]implifie(?: la racine)?\s*\.?/g, ".").replace(/\.\./g, ".");
+q.sol = t(q.sol);
+if (q.guide) q.guide = q.guide.filter((g) => !/plus grand carré qui divise/.test(g.ask || "")).map((g) => ({ ...g, ask: t(g.ask), sol: t(g.sol) }));
+if (q.traps) q.traps = q.traps.map((x) => ({ ...x, m: t(x.m) }));
+const m = /^(\d+)√(\d+)$/.exec(String(q.canon || ""));
+if (m) q.canon = "√" + m[1] * m[1] * m[2];
+return q;
+}
+
+
+TXT_CO[10].pyth = {
+hint: "Repère l'hypoténuse : le plus grand côté, en face de l'angle droit. Hypoténuse² = somme des carrés des deux cathètes ; pour une cathète, on soustrait. N'oublie pas la racine carrée à la fin.",
+lesson: {
+regle: "Dans un triangle <b>rectangle</b>, l'hypoténuse est le plus grand côté, en face de l'angle droit. Son carré vaut la somme des carrés des deux autres côtés (les cathètes) : \\(c^2 = a^2 + b^2\\). Pour l'hypoténuse : on additionne les carrés, puis on prend la racine. Pour une cathète : on soustrait les carrés, \\(b^2 = c^2 - a^2\\), puis on prend la racine. La valeur exacte s'écrit \\(\\sqrt{n}\\) ; sinon, on arrondit (au dixième, au centième).",
+exemple: ["Cathètes 6 cm et 8 cm : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\) cm.", "Hypoténuse 13 cm, cathète 5 cm : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\) cm.", "Échelle de 4 m, pied à 1,5 m du mur : \\(h^2 = 16 - 2{,}25 = 13{,}75\\), \\(h = \\sqrt{13{,}75} \\approx 3{,}71\\) m."],
+piege: "On additionne les carrés, pas les côtés : \\(6 + 8 = 14\\) n'est pas l'hypoténuse. Et \\(c^2 = 100\\) n'est pas la réponse : il faut encore la racine, \\(c = 10\\). Le théorème ne s'applique que dans un triangle rectangle.",
+},
+};
 
 
 
@@ -881,7 +944,9 @@ const coYear = this.coChap(profile, n.id, true);
 
 const again = sesa || coYear || (profile.track !== "mp" && ((profile.system === "FR" ? n.againFR : n.again) || []).includes(profile.grade));
 const label = profile.system === "FR" && n.labelFR && profile.grade < n.labelFR[0] ? n.labelFR[1] : n.label;
-return { ...n, label, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
+
+const tc = txtCO(profile, n.id), ex = tc && tc.ex ? tc.ex : n.ex;
+return { ...n, label, ex, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
 });
 },
 
@@ -1207,7 +1272,7 @@ return delta;
 
 finalize(state, id, q) {
 const p = state && state.profile;
-if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) racineCO(q);
+if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) { racineCO(q); racine10(id, q); }
 if (!q) return q;
 const txt0 = String(q.q || "");
 const mark = (sp, txt, own, step) => {
@@ -1277,6 +1342,14 @@ const UP9 = ["decread", "deccomp", "perim", "aire1", "solides", "quadri"];
 if (level === 1 && UP9.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 9) level = 2;
 
 
+
+
+
+const UP10 = { prio: 2, arith: 2, premiers: 2, fracadd: 2, fracsimp: 2, fracrep: 2, fracconv: 2, fractout: 2, decmul: 2, decdiv: 2,
+ordgr: 2, aire3: 2, solides: 2, numer: 2, decadd: 3, reladd: 3, prop: 3 };
+if (level < 4 && UP10[id] && level < UP10[id] && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10) level = UP10[id];
+
+
 const UP2 = { rel: 11 };
 if (level === 2 && UP2[id] && state && state.profile && state.profile.grade >= UP2[id]) level = 3;
 
@@ -1330,7 +1403,10 @@ if (vary && stale(q) && level === 4) return this.make(state, id, 3);
 if (pKey(q)) { for (const k in cday) if (cday[k] < lim) delete cday[k]; cday[pKey(q)] = day(); }
 sceneNote(state, sceneKey(q));
 rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
-if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
+
+
+
+state.recentCtx[id] = [...ctxs, q.ctx || ""].slice(-2);
 state.recentForm[id] = [...forms, qForm(q)].slice(-2);
 return keep(this.finalize(state, id, q));
 },
@@ -1964,8 +2040,56 @@ return plan;
 
 
 
+
+
+
+
+
+
+
+
+
+GRAND: { parts: 4, prose: 70, seeds: 40 },
+probProse(q) { return String((q && q.q) || "").replace(/\\\(.*?\\\)|\\\[.*?\\\]/g, " ").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(); },
+
+probKind(state, id, q) {
+if (!q || q.d !== 4 || !Array.isArray(q.parts) || q.parts.length < 2 || (state && horsCO(state, id, q))) return null;
+const ctx = this.probProse(q).length >= this.GRAND.prose;
+return q.parts.length >= this.GRAND.parts && ctx ? "grand" : q.parts.length >= 3 && ctx ? "riche" : "court";
+},
+isGrand(state, id, q) { return this.probKind(state, id, q) === "grand"; },
+
+probMinutes(q) { return Math.round(1.5 + this.probProse(q).length / 250 + 2 * ((q && q.parts) || []).length); },
+
+probCodes(state, id, kind) {
+const p = state.profile, c = (this._pc = this._pc || {}), k = [p.system, p.grade, p.track, p.niv, id].join("|");
+if (!(k in c)) {
+const out = { grand: [], riche: [], court: [] }, seen = new Set();
+for (let s = 1; s <= this.GRAND.seeds; s++) {
+let q; try { q = this.build(id, 4, s); } catch (e) { break; }
+const kd = this.probKind(state, id, q); if (!kd) continue;
+const f = q.ctx || qForm(q).slice(0, 60); if (seen.has(kd + f)) continue; seen.add(kd + f);
+out[kd].push(q.code);
+}
+c[k] = out;
+}
+return kind ? c[k][kind] : c[k];
+},
+weekId() { const d = new Date(); return d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5); },
+
+
+weeklySync(state) {
+const H = (state.weeklyHist = Array.isArray(state.weeklyHist) ? state.weeklyHist : []);
+if (!H.length && state.weeklyPick && state.weeklyPick.id) H.push({ w: state.weeklyPick.week, id: state.weeklyPick.id, c: state.weeklyPick.code || null, g: state.weeklyPick.g || null, done: false });
+for (const e of H) if (!e.done && state.weeklyDone && e.w === state.weeklyDone) e.done = true;
+return H;
+},
+
+
+
+
 weeklyProblem(state) {
-const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
+const week = this.weekId(), H = this.weeklySync(state);
 
 
 const worked = (id) => { const s = state.notions[id]; return this.nowHas(state, id) || (s && s.seen > 0 && s.m > 0); };
@@ -1973,35 +2097,123 @@ const ids = this.eligible(state).filter((id) => hasProb(id) && worked(id));
 if (!ids.length) return null;
 
 
-const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = typeof weekKey === "function" && state.weeklyDone === weekKey();
-if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 4 && ids.includes(state.weeklyPick.id) && (done || (state.weeklyPick.now || "") === nowSig)) return state.weeklyPick.id;
+const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = state.weeklyDone === week;
+const wp = state.weeklyPick;
+if (wp && wp.week === week && (wp.v === 5 || (wp.v === 4 && done)) && ids.includes(wp.id) && (done || (wp.now || "") === nowSig)) return wp.id;
 const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
 
 
 const g = state.profile.grade, yr = (id) => { try { const p = placeOf(NOTIONS.find((n) => n.id === id), state.profile); return p ? p[0] : g; } catch (e) { return g; } };
 
 
+
 const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
-
-
-
-
 const tier = (id) => { const own = yr(id) === g, ch = this.nowHas(state, id); return own && ch ? 0 : own ? 1 : ch ? 2 : yearSet.has(id) ? 3 : 4; };
 const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
 return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 1 ? 250 * gap : 0) + (m(id) < 0.3 ? 400 : 0); };
 
 
 
-const real = (id) => { for (let k = 1; k <= 12; k++) { try { const q = this.build(id, 4, k); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && !horsCO(state, id, q)) return true; } catch (e) { return false; } } return false; };
-let best = [];
-for (let t = 0; t <= 4 && !best.length; t++)
-for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
+
+const PASSES = [["grand", [0]], ["riche", [0]], ["court", [0]], ["grand", [1]], ["riche", [1]], ["court", [1]], ["grand", [2, 3, 4]], ["court", [2, 3, 4]]];
+const has = (id, kd) => kd === "court" ? this.probCodes(state, id, "grand").length + this.probCodes(state, id, "riche").length + this.probCodes(state, id, "court").length > 0 : this.probCodes(state, id, kd).length > 0;
+
+const poolOf = (id, kd) => kd === "court" ? [...this.probCodes(state, id, "grand"), ...this.probCodes(state, id, "riche"), ...this.probCodes(state, id, "court")] : this.probCodes(state, id, kd);
+const used = new Set(H.filter((e) => e.w !== week).map((e) => e.c)), freshOf = (id, kd) => poolOf(id, kd).filter((c) => !used.has(c));
+let best = [], kind = null;
+
+for (const [kd, tiers] of PASSES) {
+for (const newOnly of [true, false]) {
+for (const t of tiers) {
+for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (has(id, kd) && (!newOnly || freshOf(id, kd).length)) best.push(id); if (best.length >= 3) break; }
+if (best.length) break;
+}
+if (best.length) break;
+}
+if (best.length) { kind = kd; break; }
+}
 if (!best.length) return null;
 const n = +week.split("-")[1], id = best[n % best.length];
-state.weeklyPick = { week, id, v: 4, now: nowSig };
+const pool = poolOf(id, kind), fresh = freshOf(id, kind), L = fresh.length ? fresh : pool;
+let code = L[n % L.length];
+if (used.has(code)) { const q0 = this.fromCode(code), f0 = q0 && (q0.ctx || qForm(q0).slice(0, 60)), kd0 = q0 && this.probKind(state, id, q0);
+for (let s = this.GRAND.seeds + 1 + n; s <= this.GRAND.seeds + 400; s += 7) { let q; try { q = this.build(id, 4, s); } catch (e) { break; }
+if (q && !used.has(q.code) && this.probKind(state, id, q) === kd0 && (q.ctx || qForm(q).slice(0, 60)) === f0) { code = q.code; break; } } }
+state.weeklyPick = { week, id, v: 5, now: nowSig, code, g: kind };
+const e = H.find((x) => x.w === week); if (e) Object.assign(e, { id, c: code, g: kind }); else H.push({ w: week, id, c: code, g: kind, done: false });
+if (H.length > 60) H.splice(0, H.length - 60);
 return id;
 },
 
+
+weeklyQuestion(state) {
+const id = this.weeklyProblem(state); if (!id) return null;
+const c = state.weeklyPick && state.weeklyPick.code;
+let q = c ? this.fromCode(c) : null;
+if (!q) { q = this.make(state, id, 4, undefined, false); return q && q.d === 4 ? this.weeklyAid(state, q) : q; }
+return this.weeklyAid(state, this.finalize(state, id, q));
+},
+
+
+
+
+weeklyAid(state, q, force) {
+if (!q || !Array.isArray(q.parts) || !(force || this.weak4(state))) return q;
+const H = (q.hints || []).map((x) => String(x)), seg = {}, free = [];
+for (const h of H) {
+const bits = h.split(/(?:^|\s)(?=[a-h]\)\s)/);
+for (const b of bits) { const m = /^([a-h])\)\s*([\s\S]*)$/.exec(b.trim()); if (m) (seg[m[1]] = seg[m[1]] || []).push(m[2].trim()); else if (b.trim()) free.push(b.trim()); }
+}
+const nH = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
+const n = q.parts.length, parts = q.parts.map((p, i) => { const L = String.fromCharCode(97 + i);
+if (seg[L]) return seg[L].join(" ");
+if (i === 0 && free[0]) return free[0];
+if (i === n - 1 && free.length > 1) return free[free.length - 1];
+return i === 0 && nH ? nH : null; });
+const plan = "Un grand problème en " + n + " parties : lis tout l'énoncé et repère les données. Fais les parties dans l'ordre : chaque réponse sert souvent à la suivante. Tu as 4 essais et un coup de pouce par partie.";
+return { ...q, aid: { plan, parts }, maxTries: 4, helped: true };
+},
+
+
+
+
+
+
+
+
+
+
+digOpen(state) { return !!state && state.weeklyDone === this.weekId(); },
+digMore(state, n = 8, opt) {
+if (!state || !(opt && opt.force) && !this.digOpen(state)) return [];
+const H = this.weeklySync(state), week = this.weekId(), cur = state.weeklyPick && state.weeklyPick.week === week ? state.weeklyPick.code : null;
+const log = state.digLog || {}, lim = addDays(day(), -14), recentDug = (c) => !!(log[c] && log[c] >= lim);
+const lab = (id) => { const x = NOTIONS.find((k) => k.id === id); return x ? x.label : id; };
+const item = (code, kind, extra) => { let q = null; try { q = this.fromCode(code); } catch (e) { q = null; } if (!q || !this.probKind(state, q.id, q)) return null;
+return { code, id: q.id, kind, label: lab(q.id), parts: q.parts.length, minutes: this.probMinutes(q), ...(extra || {}) }; };
+const out = [], seen = new Set(cur ? [cur] : []), push = (x) => { if (x && !seen.has(x.code) && !recentDug(x.code)) { seen.add(x.code); out.push(x); } };
+const past = H.filter((e) => e.w !== week && e.c).reverse(), histC = new Set(H.map((e) => e.c));
+for (const e of past.filter((e) => !e.done)) push(item(e.c, "semaine", { week: e.w, done: false }));
+
+
+const g = state.profile.grade, own = (id) => { const p = placeOf(NOTIONS.find((k) => k.id === id), state.profile); return !!p && p[0] === g; };
+const s = (id) => state.notions[id] || {}, worked = (id) => this.nowHas(state, id) || (s(id).seen > 0 && s(id).m > 0);
+const ids = this.eligible(state).filter((id) => hasProb(id) && own(id) && worked(id) && (this.nowHas(state, id) || this.isRecent(state, id)))
+.sort((a, b) => (this.nowHas(state, b) ? 1 : 0) - (this.nowHas(state, a) ? 1 : 0) || (s(b).last || "").localeCompare(s(a).last || ""));
+const lists = ids.map((id) => this.probCodes(state, id, "grand").slice());
+for (let k = 0; out.length < n && lists.some((l) => l.length); k++) for (const l of lists) { if (out.length >= n) break; const c = l.shift(); if (c && !histC.has(c)) push(item(c, "chapitre")); }
+for (const e of past.filter((e) => e.done)) push(item(e.c, "semaine", { week: e.w, done: true }));
+return out.slice(0, n);
+},
+digQuestion(state, code) {
+let q = null; try { q = this.fromCode(code); } catch (e) { q = null; }
+if (!q || q.d !== 4 || !q.parts) return null;
+return { ...this.weeklyAid(state, this.finalize(state, q.id, q)), dig: true };
+},
+digNote(state, code) {
+const L = (state.digLog = state.digLog || {}); L[code] = day();
+const ks = Object.keys(L).sort((a, b) => L[a].localeCompare(L[b])); while (ks.length > 80) delete L[ks.shift()];
+},
 isProvisional(state) { return state.elo.n < 20; },
 
 themeLevels(state) {
@@ -2029,6 +2241,19 @@ const plan0 = Engine.planSession, one0 = Engine.oneLesson, P = () => (typeof PRI
 
 Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); if (X) X.note(state); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.vary(state, X.strip(p)))) : p; };
 Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, X.vary(state, one0.call(this, state, X.strip(plan), n))) : one0.call(this, state, plan, n); };
+})();
+
+
+
+
+(function () {
+const cur = (id) => (typeof state !== "undefined" && state && state.profile ? txtCO(state.profile, id) : null);
+const ids = new Set(Object.values(TXT_CO).flatMap((o) => Object.keys(o)));
+for (const id of ids) {
+if (typeof HINTS !== "undefined" && id in HINTS) { const h0 = HINTS[id]; Object.defineProperty(HINTS, id, { configurable: true, enumerable: true, get: () => { const t = cur(id); return t && t.hint ? t.hint : h0; }, set: (v) => { Object.defineProperty(HINTS, id, { value: v, writable: true, configurable: true, enumerable: true }); } }); }
+const L = typeof LESSONS !== "undefined" && LESSONS[id];
+if (L) for (const k of ["regle", "exemple", "piege"]) { const v0 = L[k]; Object.defineProperty(L, k, { configurable: true, enumerable: true, get: () => { const t = cur(id); return t && t.lesson && t.lesson[k] !== undefined ? t.lesson[k] : v0; } }); }
+}
 })();
 
 
@@ -2234,7 +2459,7 @@ h(`${brand}<div class="eyebrow">👪 Espace parent${opt.preview ? " · aperçu" 
   <div class="card stack par-week"><div class="eyebrow">📅 Sa semaine</div>
     <div class="par-days" aria-label="${W.n} jours de pratique sur 7">${W.days.map((d) => `<span class="${d.on ? "on" : ""}" title="${Parents.fmt(d.d)}">${JR[new Date(d.d + "T12:00:00").getDay()]}</span>`).join("")}</div>
     <p><b>${W.n} jour${W.n > 1 ? "s" : ""} de pratique sur 7.</b> ${reg}</p>
-    ${W.gems ? `<p class="par-gems">🟡 Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
+    ${W.gems ? `<p class="par-gems">${typeof NUG_IC === "string" ? NUG_IC : ""} Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
     ${W.ids.length ? `<div><b>Ce qui a été travaillé</b><ul class="plain par-list small">${W.ids.map((x) => `<li>• ${esc(Parents.label(x))}</li>`).join("")}${W.more ? `<li class="muted">et ${W.more} autre${W.more > 1 ? "s" : ""}</li>` : ""}</ul></div>` : ""}
     ${W.now.length ? `<p class="small">📚 En classe en ce moment : ${W.now.map((x) => esc(Parents.label(x))).join(" · ")}</p>` : ""}
     ${W.fete ? `<div class="par-fete"><span>${W.fete.ic}</span><div><b>À fêter</b><div class="small">${W.fete.txt}</div></div></div>` : ""}

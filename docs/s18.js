@@ -3867,7 +3867,7 @@ const pct0 = PROB.pct;
 const PC = (cx, quoi, fin, intro, up, dn, P0) => { const p1 = P0 * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P0 - 1) * 100;
 return CXP(cx, Object.assign(P(intro, [["a) " + quoi + " après la hausse (CHF)", +p1.toFixed(6)], ["b) " + quoi + " " + fin + " (CHF)", +p2.toFixed(6)], ["c) Variation globale en % (négative si baisse)", +glob.toFixed(6), 0.01]],
 ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + T(1 + up / 100) + " puis par " + T(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
-"a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { fig: FIG.percentBar(up, P0, " CHF") })); };
+"a) " + M(nb(P0) + " \\cdot " + D(1 + up / 100) + " = " + CHF(p1)) + ". b) " + M(CHF(p1) + " \\cdot " + D(1 - dn / 100) + " = " + CHF(p2)) + ". c) " + M(D(+glob.toFixed(2)) + "\\,\\%") + " (et non " + (up - dn) + " %)."), { })); };
 
 
 
@@ -4211,7 +4211,12 @@ const tr = profile && profile.track === "mp" && profile.grade >= 12 ? "mp" : pro
 let best = null, n = 0;
 for (const [k, c] of Object.entries(RICH)) {
 if ((c.track === "mp" && tr !== "mp") || (c.track === "col" && tr === "mp")) continue;
-const m = ids.filter((id) => c.ids.includes(id)).length + (c.track && c.track === tr ? 0.5 : 0);
+
+
+
+const gOk = c.grades && profile ? profile.system === "CH" && profile.track !== "mp" && c.grades.includes(profile.grade) : null;
+if (gOk === false) continue;
+const m = ids.filter((id) => c.ids.includes(id)).length + (c.track && c.track === tr ? 0.5 : 0) + (gOk ? 0.5 : 0);
 if (m > n) { best = k; n = m; }
 }
 return best && Math.floor(n) * 2 >= ids.length ? best : null;

@@ -563,6 +563,16 @@ if (!s || s === p) return null;
 return QC("Laquelle de ces expressions est égale à " + M("(" + v + sg(a) + ")(" + v + sg(b) + ")") + " ?", [["\\(" + good + "\\)", ""], ["\\(" + f1 + "\\)", "Il manque les produits croisés : " + v + " · (" + b + ") et (" + a + ") · " + v + "."], ["\\(" + f2 + "\\)", "Le terme en " + v + " vient de " + a + " + " + b + ", et le terme constant de " + a + " · " + b + "."], ["\\(" + f3 + "\\)", v + " · " + v + " = " + v + "², pas 2" + v + "."]],
 "Chaque terme de la première parenthèse multiplie chaque terme de la deuxième : " + M(v + "^2 + " + b + v + " + " + a + v + sg(p).replace("+ -", "- ") + " = " + good) + ".",
 { ctx: "equiv-double", guide: [GR("Terme constant : " + M("(" + a + ") \\cdot (" + b + ")") + " ?", p, M(p) + "."), GR("Coefficient de " + M(v) + " : " + M(a + " + (" + b + ")") + " ?", s, M(s) + ".")] }); },
+
+
+() => { const v = LT(), a = R.int(2, 6), b = nz(-6, 6), c = R.int(2, 5), d = nz(-6, 6), A = a - c, B = a * b - c * d;
+if (!A || !B || a === c) return null;
+const t = (k, w) => mono(k, v) + sg(w), good = t(A, B), f1 = t(A, a * b + c * d), f2 = t(A, b - d), f3 = t(a + c, B);
+if (new Set([good, f1, f2, f3]).size < 4) return null;
+return QC("Laquelle de ces expressions est égale à " + M(a + "(" + v + sg(b) + ") - " + c + "(" + v + sg(d) + ")") + " pour toutes les valeurs de " + M(v) + " ?",
+[["\\(" + good + "\\)", ""], ["\\(" + f1 + "\\)", "Le signe − devant " + c + " porte sur les deux termes de la parenthèse : " + M("-" + c + " \\cdot (" + d + ") = " + -c * d) + "."], ["\\(" + f2 + "\\)", "Chaque facteur multiplie tous les termes de sa parenthèse : " + M(a + " \\cdot (" + b + ")") + " et " + M(c + " \\cdot (" + d + ")") + "."], ["\\(" + f3 + "\\)", "On soustrait " + M(mono(c, v)) + " : le coefficient de " + M(v) + " est " + M(a + " - " + c) + "."]],
+M(a + "(" + v + sg(b) + ") - " + c + "(" + v + sg(d) + ") = " + mono(a, v) + sg(a * b) + " - " + mono(c, v) + sg(-c * d) + " = " + good) + ".",
+{ ctx: "equiv-deuxsimples", guide: [GR("Coefficient de " + M(v) + " : " + M(a + " - " + c) + " ?", A, M(A) + "."), GR("Terme constant : " + M(a + " \\cdot (" + b + ") - " + c + " \\cdot (" + d + ")") + " ?", B, M(B) + ".")] }); },
 ],
 };
 const LCP = [

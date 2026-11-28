@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "708238448b";
+const BUILD = "64692aedc1";
 const ERR_MAX = 5;
 var errMem = null;
 
@@ -116,6 +116,7 @@ if (errReport(msg, src, at[1], at[2], st)) errLogSent(j);
 
 
 
+let flameChip = false, sbLast = null;
 const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
 function a11yMotion() {
 const calm = (a) => (a && typeof a === "object" && a.behavior === "smooth" && reducedMotion() ? { ...a, behavior: "auto" } : a);
@@ -239,7 +240,7 @@ return t.replace(/(^|[\s(«'’])(-?\d+(?:[.,'’]\d+)*)(?=[\s).,;:!?»%]|$)/g, 
 }).join("");
 };
 
-const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; ecranSplit(); addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; ecranSplit(); addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); seanceBar(); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -330,9 +331,12 @@ function glueDots(el) {
 if (!el || !el.querySelectorAll) return;
 for (const c of el.querySelectorAll("mjx-container:not([display=true])")) {
 const t = c.nextSibling;
-if (!t || t.nodeType !== 3 || !/^[.,;]/.test(t.nodeValue) || (c.parentNode && c.parentNode.classList && c.parentNode.classList.contains("nobr"))) continue;
+
+
+const m = t && t.nodeType === 3 ? /^(?:[.,;)]|[\s\u00a0\u202f]?[?!:])/.exec(t.nodeValue) : null;
+if (!m || (c.parentNode && c.parentNode.classList && c.parentNode.classList.contains("nobr"))) continue;
 const w = document.createElement("span"); w.className = "nobr"; w.style.whiteSpace = "nowrap";
-c.parentNode.insertBefore(w, c); w.appendChild(c); w.appendChild(document.createTextNode(t.nodeValue[0])); t.nodeValue = t.nodeValue.slice(1);
+c.parentNode.insertBefore(w, c); w.appendChild(c); w.appendChild(document.createTextNode(m[0].replace(/^[\s\u00a0]/, "\u202f"))); t.nodeValue = t.nodeValue.slice(m[0].length);
 }
 }
 const hash = (s) => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x.toString(36).slice(-4); };
@@ -380,7 +384,7 @@ return Engine.build("prio", 1, 7);
 function screenWelcome() {
 const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
 h(`${brand}
-  <div class="stack"><h1>${APP_TAGLINE_HTML}.</h1>
+  <div class="stack"><h1>${APP_TAGLINE_FUN_HTML}.</h1>
   <p class="small muted app-spoken">${APP_NAME} se dit <i>${APP_SPOKEN}</i></p> <!-- 27.11 : nom dit, discret, au premier lancement -->
   <p class="muted"><b>Chaque jour, environ 5 minutes, à ton niveau.</b> Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; rien n'est envoyé sans ton accord, seulement des statistiques anonymes si tu dis oui (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
@@ -553,7 +557,7 @@ const NIVEAUX = [[-Infinity, "à consolider"], [-300, "en construction"], [-150,
 function niveauOf(st) {
 const p = st.profile, h = harmos(p.system, p.grade), ref = (ELO_REF.find((x) => x[0] === h) || ELO_REF[ELO_REF.length - 1])[1];
 const r = st.elo.r, gap = r - ref, mot = NIVEAUX.filter(([at]) => gap >= at).pop()[1];
-return { r, mot, titre: /^au /.test(mot) ? "A" + mot.slice(1) : "Niveau " + mot , pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
+return { r, mot, i: NIVEAUX.findIndex(([, m]) => m === mot), ref, titre: /^au /.test(mot) ? "A" + mot.slice(1) : "Niveau " + mot , pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
 }
 function niveauCard() {
 const e = state.elo, nv = niveauOf(state), log = e.log || [], today = day();
@@ -569,10 +573,12 @@ const line = W.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFi
 spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/></svg>`;
 }
 const prov = Engine.isProvisional(state) ? ` <span class="badge">se précise</span>` : "";
-return `<div class="card flat stack niv-card"><div class="eyebrow">📈 Mon niveau</div><h3>${esc(nv.titre)}${prov}</h3>
+
+return `<div class="card flat stack niv-card" id="mon-niveau"><div class="eyebrow">📈 Mon niveau</div><h3>${esc(nv.titre)}${prov}</h3>
+    <p class="niv-elo">Ton Mathélo actuel : <span class="mark">${e.r}</span></p>
     <span class="pbar niv-bar" role="img" aria-label="${esc(nv.titre)}"><i style="width:${nv.pct}%"></i></span>
     <p class="small">${evo}</p>${spark}
-    <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais. <span class="niv-num">Mathélo ${e.r}</span></p></div>`;
+    <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais.</p></div>`;
 }
 
 
@@ -681,7 +687,7 @@ if (!state.eloSeen) { state.eloSeen = true; save(); }
 const y = ypSync(), r = y.pts, g = gradeOf(r);
 const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >= at).pop(); return `<li>${esc(x.c)} · ${yearLabel(+x.k.split("|")[0])} : ${G[1]} ${G[2]} atteint</li>`; }).reverse().join("");
 h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
-  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted"><span class="yp-gems">🟡 ${nbFmt(r)} ${r > 1 ? "pépites" : "pépite"}</span> trouvée${r > 1 ? "s" : ""} cette année : elles ne se perdent jamais.</div></div></div>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted"><span class="yp-gems">${NUG_IC} ${nbFmt(r)} ${r > 1 ? "pépites" : "pépite"}</span> trouvée${r > 1 ? "s" : ""} cette année : elles ne se perdent jamais.</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+${YP.weekly}</b>.</p>
     <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
@@ -705,7 +711,7 @@ function eloBanner() {
 const r = ypPts(), g = gradeOf(r);
 return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} pépites cette année, voir mes grades">
     <span class="eb-num"><b class="num">${nbFmt(r)}</b><span class="eb-unit">${r > 1 ? "pépites" : "pépite"}</span></span> <!-- 27.11 : unité sous le nombre, visible à toutes les largeurs -->
-    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} 🟡</span>` : ""}</span>
+    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} ${NUG_IC}</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
 function themeBars(lv) {
@@ -828,7 +834,8 @@ panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div cla
 
 panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades</button></div>${niveauCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`;
 if (!panels[homeTab]) homeTab = "today";
-const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" }</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) }</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+const fc = flameChip; flameChip = false;
+const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip${fc && alive && s.count ? " flame-up" : ""}" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? '<span class="chip-fl" aria-hidden="true">🔥</span> <b>' + s.count + "</b> j" : "✏️" }</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) }</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
 if (homeTab !== "today") {
 const T = { prob: "La mine", test: "Jour J", carnet: "À polir", prog: "Mon trésor" };
 h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -1447,7 +1454,7 @@ const box = document.getElementById("prev");
 let s;
 try { s = await Backup.decode(document.getElementById("code").value); } catch (e) { box.innerHTML = '<div class="card flat"><b>Code illisible.</b><p class="small muted">Vérifie qu\'il est complet (copie-le en entier).</p></div>'; return; }
 const nb = Object.keys(s.badges || {}).length, days = s.bc ? s.bc.days : s.history.length;
-box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} ${s.yp && s.yp.pts ? ` · 🟡 ${nbFmt(s.yp.pts)} pépite${s.yp.pts > 1 ? "s" : ""}` : ""} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
+box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} ${s.yp && s.yp.pts ? ` · ${NUG_IC} ${nbFmt(s.yp.pts)} pépite${s.yp.pts > 1 ? "s" : ""}` : ""} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
     ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
 document.getElementById("check").style.display = "none";
 document.getElementById("ok").onclick = () => { if (!s.a11y && state && state.a11y) s.a11y = state.a11y; state = s; save(); uiApply(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
@@ -1648,7 +1655,7 @@ const recentG = (l) => G0.some(([th, l2]) => l2 === l && pinned.has(th));
 
 
 const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : \\(" + esc(c.ex) + "\\)" : " du chapitre") : c.label; };
-const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><h3>${thL}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
+const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><div class="spread"><h3>${thL}</h3>${list.length > 1 ? '<button type="button" class="btn-ghost small all-ch">Tout le chapitre</button>' : ""}</div><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
 h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="muted">Choisis les notions de ton évaluation et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date de l'évaluation</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
@@ -1657,6 +1664,9 @@ h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="small muted" id="perr"></p>
   <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon évaluation</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer cette évaluation</button>' : ""}</div>`);
+
+
+for (const bt of app.querySelectorAll(".all-ch")) bt.onclick = () => { const bx = [...bt.closest(".card").querySelectorAll(".check input")], on = !bx.every((x) => x.checked); bx.forEach((x) => (x.checked = on)); bt.textContent = on ? "Tout décocher" : "Tout le chapitre"; };
 document.getElementById("save").onclick = () => {
 const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
 if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
@@ -2084,6 +2094,9 @@ for (let k = 0; k < 40 && used.includes(key(q)); k++) { const q2 = Engine.make(s
 used.push(key(q));
 }
 
+
+
+if (!redo && session.weekly) { const wq = Engine.weeklyQuestion(state); if (wq && wq.id === id) q = wq; }
 if (!redo && session.weekly) for (let k = 0; k < 20 && q && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
 
 
@@ -2144,7 +2157,7 @@ noRedo: !!redo || session.fmt === "auto" || Engine.struggling(state),
 sub: session.ctest ? session.ctest.label : "",
 
 
-eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Ma pépite du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine"  : session.ctest ? "Me tester · " + nTxt  : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
+eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true" data-done="${Math.round((Math.min(ST.pos, ST.total) / ST.total) * 100)}"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>`  : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Ma pépite du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine"  : session.ctest ? "Me tester · " + nTxt  : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
 
 
 onGuided: (delta) => {
@@ -2156,10 +2169,10 @@ if (back || yp) toast("🪜 Tu as reconstruit la solution" + (yp ? " : +1 pépit
 onDone: (res) => {
 const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
 
-if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("✨ Polie ! Une pépite de plus ✓"); } else if (r === "encore") toast("✨ 1 réussite sur 2 : encore une, du premier coup, et elle est polie.", 4000); else if (r === "rate") toast("✨ Pas encore polie : il faut " + carnetRule() + ".", 4000); }
+if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("✨ Polie ! Une pépite de plus ✓", 2200, "shine"); } else if (r === "encore") toast("✨ 1 réussite sur 2 : encore une, du premier coup, et elle est polie.", 4000); else if (r === "rate") toast("✨ Pas encore polie : il faut " + carnetRule() + ".", 4000); }
 else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("✨ Pépite brute : rangée dans « À polir », tu pourras la refaire.");
 
-else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓"); } }
+else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓", 2200, "shine"); } }
 
 
 
@@ -2187,7 +2200,9 @@ session.ypg = (session.ypg || 0) + ypAdd(state, ypPoints(q.d, res, !!redo)) + (s
 session.score += sc; session.answered++; session.ids.add(id); if (res.solved) session.solvedN = (session.solvedN || 0) + 1;
 if (res.parts) { session.parts = [(session.parts ? session.parts[0] : 0) + res.parts[0], (session.parts ? session.parts[1] : 0) + res.parts[1]]; session.nP = (session.nP || 0) + 1; }
 session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
+const fil0 = (state.streak && state.streak.count) || 0;
 if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de filon utilisé : ton filon continue !"); save();
+if (((state.streak && state.streak.count) || 0) > fil0) { session.filonUp = true; flameChip = true; }
 return res.delta;
 },
 onNext: (wantRedo) => {
@@ -2423,7 +2438,8 @@ h(`<div class="spread">${brand}</div><div class="eyebrow">${opt.eyebrow}</div>
   <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${scratchHtml()}
   ${lessonDetails(q.id)}
-  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
+  ${q.aid ? `<p class="small aid-plan">🪜 ${escT(q.aid.plan)}</p>`  : ""}
+  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>${q.aid && q.aid.parts[i] ? `<details class="aid small"><summary>Coup de pouce</summary>${escT(q.aid.parts[i])}</details>` : ""}
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div id="fb" aria-live="polite"></div></div>
@@ -2476,9 +2492,11 @@ app.querySelectorAll(".next-part").forEach((b) => b.remove());
 const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
 const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
 if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-if (frac === 1) burst();
 buzz(frac === 1);
+const yp0 = ypPts();
 const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0), parts: [ok.filter(Boolean).length, q.parts.length] });
+if (frac === 1) nugFly(active || app.querySelector(".card input.ans") || document.getElementById("check"), ypPts() - yp0);
+seanceBarDone();
 const d = "";
 const pSteps = frac < 1 && splitSol(q.sol);
 
@@ -2513,7 +2531,7 @@ q.parts.forEach((p, i) => {
 document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
 if (ok[i]) document.getElementById("p" + i).disabled = true;
 });
-if (ok.every(Boolean) || tries >= 3) return end(false);
+if (ok.every(Boolean) || tries >= (q.maxTries || 3)) return end(false);
 const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
 
 
@@ -2598,8 +2616,10 @@ buzz(solved);
 setTimeout(() => { const f = document.getElementById("fb"); if (f && f.getBoundingClientRect().top > innerHeight * 0.75) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
 const res = { solved, tries, dontKnow, diag: solved ? null : lastDiag, ans: solved ? null : lastAns };
 if (S) { S.issue = solved ? (tries === 1 ? "ok1" : "ok2") : dontKnow ? "idk" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-if (solved) burst();
+const yp0 = ypPts();
 const delta = opt.onDone(res);
+if (solved) nugFly(inp, ypPts() - yp0);
+seanceBarDone();
 if (opt.single) {
 fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? (q.sol ? '<details class="solfull"><summary>Voir la correction</summary><div class="sol">' + q.sol + "</div></details>" : "")  : '<span class="sol">' + q.sol + "</span>"}</div>`;
 qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>');
@@ -2744,29 +2764,85 @@ step();
 }
 
 
-function toast(msg, ms = 2200) {
+
+
+
+
+const NUG_MINI = () => (typeof NUG_IC === "string" ? NUG_IC : '<i class="nug-dot"></i>');
+
+
+function nugFly(from, n) {
+if (!(n > 0) || reducedMotion()) return;
+const r = [from, document.getElementById("check"), app.querySelector(".card.pop")].map((e) => e && e.getBoundingClientRect && e.getBoundingClientRect()).find((b) => b && b.width && b.bottom > 0 && b.top < innerHeight);
+if (!r) return;
+const f = document.createElement("div"); f.className = "nugfly"; f.setAttribute("aria-hidden", "true");
+f.innerHTML = `<span class="nugfly-ic">${NUG_MINI()}</span><b>+${n}</b>`;
+const x0 = Math.min(innerWidth - 108, Math.max(8, r.left + r.width / 2 - 50)), y0 = Math.max(8, r.top + Math.min(r.height, 60) / 2 - 20);
+f.style.left = x0 + "px"; f.style.top = y0 + "px";
+document.body.appendChild(f);
+const tg = [...document.querySelectorAll(".eb-unit, .yp-gems, .yp-row .yp-n")].map((e) => e.getBoundingClientRect()).find((b) => b.width && b.bottom > 0 && b.top < innerHeight);
+
+
+const dx = tg ? tg.left + tg.width / 2 - (x0 + 50) : 26, dy = tg ? tg.top + tg.height / 2 - (y0 + 20) : -Math.min(150, y0 + 10);
+const a = f.animate([{ transform: "translate(0,0) scale(.6)", opacity: 0 }, { transform: "translate(0,-4px) scale(1.15)", opacity: 1, offset: 0.16 },
+{ transform: "translate(0,-8px) scale(1)", opacity: 1, offset: 0.3 }, { transform: `translate(${dx * 0.35}px,${dy * 0.6}px) scale(1)`, opacity: 1, offset: 0.65 },
+{ transform: `translate(${dx}px,${dy}px) scale(${tg ? 0.6 : 0.92})`, opacity: 0 }], { duration: 700, easing: "cubic-bezier(.35,.6,.45,1)", fill: "forwards" });
+a.onfinish = () => f.remove(); setTimeout(() => f.remove(), 1100);
+}
+
+
+function ypCount() {
+const c = app.querySelector(".yp-cnt"); if (!c || reducedMotion() || !(+c.style.getPropertyValue("--n") > 1) || !(window.CSS && CSS.registerProperty)) return;
+c.classList.add("cnt"); setTimeout(() => c.classList.remove("cnt"), 800);
+}
+
+
+function seanceBar() {
+const i = app.querySelector(".eyebrow .pbar > i"); if (!i || !session) { if (!i) sbLast = null; return; }
+const to = parseFloat(i.style.width) || 0, from = sbLast && sbLast.s === session ? sbLast.w : null;
+if (from !== null && from > to) i.style.width = from + "%";
+sbLast = { s: session, w: Math.max(to, from || 0) };
+if (from === null || from >= to || reducedMotion()) return;
+i.style.transition = "none"; i.style.width = from + "%"; void i.offsetWidth; i.style.transition = ""; i.style.width = to + "%";
+}
+function seanceBarDone() {
+const p = app.querySelector(".eyebrow .pbar[data-done]"), i = p && p.firstElementChild; if (!i || !session) return;
+const w = Math.max(+p.dataset.done || 0, parseFloat(i.style.width) || 0);
+i.style.width = w + "%"; sbLast = { s: session, w };
+}
+
+
+function toast(msg, ms = 2200, cls) {
 const t = document.createElement("div");
-t.className = "toast pop"; t.setAttribute("role", "status"); t.textContent = msg;
+t.className = "toast pop" + (cls ? " " + cls : "");  t.setAttribute("role", "status"); t.textContent = msg;
 document.body.appendChild(t);
 setTimeout(() => t.remove(), ms);
 }
 
-function burst() {
-if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-const b = document.createElement("div");
-b.className = "burst";
-const syms = ["π", "√", "∞", "Σ", "x²", "½", "Δ", "∫", "≈", "%", "θ", "+"];
-const cx = window.innerWidth / 2, cy = window.innerHeight * 0.55;
-for (let i = 0; i < 22; i++) {
-const s = document.createElement("span"), a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 180;
-s.textContent = syms[i % syms.length];
-s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.fontSize = 16 + Math.random() * 18 + "px";
-s.style.setProperty("--dx", Math.cos(a) * r + "px"); s.style.setProperty("--dy", Math.sin(a) * r - 80 + "px"); s.style.setProperty("--r", (Math.random() * 120 - 60) + "deg");
+
+
+
+
+
+function burst(el) {
+if (!el || !el.getBoundingClientRect || reducedMotion()) return;
+const r = el.getBoundingClientRect(); if (!r.width || r.bottom < 0 || r.top > innerHeight) return;
+const b = document.createElement("div"); b.className = "burst"; b.setAttribute("aria-hidden", "true");
+
+const top = r.top < 140, cx = r.left + Math.min(r.width, 300) / 2 + (top ? 0 : (r.width - Math.min(r.width, 300)) / 2), cy = top ? r.top + r.height / 2 : Math.max(12, r.top + 18), N = 16;
+for (let i = 0; i < N; i++) {
+const s = document.createElement("span"), a = top ? 2 * Math.PI * (i / N) + (Math.random() - 0.5) * 0.3 : Math.PI * (1.08 + 0.84 * (i / (N - 1))) + (Math.random() - 0.5) * 0.12, d = (70 + Math.random() * 90) * (top ? 1.1 : 1);
+s.textContent = "✦"; s.className = i % 3 ? "" : "deep";
+s.style.left = cx + (Math.random() - 0.5) * Math.min(r.width * 0.5, 160) + "px"; s.style.top = cy + "px"; s.style.fontSize = 10 + Math.random() * 14 + "px";
+s.style.setProperty("--dx", Math.cos(a) * d + "px"); s.style.setProperty("--dy", Math.sin(a) * d * (top ? 0.55 : 1) + "px"); s.style.setProperty("--r", (Math.random() * 90 - 45) + "deg");
+s.style.animationDelay = Math.round(Math.random() * 90) + "ms";
 b.appendChild(s);
 }
 document.body.appendChild(b);
 setTimeout(() => b.remove(), 1000);
 }
+
+const bigMoment = () => { const c = app.querySelector(".grade-up, .bdg-new"), v = c && c.getBoundingClientRect(); burst(v && v.top < innerHeight - 40 && v.bottom > 0 ? c : app.querySelector("h2") || c); };
 
 
 function deviceId() {
@@ -3168,8 +3244,12 @@ const yg = session.ypg || 0, ypt = ypPts(), g0 = gradeOf(ypt - yg), g1 = gradeOf
 if (g1.i > g0.i) gradeNumbers();
 const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " pépites."  : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
 
+
+const hasE0 = Number.isFinite(session.elo0), nvA = hasE0 ? niveauOf({ profile: state.profile, elo: { r: session.elo0 } }) : null, nvB = niveauOf(state);
+const nivUp = hasE0 && nvB.i > nvA.i && !Engine.isProvisional(state) ? `<div class="card stack grade-up niv-up"><div class="eyebrow">📈 Ton niveau monte !</div><h3>Ton niveau passe à « ${esc(nvB.mot)} »</h3><p class="small">Ton Mathélo actuel : <span class="mark">${nvB.r}</span></p><button type="button" class="btn-sec" id="nivup">Voir mon niveau</button></div>` : "";
+
 const ypCapped = !yg && ((ypSync() || {}).dp || 0) >= YP.cap;
-const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b><span class="yp-n">+${yg} ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
+const ypRow = ypCapped ? `<div class="spread yp-row"><span>${NUG_IC} Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>${NUG_IC} Pépites</span><b><span class="yp-n">+<span class="yp-cnt" style="--n:${yg}">${yg}</span> ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
 
 
 
@@ -3181,11 +3261,11 @@ const title = fx ? "✨ " + (fx > 1 ? fx + " polies !" : "Polie !") : ok ? "✨ 
 const rule = left && fx < n ? `<div class="small muted">Pour polir une pépite : ${carnetRule()}.</div>` : "";
 h(`${brand}<h2>${esc(title)}</h2>
     <div class="card flat stack">${ypRow}<div class="spread"><span>À polir</span><b>${left ? carnetLeft(state.carnet) : "rien : bravo !"}</b></div>${rule}</div>
-    ${newGrade}${nb}
+    ${newGrade}${nivUp}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">✨ Continuer à polir</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
-if (nb || newGrade) setTimeout(burst, 250);
-updBanner("bilan");
+if (nb || newGrade || nivUp) setTimeout(bigMoment, 250);  { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+updBanner("bilan");  ypCount();
 document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); };
 if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
 return;
@@ -3197,13 +3277,13 @@ const shortMsg = session.stopped && session.i < session.plan.length ? "Séance i
 : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
 
 h(`${brand}${session.weekly ? '<div class="eyebrow">⛏️ La mine · problème de la semaine</div>'  : ""}<h2>${esc(sumTitle(n, sc))}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${plur(state.streak.count + 1, "jour", "jours")}${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
+  <div class="card flat streak"><span class="flame${session.filonUp ? " flame-up" : ""}" aria-hidden="true">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${plur(state.streak.count + 1, "jour", "jours")}${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack">${scoreRow(n, sc)}
   ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
-  ${newGrade}${nb}
+  ${newGrade}${nivUp}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>✨ À polir</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour polir une pépite : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à polir" : "✨ Polir mes pépites maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>✨ Rien à polir : bravo !</p></div>' : ""}
   ${returnCard()}
   ${xReady() ? curBonus() : '<span id="curslot" hidden></span>'}
@@ -3213,8 +3293,8 @@ h(`${brand}${session.weekly ? '<div class="eyebrow">⛏️ La mine · problème 
 ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
 
 if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
-if (nb || newGrade) setTimeout(burst, 250);
-updBanner("bilan");
+if (nb || newGrade || nivUp) setTimeout(bigMoment, 250);  { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+updBanner("bilan"); ypCount();
 document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); };
 const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
 bindCur();
@@ -3306,3 +3386,18 @@ ping("open");
 if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(window.__reprise)) { const rp = window.__reprise; window.__reprise = null; setProfile(rp); }
 else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
 else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
+
+
+
+(() => {
+const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
+const d = document.createElement("div"); d.className = "splash"; d.setAttribute("aria-hidden", "true");
+
+
+const nm = APP_NAME.endsWith("²") ? APP_NAME.slice(0, -1) + '<span class="splash-sq">²</span>' : APP_NAME;
+d.innerHTML = `<div class="splash-ring"><svg class="splash-circle" viewBox="0 0 172 172"><circle cx="86" cy="86" r="82"/></svg><div class="splash-nug">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}<i class="splash-glint"></i></div><b class="spk s1">✦</b><b class="spk s2">✦</b><b class="spk s3">✦</b></div><div class="splash-name">${nm}</div><div class="splash-tag">${APP_TAGLINE_FUN}</div>`;
+document.body.appendChild(d);
+const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
+d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 1600 : 2300);
+})();

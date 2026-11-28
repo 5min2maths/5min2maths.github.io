@@ -1824,6 +1824,123 @@ sol: ul([w.Il + " n'a pas tenu compte des effectifs : chaque note compte autant 
 chk: [[Math.abs(S / n - 4.75) > 0.004, "différent"]], vals: [S / n] }); },
 ];
 RICH.diagr = { ids: ["diagr"], label: "Diagrammes (9e–10e)", ex: EXDI, raison: RAISONDI, minutes: 45 };
+
+
+
+
+
+
+const EXL9 = [
+
+() => { const k = pk([3, 4, 6]), c = pk([4, 7, 9]), I = sh([3, 5, 7, 10, 12]).slice(0, 4).sort((x, y) => x - y), x1 = pk([2.5, 1.5, 3.5]), m = pk([2, 5]), n4 = pk([4, 6, 8]);
+const T = (f) => tab(["nombre choisi", "résultat affiché"], I.map((v) => [String(v), N(f(v))]));
+return X({ id: "litelab", lv: 1, titre: "Les machines à calculer",
+q: "Trois machines transforment le nombre qu'on leur donne. Voici des essais.<br><b>Machine A</b>" + T((v) => k * v) + "<b>Machine B</b>" + T((v) => v + c) + "<b>Machine C</b>" + T((v) => v * v),
+parts: [{ label: "Avec " + M("n") + " le nombre choisi, écris la formule de chaque machine.", pts: 3 }, { label: "Que donne chaque machine pour " + M("n = " + N(x1)) + " ?", pts: 2 },
+{ label: "Une machine D multiplie le nombre par " + m + ", puis ajoute " + c + ". Écris sa formule et calcule son résultat pour " + M("n = " + n4) + ".", pts: 2 }],
+sol: ul(["A : " + M(k + " \\cdot n = " + k + "n") + " ; B : " + M("n + " + c) + " ; C : " + M("n \\cdot n = n^2") + ".", "A : " + M(k + " \\cdot " + N(x1) + " = " + N(k * x1)) + " ; B : " + M(N(x1) + " + " + c + " = " + N(x1 + c)) + " ; C : " + M(N(x1) + "^2 = " + N(r6(x1 * x1))) + ".", M(m + "n + " + c) + " ; pour " + M("n = " + n4) + " : " + M(m + " \\cdot " + n4 + " + " + c + " = " + (m * n4 + c)) + "."]),
+chk: [[I.length === 4, "4 essais"]], vals: [k * x1, x1 + c, r6(x1 * x1), m * n4 + c] }); },
+
+() => { let p, q; do { p = R.int(2, 5); q = R.int(3, 9); } while (p === q);
+const a0 = r6(q + pk([1.5, 2, 4, 2.5])), E = [["je le multiplie par " + p + ", puis j'ajoute " + q + " au résultat", p + " \\cdot a + " + q, p * a0 + q], ["je lui ajoute " + q + ", puis je multiplie le résultat par " + p, p + " \\cdot (a + " + q + ")", p * (a0 + q)], ["je lui ajoute le produit de " + p + " par " + q, "a + " + p + " \\cdot " + q, a0 + p * q], ["je lui enlève " + q + ", puis je multiplie le résultat par " + p, p + " \\cdot (a - " + q + ")", p * (a0 - q)], ["je l'élève au carré, puis j'ajoute " + q + " au résultat", "a^2 + " + q, a0 * a0 + q]];
+const ex = sh(E.map((e, i) => [e[1], i]).concat([["(a + " + q + ")^2", -1]])), lab = (i) => String.fromCharCode(97 + ex.findIndex((e) => e[1] === i)), w = who();
+return X({ id: "litelab", lv: 1, titre: "Phrases et expressions",
+q: "Je choisis un nombre " + M("a") + ", puis : " + E.map((e, i) => "(" + (i + 1) + ") " + e[0]).join(" ; ") + ".<br>Expressions : " + ex.map((e, j) => String.fromCharCode(97 + j) + ") " + M(e[0])).join(" ; ") + ".",
+parts: [{ label: "Associe chaque phrase à son expression (une expression est en trop).", pts: 2 }, { label: "Calcule les cinq résultats pour " + M("a = " + N(a0)) + ".", pts: 3 },
+{ label: w.n + " affirme que les phrases (1) et (2) donnent toujours le même résultat. Montre par un exemple qu'" + w.il + " a tort.", pts: 1 }],
+sol: ul([E.map((e, i) => "(" + (i + 1) + ") → " + lab(i)).join(", ") + ".", E.map((e, i) => "(" + (i + 1) + ") " + M(e[1].replace(/a/g, N(a0)) + " = " + N(r6(e[2])))).join(" ; ") + ".", "Pour " + M("a = " + N(a0)) + " : " + M(N(r6(E[0][2]))) + " et " + M(N(r6(E[1][2]))) + ". Dans (2), on multiplie aussi le " + q + " par " + p + "."]),
+chk: [[a0 > q, "positif"], [E[0][2] !== E[1][2], "différents"]], vals: E.map((e) => r6(e[2])) }); },
+
+() => { const k = pk([2, 3, 4]), x1 = pk([1.5, 2.5, 3.5]), x2 = pk([4, 5, 6]), w = who();
+const fig = svg(250, 110, pg([[30, 15], [30 + 50 * k, 15], [30 + 50 * k, 65], [30, 65]], "f-shape2") + tx(30 + 25 * k, 85, k + "x", "f-txt", "middle", 13) + tx(18, 45, "x", "f-txt", "middle", 13), "rectangle de largeur x et de longueur " + k + "x");
+return X({ id: "litelab", lv: 2, titre: "Le rectangle",
+q: "La longueur d'un rectangle vaut " + (k === 2 ? "le double" : k === 3 ? "le triple" : "le quadruple") + " de sa largeur " + M("x") + " (en cm)." + fig,
+parts: [{ label: "Écris le périmètre du rectangle en fonction de " + M("x") + ".", pts: 1 }, { label: "Écris son aire en fonction de " + M("x") + ".", pts: 1 },
+{ label: "Calcule le périmètre et l'aire pour " + M("x = " + N(x1)) + " cm, puis pour " + M("x = " + x2) + " cm.", pts: 2 },
+{ label: w.n + " affirme : « Si la largeur double, l'aire double aussi. » Vérifie avec " + M("x = 2") + " et " + M("x = 4") + ".", pts: 1 }],
+sol: ul([M("x + " + k + "x + x + " + k + "x") + ", qu'on peut écrire " + M(2 * (k + 1) + "x") + " (cm).", M(k + "x \\cdot x = " + k + "x^2") + " (cm²).",
+M("x = " + N(x1)) + " : périmètre " + Q(2 * (k + 1) * x1, "cm") + ", aire " + M(k + " \\cdot " + N(x1) + "^2 = " + N(r6(k * x1 * x1))) + " cm² ; " + M("x = " + x2) + " : " + Q(2 * (k + 1) * x2, "cm") + " et " + Q(k * x2 * x2, "cm^2") + ".",
+"Pour " + M("x = 2") + " : aire " + Q(4 * k, "cm^2") + " ; pour " + M("x = 4") + " : " + Q(16 * k, "cm^2") + ", 4 fois plus. " + w.n + " a tort (c'est le périmètre qui double)."]),
+chk: [[k * 16 === 4 * (4 * k), "×4"]], vals: [2 * (k + 1) * x1, r6(k * x1 * x1), 2 * (k + 1) * x2, k * x2 * x2] }); },
+
+() => { const a = pk([2.5, 1.5, 3.5, 4.5]), b = R.int(3, 8), c = pk([1.2, 0.8, 2, 0.5]), k = pk([2, 3, 5]), m = pk([3, 4]), x1 = pk([2.5, 1.5, 4]);
+const V = r6(a * b * c), A2 = r6(2 * (a * b + b * c + a * c)), Vx = r6(m * x1 * (x1 + k));
+return X({ id: "valnum", lv: 2, titre: "Le pavé droit",
+q: "Pour un pavé droit de dimensions " + M("a") + ", " + M("b") + " et " + M("c") + ", le volume vaut " + M("V = a \\cdot b \\cdot c") + " et l'aire totale " + M("A = 2(ab + bc + ac)") + ".",
+parts: [{ label: "Calcule le volume d'un pavé de " + Q(a, "cm") + " sur " + Q(b, "cm") + " sur " + Q(c, "cm") + ".", pts: 1 }, { label: "Calcule son aire totale.", pts: 2 },
+{ label: "Un autre pavé mesure " + M("x") + ", " + M("x + " + k) + " et " + M(m) + " (en cm). Écris son volume en fonction de " + M("x") + ".", pts: 1 },
+{ label: "Calcule ce volume pour " + M("x = " + N(x1)) + ".", pts: 1 }],
+sol: ul([M(N(a) + " \\cdot " + b + " \\cdot " + N(c) + " = " + N(V)) + " cm³.", M("A = 2(" + N(r6(a * b)) + " + " + N(r6(b * c)) + " + " + N(r6(a * c)) + ") = 2 \\cdot " + N(r6(a * b + b * c + a * c)) + " = " + N(A2)) + " cm² (on calcule d'abord la parenthèse).",
+M("V = x \\cdot (x + " + k + ") \\cdot " + m) + ", qu'on écrit " + M(m + "x(x + " + k + ")") + " (cm³) : la parenthèse est indispensable.",
+M(m + " \\cdot " + N(x1) + " \\cdot (" + N(x1) + " + " + k + ") = " + m + " \\cdot " + N(x1) + " \\cdot " + N(x1 + k) + " = " + N(Vx)) + " cm³."]),
+chk: [[V > 0 && A2 > 0, "positifs"]], vals: [V, A2, Vx] }); },
+
+() => { const C1 = sh([15, 25, 35, 10]).slice(0, 2), Cs = pk([30, 40, 45]), ok = R.rand() < 0.5, Fs = (9 * Cs) / 5 + 32, claim = ok ? Cs : Cs + 5, w = who(), F = (t) => (9 * t) / 5 + 32;
+return X({ id: "valnum", lv: 3, titre: "Degrés Fahrenheit",
+q: "Aux États-Unis, on mesure la température en degrés Fahrenheit (°F). Pour passer des degrés Celsius aux degrés Fahrenheit, on utilise la formule " + M("F = \\frac{9 \\cdot C}{5} + 32") + ". Daniel Gabriel Fahrenheit a créé son échelle en 1724.",
+parts: [{ label: "Calcule " + M("F") + " pour " + M("C = " + C1[0]) + ", " + M("C = " + C1[1]) + " et " + M("C = 37") + " (température du corps).", pts: 3 },
+{ label: "Il fait " + Fs + " °F à Phoenix. " + w.n + " dit qu'il fait " + claim + " °C. Vérifie avec la formule.", pts: 1 },
+{ label: "Pour " + M("C = 20") + ", Noé calcule d'abord " + M("20 : 5 = 4") + ", puis " + M("9 \\cdot 4 + 32") + ". Trouve-t-il le bon résultat ? Et Léa, qui calcule " + M("9 \\cdot (20 + 32) : 5") + " ?", pts: 2 },
+{ label: "Quelle donnée de l'énoncé ne sert à rien ?", pts: 1 }],
+sol: ul([C1.map((t) => M("\\frac{9 \\cdot " + t + "}{5} + 32 = " + N(F(t)))).join(" ; ") + " ; " + M("\\frac{9 \\cdot 37}{5} + 32 = " + N(F(37))) + " °F.",
+M("\\frac{9 \\cdot " + claim + "}{5} + 32 = " + N(F(claim))) + (ok ? " : " + w.n + " a raison." : " et non " + Fs + " : " + w.n + " se trompe (il fait " + Cs + " °C)."),
+"Noé : " + M("9 \\cdot 4 + 32 = 68") + ", juste (" + M("\\frac{9 \\cdot 20}{5} = 9 \\cdot \\frac{20}{5}") + "). Léa : " + M("9 \\cdot 52 : 5 = " + N((9 * 52) / 5)) + ", faux : elle ajoute 32 avant de diviser.",
+"L'année 1724."]),
+chk: [[F(Cs) === Fs && Number.isInteger(Fs), "Phoenix"], [F(20) === 68, "Noé"]], vals: [F(C1[0]), F(C1[1]), F(37), Fs] }); },
+
+() => { const k = pk([6, 10, 12, 15]), n0 = pk([8, 9, 14, 25]), w = who();
+return X({ id: "litelab", lv: 2, titre: "Les boîtes",
+q: "Denis range des objets dans trois boîtes. La première contient " + M("n") + " objets, la deuxième en contient " + k + " de plus que la première, et la troisième contient le double de la première.",
+parts: [{ label: "Écris, en fonction de " + M("n") + ", le nombre d'objets de chaque boîte.", pts: 2 }, { label: "Écris le nombre total d'objets en fonction de " + M("n") + ".", pts: 1 },
+{ label: "La première boîte contient " + n0 + " objets. Combien y a-t-il d'objets en tout ?", pts: 1 },
+{ label: w.n + " a écrit le total ainsi : " + M("n + " + k + " \\cdot 2n") + ". Explique son erreur.", pts: 1 }],
+sol: ul([M("n") + " ; " + M("n + " + k) + " ; " + M("2 \\cdot n = 2n") + ".", M("n + (n + " + k + ") + 2n") + ", qu'on peut écrire " + M("4n + " + k) + ".", M(n0 + " + " + (n0 + k) + " + " + 2 * n0 + " = " + (4 * n0 + k)) + " objets.",
+w.n + " a oublié la deuxième boîte (" + M("n + " + k) + ") et a multiplié " + k + " par " + M("2n") + " : il faut additionner les trois boîtes."]),
+chk: [[4 * n0 + k === n0 + n0 + k + 2 * n0, "total"]], vals: [4 * n0 + k, n0 + k, 2 * n0] }); },
+];
+const RAISONL9 = [
+
+() => { const pool = [
+() => { const k = pk([3, 5, 7]), v = pk([2.5, 1.5]); return [M(k + "x") + " pour " + M("x = " + N(v)), M(k + N(v)), "On a collé " + k + " et " + N(v) + " : " + M(k + "x") + " veut dire " + M(k + " \\cdot x") + ".", M(k + " \\cdot " + N(v) + " = " + N(k * v))]; },
+() => { const k = pk([2, 3, 5]), v = pk([3, 4, 6]); return [M(k + "x^2") + " pour " + M("x = " + v), M("(" + k + " \\cdot " + v + ")^2 = " + (k * v) ** 2), "Le carré ne porte que sur " + M("x") + ".", M(k + " \\cdot " + v + "^2 = " + k + " \\cdot " + v * v + " = " + k * v * v)]; },
+() => { const a = pk([2, 4, 6]), k = pk([3, 5]), v = pk([3, 7]); return [M(a + " + " + k + "x") + " pour " + M("x = " + v), M("(" + a + " + " + k + ") \\cdot " + v + " = " + (a + k) * v), "La multiplication passe avant l'addition.", M(a + " + " + k + " \\cdot " + v + " = " + (a + k * v))]; },
+() => { const v = pk([28, 35, 56]); return [M("x : 7 + 3") + " pour " + M("x = " + v), M(v + " : (7 + 3) = " + N(v / 10)), "La division passe avant l'addition.", M(v + " : 7 + 3 = " + (v / 7 + 3))]; },
+() => { const a = pk([3, 4, 6]), b = pk([5, 7, 8]); return [M("ab") + " pour " + M("a = " + a) + " et " + M("b = " + b), M(String(a) + String(b)), M("ab") + " est un produit, pas un nombre à deux chiffres.", M(a + " \\cdot " + b + " = " + a * b)]; },
+]; const L = sh(pool).slice(0, 3).map((f) => f()), w = who();
+return X({ id: "valnum", lv: 1, titre: "Trouve l'erreur",
+q: w.n + " a calculé la valeur de trois expressions. Chaque calcul est faux." + tab(["", "expression", "calcul de " + w.n], L.map((l, i) => [String.fromCharCode(65 + i), l[0], l[1]])),
+parts: [{ label: "Explique l'erreur de chaque calcul.", pts: 2 }, { label: "Fais les trois calculs correctement.", pts: 2 }],
+sol: ul([L.map((l, i) => String.fromCharCode(65 + i) + " : " + l[2]).join(" "), L.map((l, i) => String.fromCharCode(65 + i) + " : " + l[3]).join(" ; ") + "."]),
+chk: [[L.length === 3, "3"]], vals: [] }); },
+
+() => VF({ id: "litelab", titre: "Vrai ou faux ? Justifie" }, [
+() => [M("a + a + a = a^3") + "", false, M("a + a + a = 3 \\cdot a = 3a") + " ; " + M("a^3 = a \\cdot a \\cdot a") + ". Pour " + M("a = 2") + " : 6 et 8."],
+() => [M("3 + x \\cdot 2") + " peut s'écrire " + M("3 + 2x") + "", true, "On peut changer l'ordre d'un produit et supprimer le signe « · » devant une lettre."],
+() => [M("x \\cdot x = 2x") + "", false, M("x \\cdot x = x^2") + " ; pour " + M("x = 3") + " : 9 et 6."],
+() => { const q = pk([3, 4, 5]); return [M("(n + " + q + ") \\cdot 2") + " et " + M("n + " + q + " \\cdot 2") + " donnent toujours le même résultat »", false, "Pour " + M("n = 1") + " : " + M(2 * (1 + q)) + " et " + M(1 + 2 * q) + ". Dans la première, on ajoute d'abord " + q + "."]; },
+() => ["Le nombre entier qui suit " + M("n") + " s'écrit " + M("n + 1"), true, "On ajoute 1 : après 7 vient 8."],
+() => [M("x^2") + " est toujours plus grand que " + M("x") + "", false, "Pour " + M("x = 0{,}5") + " : " + M("0{,}5^2 = 0{,}25") + ", plus petit que " + M("0{,}5") + "."],
+() => [M("5 \\cdot a \\cdot 2") + " peut s'écrire " + M("10a") + "", true, M("5 \\cdot 2 = 10") + " : on peut changer l'ordre des facteurs."],
+]),
+
+() => { const xs = [pk([1.5, 2.5]), 2, pk([3, 5])], E = [["2x", (v) => 2 * v], ["x^2", (v) => v * v], ["x + x", (v) => v + v], ["x \\cdot x", (v) => v * v]];
+return X({ id: "valnum", lv: 2, titre: "Égales ?",
+q: "On remplace " + M("x") + " par " + xs.map((v) => M(N(v))).join(", ") + " dans les expressions " + E.map((e) => M(e[0])).join(", ") + ".",
+parts: [{ label: "Complète un tableau avec les douze résultats.", pts: 2 }, { label: "Quelles expressions donnent toujours le même résultat ? Explique.", pts: 2 },
+{ label: "Pour " + M("x = 2") + ", " + M("2x") + " et " + M("x^2") + " valent tous deux 4. Sont-elles pour autant égales pour tous les nombres ?", pts: 1 }],
+sol: ul([E.map((e) => M(e[0]) + " : " + xs.map((v) => M(N(r6(e[1](v))))).join(" ; ")).join(". ") + ".", M("2x") + " et " + M("x + x") + " (deux fois le même nombre) ; " + M("x^2") + " et " + M("x \\cdot x") + " (le nombre multiplié par lui-même).", "Non : pour " + M("x = " + xs[2]) + ", " + M("2x = " + 2 * xs[2]) + " mais " + M("x^2 = " + xs[2] * xs[2]) + ". Un seul contre-exemple suffit."]),
+chk: [[xs[2] * xs[2] !== 2 * xs[2], "contre-exemple"]], vals: [2 * xs[0], 4, 2 * xs[2], xs[2] * xs[2]] }); },
+
+() => { const a = pk([2.5, 1.5, 0.5]), b = pk([4, 6, 8]), E = [["a \\cdot (b + 3)", "produit", a * (b + 3)], ["a \\cdot b + 3", "somme", a * b + 3], ["(a + b) \\cdot (a + 3)", "produit", (a + b) * (a + 3)], ["a + b \\cdot 3", "somme", a + b * 3]], L = sh(E);
+return X({ id: "valnum", lv: 1, titre: "Somme ou produit ?",
+q: "On considère les expressions " + L.map((e, i) => "(" + (i + 1) + ") " + M(e[0])).join(" ; ") + ".",
+parts: [{ label: "Pour chacune, dis si c'est une somme ou un produit (la dernière opération effectuée).", pts: 2 }, { label: "Calcule chacune pour " + M("a = " + N(a)) + " et " + M("b = " + b) + ".", pts: 2 }],
+sol: ul([L.map((e, i) => "(" + (i + 1) + ") " + e[1]).join(", ") + ".", L.map((e, i) => "(" + (i + 1) + ") " + M(N(r6(e[2])))).join(" ; ") + "."]),
+chk: [[L.length === 4, "4"]], vals: E.map((e) => r6(e[2])) }); },
+];
+
+RICH.litt9 = { ids: ["litelab", "valnum"], label: "Calcul littéral (9e)", ex: EXL9, raison: RAISONL9, minutes: 45, grades: [9] };
+
 })();
 
 
@@ -2178,5 +2295,407 @@ sol: ul(["Dans le sens des aiguilles d'une montre : " + M("(x \\,;\\, y) \\to (y
 chk: [[!(b === -b && -a === a), "différent"]], vals: [-b, a] }); },
 ];
 RICH.transf10 = { ids: ["agrand", "rotation"], label: "Transformations du plan (10e)", ex: EXT, raison: RAISONT, minutes: 45 };
+
+
+
+
+
+
+const cxT = (a, v = "x") => (a === 1 ? v : a === -1 ? "-" + v : N(a) + v);
+const lin = (a, b, v = "x") => cxT(a, v) + (b < 0 ? " - " + N(-b) : b > 0 ? " + " + N(b) : "");
+const linP = (a, b, v = "x") => lin(a, b, v).replace(/\{,\}/g, ",").replace(/-/g, "−");
+const rect = (x, y, w, h, cls) => pg([[x, y], [x + w, y], [x + w, y + h], [x, y + h]], cls);
+const EXL10 = [
+
+() => { let B, Nw, T2; do { B = [0, 1, 2].map(() => [pk([2, 3, 4, 5, -2, -3]), pk([-7, -5, -4, -2, 3, 5, 6, 8])]); Nw = [pk([2, 3, 4, -1, 5]), pk([-6, -3, 2, 4, 7])]; } while (B[0][0] + 2 * B[1][0] + B[2][0] === 0 || B[0][1] + 2 * B[1][1] + B[2][1] === 0 || (Nw[0] === B[1][0] && Nw[1] === B[1][1]));
+const M1 = [B[0][0] + B[1][0], B[0][1] + B[1][1]], M2 = [B[1][0] + B[2][0], B[1][1] + B[2][1]], T = [M1[0] + M2[0], M1[1] + M2[1]], x0 = pk([-2, -3, -4]), vT = T[0] * x0 + T[1];
+T2 = [B[0][0] + 2 * Nw[0] + B[2][0], B[0][1] + 2 * Nw[1] + B[2][1]];
+const W = 300, H = 112, b = (i, j, s, cls) => rect(10 + j * 93 + i * 46.5, 10 + (2 - i) * 32, 93, 32, cls) + tx(10 + j * 93 + i * 46.5 + 46.5, 10 + (2 - i) * 32 + 21, s, "f-txt", "middle", 13);
+const fig = svg(W, H, b(0, 0, linP(...B[0]), "f-shape2") + b(0, 1, linP(...B[1]), "f-shape2") + b(0, 2, linP(...B[2]), "f-shape2") + b(1, 0, "?", "f-soft") + b(1, 1, "?", "f-soft") + b(2, 0, "?", "f-soft"), "mur de six briques : trois en bas, deux au milieu, une au sommet");
+return X({ id: "reduire", lv: 1, titre: "Le mur de briques",
+q: "Dans ce mur, chaque brique contient la <b>somme</b> des deux briques sur lesquelles elle repose. Écris chaque résultat sous forme réduite." + fig,
+parts: [{ label: "Écris les deux briques du milieu.", pts: 2 }, { label: "Écris la brique du sommet.", pts: 1 }, { label: "Calcule la brique du sommet pour " + M("x = " + x0) + ". Vérifie en remplaçant " + M("x") + " par " + M(x0) + " dans les trois briques du bas.", pts: 2 },
+{ label: "On change seulement la brique du milieu, en bas. Le sommet devient " + M(lin(...T2)) + ". Quelle expression a-t-on mise dans cette brique ?", pts: 2 }],
+sol: ul([M("(" + lin(...B[0]) + ") + (" + lin(...B[1]) + ") = " + lin(...M1)) + " et " + M("(" + lin(...B[1]) + ") + (" + lin(...B[2]) + ") = " + lin(...M2)) + ".",
+M("(" + lin(...M1) + ") + (" + lin(...M2) + ") = " + lin(...T)) + " (la brique du milieu, en bas, compte deux fois).",
+M(N(T[0]) + " \\cdot (" + x0 + ")" + (T[1] < 0 ? " - " + -T[1] : " + " + T[1]) + " = " + vT) + ". En bas, pour " + M("x = " + x0) + " : " + B.map((v) => M(N(v[0] * x0 + v[1]))).join(", ") + ", et " + M(N(B[0][0] * x0 + B[0][1]) + " + 2 \\cdot (" + N(B[1][0] * x0 + B[1][1]) + ") + (" + N(B[2][0] * x0 + B[2][1]) + ") = " + vT) + " ✓.",
+"Sommet = brique de gauche + 2 · brique du milieu + brique de droite. Donc 2 · brique du milieu " + M("= (" + lin(...T2) + ") - (" + lin(...B[0]) + ") - (" + lin(...B[2]) + ") = " + lin(2 * Nw[0], 2 * Nw[1])) + ", et la brique vaut " + M(lin(...Nw)) + "."]),
+chk: [[vT === B[0][0] * x0 + B[0][1] + 2 * (B[1][0] * x0 + B[1][1]) + B[2][0] * x0 + B[2][1], "deux calculs"], [T2[0] - B[0][0] - B[2][0] === 2 * Nw[0] && T2[1] - B[0][1] - B[2][1] === 2 * Nw[1], "inverse"]],
+vals: [T[0], T[1], vT].filter((v) => Math.abs(v) > 1) }); },
+
+() => { const n = pk([5, 6]), big = pk([20, 25, 40]), n0 = pk([12, 15, 18]), C0 = 4 * n0 - 4, no = pk([50, 70, 90]);
+const s = 22, fig = svg(n * s + 20, n * s + 20, Array.from({ length: n * n }, (_, k) => { const i = k % n, j = Math.floor(k / n), edge = i === 0 || j === 0 || i === n - 1 || j === n - 1; return rect(10 + i * s, 10 + j * s, s, s, edge ? "f-fill2" : "f-soft"); }).join(""), "carré de " + n + " sur " + n + " carreaux, les carreaux du bord colorés");
+return X({ id: "litelab", lv: 2, titre: "Les carreaux du bord",
+q: "On pave un carré de " + M("n") + " carreaux sur " + M("n") + " carreaux, et on colore les carreaux du bord (ici " + M("n = " + n) + ")." + fig,
+parts: [{ label: "Combien de carreaux sont colorés pour " + M("n = " + n) + " ? Et pour " + M("n = 10") + " ?", pts: 2 },
+{ label: "Pour le nombre de carreaux colorés, Léa propose " + M("4n - 4") + ", Noé " + M("4(n - 1)") + ", Sam " + M("2n + 2(n - 2)") + " et Yanis " + M("4n") + ". Lesquelles de ces expressions sont justes ? Justifie en réduisant, et donne un contre-exemple pour celle qui est fausse.", pts: 3 },
+{ label: "Combien de carreaux sont colorés pour un carré de " + M(big) + " sur " + M(big) + " ?", pts: 1 },
+{ label: "Un carré a " + M(C0) + " carreaux colorés. Combien de carreaux a-t-il de côté ? Peut-on en avoir exactement " + M(no) + " ? Explique.", pts: 2 }],
+sol: ul([M("n = " + n) + " : " + M(4 * n - 4) + " carreaux ; " + M("n = 10") + " : 36 carreaux (les 4 coins ne se comptent qu'une fois).",
+"Léa, Noé et Sam ont raison : " + M("4(n - 1) = 4n - 4") + " et " + M("2n + 2(n - 2) = 2n + 2n - 4 = 4n - 4") + " (deux côtés entiers, plus deux côtés sans leurs coins). Yanis a tort : il compte les coins deux fois ; contre-exemple " + M("n = " + n) + " : " + M(4 * n) + " au lieu de " + M(4 * n - 4) + ".",
+M("4 \\cdot " + big + " - 4 = " + (4 * big - 4)) + " carreaux.",
+M("4n - 4 = " + C0) + " : " + M("4n = " + (C0 + 4)) + ", " + M("n = " + n0) + " carreaux de côté. " + M(no + 4 + " : 4 = " + N((no + 4) / 4)) + " n'est pas un nombre entier : impossible d'avoir exactement " + no + " carreaux colorés."]),
+chk: [[(no + 4) % 4 !== 0, "impossible"], [4 * n0 - 4 === C0, "inverse"]], vals: [4 * n - 4, 36, 4 * big - 4, n0] }); },
+
+() => { let m, a, t; do { m = pk([3, 4, 5]); a = R.int(2, 9); t = pk([4, -3, 7]); } while (Math.abs(t + a) < 2);
+return X({ id: "distrib", lv: 2, titre: "Le programme de calcul",
+q: "Programme : « Choisis un nombre. Ajoute " + a + ". Multiplie le résultat par " + m + ". Retranche le nombre choisi. Retranche " + m * a + ". Divise par " + (m - 1) + ". »",
+parts: [{ label: "Applique le programme à " + M(t) + ", puis à " + M("2{,}5") + ". Que constates-tu ?", pts: 2 },
+{ label: "On appelle " + M("x") + " le nombre choisi. Écris le résultat de chaque étape à l'aide de " + M("x") + ".", pts: 2 },
+{ label: "Prouve que ta constatation est vraie pour tous les nombres (développe, puis réduis).", pts: 2 },
+{ label: "Change la dernière étape pour que le programme donne toujours le double du nombre choisi.", pts: 1 }],
+sol: ul([M(t) + " → " + M(N(t + a)) + " → " + M(N(m * (t + a))) + " → " + M(N(m * (t + a) - t)) + " → " + M(N(m * (t + a) - t - m * a)) + " → " + M(N(t)) + " ; " + M("2{,}5") + " donne " + M("2{,}5") + " : on retrouve le nombre choisi.",
+M("x \\to x + " + a + " \\to " + m + "(x + " + a + ") \\to " + m + "(x + " + a + ") - x \\to " + m + "(x + " + a + ") - x - " + m * a + " \\to \\frac{" + m + "(x + " + a + ") - x - " + m * a + "}{" + (m - 1) + "}") + ".",
+M(m + "(x + " + a + ") - x - " + m * a + " = " + m + "x + " + m * a + " - x - " + m * a + " = " + (m - 1) + "x") + ", et " + M((m - 1) + "x : " + (m - 1) + " = x") + " : c'est vrai pour tout " + M("x") + " (une preuve, pas seulement des exemples).",
+"Par exemple « Divise par " + (m - 1) + ", puis multiplie par 2 »" + (m === 3 ? " (ou simplement : « Ne divise pas » : " + M("2x") + ")" : "") + "."]),
+chk: [[m * (t + a) - t - m * a === (m - 1) * t, "preuve"]], vals: [t + a, m * (t + a), m * a, m - 1] }); },
+
+() => { let d, k0, k2; do { d = pk([0.2, 0.25, 0.4, 0.5]); k0 = pk([4, 5, 6, 8, 10]); k2 = pk([15, 20, 25]); } while (Math.abs(Math.abs(d * (k2 - k0)) - 1) < 1e-9);
+const q = pk([2.6, 2.8, 3]), a0 = pk([3.5, 4, 5, 6.5]), p = r6(q + d), b0 = r6(a0 + d * k0), k1 = pk([2, 3]);
+const A1 = r6(a0 + p * k1), B1 = r6(b0 + q * k1), D = (k) => r6(a0 - b0 + d * k);
+return X({ id: "valnum", lv: 2, titre: "Deux taxis",
+q: "Dans une ville, deux compagnies de taxis calculent le prix d'une course de " + M("k") + " km avec les formules " + M("A = " + N(a0) + " + " + N(p) + "k") + " et " + M("B = " + N(b0) + " + " + N(q) + "k") + " (en CHF).",
+parts: [{ label: "Calcule le prix d'une course de " + Q(k1, "km") + " avec chaque compagnie.", pts: 2 },
+{ label: "Écris la différence " + M("A - B") + " sous forme réduite.", pts: 2 },
+{ label: "Pour quelle distance les deux prix sont-ils égaux ?", pts: 1 },
+{ label: "Inès affirme : « Pour une course de " + k2 + " km, la compagnie A est la moins chère. » A-t-elle raison ? Justifie avec " + M("A - B") + ".", pts: 1 }],
+sol: ul(["A : " + M(N(a0) + " + " + N(p) + " \\cdot " + k1 + " = " + Nk(A1, 2)) + " CHF ; B : " + M(N(b0) + " + " + N(q) + " \\cdot " + k1 + " = " + Nk(B1, 2)) + " CHF.",
+M("A - B = " + N(a0) + " + " + N(p) + "k - " + N(b0) + " - " + N(q) + "k = " + N(d) + "k - " + N(r6(b0 - a0))) + " (attention : le « − » porte sur les deux termes de B).",
+M(N(d) + "k - " + N(r6(b0 - a0)) + " = 0") + " pour " + M("k = " + N(r6(b0 - a0)) + " : " + N(d) + " = " + k0) + " km.",
+"Pour " + M("k = " + k2) + " : " + M("A - B = " + N(d) + " \\cdot " + k2 + " - " + N(r6(b0 - a0)) + " = " + N(D(k2))) + " CHF > 0 : A est plus chère. Inès a tort (A n'est moins chère que pour les courses de moins de " + k0 + " km)."]),
+chk: [[Math.abs(D(k0)) < 1e-9, "égalité"], [D(k2) > 0 && D(k1) < 0, "signes"], [k2 > k0 && k1 < k0, "ordre"]], vals: [A1, B1, d, k0, D(k2)] }); },
+
+() => { const [a, b, c] = sh(pk([[2, 3, 4], [2, 3, 5], [3, 4, 5], [2, 4, 5]])), V = a * b * c, S = a * b + 2 * a * c + 2 * b * c, x1 = pk([1.5, 2.5, 0.5]), w = who();
+return X({ id: "monomes", lv: 3, titre: "La boîte sans couvercle",
+q: "Une boîte en carton, sans couvercle, a la forme d'un pavé droit. Son fond mesure " + M(a + "x") + " cm sur " + M(b + "x") + " cm et sa hauteur est de " + M(c + "x") + " cm.",
+parts: [{ label: "Écris son volume sous la forme d'un monôme.", pts: 1 },
+{ label: "Écris l'aire de carton utilisée (le fond et les quatre côtés) sous la forme d'un monôme.", pts: 2 },
+{ label: w.n + " écrit : « l'aire de carton vaut " + M(a * b * c + "x^3") + " ». Explique son erreur.", pts: 1 },
+{ label: "Calcule le volume et l'aire de carton pour " + M("x = " + N(x1)) + ". Si " + M("x") + " double, par combien le volume est-il multiplié ? Et l'aire ?", pts: 2 }],
+sol: ul([M(a + "x \\cdot " + b + "x \\cdot " + c + "x = " + V + "x^3") + " cm³.",
+"Fond " + M(a + "x \\cdot " + b + "x = " + a * b + "x^2") + ", deux côtés " + M("2 \\cdot " + a + "x \\cdot " + c + "x = " + 2 * a * c + "x^2") + ", deux côtés " + M("2 \\cdot " + b + "x \\cdot " + c + "x = " + 2 * b * c + "x^2") + " : en tout " + M(S + "x^2") + " cm² (monômes semblables : on additionne les coefficients).",
+w.n + " a multiplié les trois dimensions : c'est le volume. Une aire s'exprime en cm², avec " + M("x^2") + " : on additionne les aires des faces.",
+"Volume : " + M(V + " \\cdot " + N(x1) + "^3 = " + V + " \\cdot " + N(r6(x1 ** 3)) + " = " + N(r6(V * x1 ** 3))) + " cm³ ; aire : " + M(S + " \\cdot " + N(r6(x1 * x1)) + " = " + N(r6(S * x1 * x1))) + " cm². Si " + M("x") + " double : " + M("(2x)^3 = 8x^3") + ", volume × 8 ; " + M("(2x)^2 = 4x^2") + ", aire × 4."]),
+chk: [[S !== V, "aire ≠ volume"]], vals: [V, S, r6(V * x1 ** 3), r6(S * x1 * x1), 8] }); },
+];
+const RAISONL10 = [
+
+() => { const a = R.int(2, 6), b = R.int(2, 7), c = R.int(2, 9), d = R.int(5, 9), e = R.int(2, d - 2), f = R.int(2, 9), w = who();
+return X({ id: "distrib", lv: 1, titre: "Trouve l'erreur",
+q: w.n + " a développé et réduit deux expressions : " + ul([M("-" + a + "(" + b + "x - " + c + ") = -" + a * b + "x - " + a * c), M(d + "x - (" + e + "x - " + f + ") = " + (d - e) + "x - " + f)]).replace(/<ol type="a" class="mock-parts">/, "<ol class=\"mock-parts\">"),
+parts: [{ label: "Explique l'erreur de " + w.n + " dans chaque calcul.", pts: 2 }, { label: "Corrige les deux calculs.", pts: 2 }, { label: "Vérifie ta correction du premier calcul en remplaçant " + M("x") + " par 2 des deux côtés.", pts: 1 }],
+sol: ul(["Premier : " + M("-" + a + " \\cdot (-" + c + ") = +" + a * c) + " (moins par moins donne plus). Second : le « − » devant la parenthèse change le signe de <b>tous</b> les termes : " + M("-(-" + f + ") = +" + f) + ".",
+M("-" + a + "(" + b + "x - " + c + ") = -" + a * b + "x + " + a * c) + " ; " + M(d + "x - " + e + "x + " + f + " = " + (d - e) + "x + " + f) + ".",
+"Gauche : " + M("-" + a + " \\cdot (" + 2 * b + " - " + c + ") = " + -a * (2 * b - c)) + " ; droite : " + M("-" + 2 * a * b + " + " + a * c + " = " + (-2 * a * b + a * c)) + " ✓."]),
+chk: [[-a * (2 * b - c) === -2 * a * b + a * c, "vérification"], [d - e >= 2, "réduit"]], vals: [a * c, d - e, f].filter((v) => v > 1) }); },
+
+() => VF({ id: "litconv", titre: "Vrai ou faux ? Justifie" }, [
+() => { const v = pk([2, 3, 4]), k = pk([3, 5]); return ["Pour " + M("x = -" + v) + ", " + M(k + "x^2") + " vaut " + M(N(k * k * v * v)) + ".", false, M(k + " \\cdot (-" + v + ")^2 = " + k + " \\cdot " + v * v + " = " + k * v * v) + " : le carré ne porte que sur " + M("x") + " ; " + M(N(k * k * v * v)) + " serait " + M("(" + k + "x)^2") + "."]; },
+() => ["« " + M("a \\cdot a = 2a") + " »", false, M("a \\cdot a = a^2") + " ; contre-exemple " + M("a = 3") + " : 9 et 6."],
+() => { const p = pk([2, 3, 4]), q = pk([5, 6, 7]); return [M(p + "x + " + q + "x^2 = " + (p + q) + "x^3"), false, "Les termes " + M(p + "x") + " et " + M(q + "x^2") + " ne sont pas semblables : on ne peut pas les additionner. Contre-exemple " + M("x = 2") + " : " + M(p + " \\cdot 2 + " + q + " \\cdot 4 = " + (2 * p + 4 * q)) + ", mais " + M((p + q) + " \\cdot 8 = " + 8 * (p + q)) + "."]; },
+() => [M("-x^2") + " est négatif ou nul pour tous les nombres " + M("x") + ".", true, M("x^2 \\ge 0") + ", donc " + M("-x^2 = -(x^2) \\le 0") + " ; par exemple " + M("x = -3") + " : " + M("-9") + "."],
+() => { const k = pk([2, 3]); return [M("(" + k + "x)^3 = " + k + "x^3"), false, M("(" + k + "x)^3 = " + k + "x \\cdot " + k + "x \\cdot " + k + "x = " + k ** 3 + "x^3") + " : le coefficient aussi est au cube."]; },
+() => { let p, q, r, s; do { p = R.int(2, 6); q = R.int(2, 6); r = R.int(2, 5); s = R.int(1, 6); } while (p === r); return [M(p + "(x - " + q + ") - " + r + "(x + " + s + ") = " + lin(p - r, -(p * q + r * s))), true, M(p + "x - " + p * q + " - " + r + "x - " + r * s + " = " + lin(p - r, -(p * q + r * s))) + " : les deux côtés ont la même forme réduite."]; },
+() => ["« " + M("(a + b)^2 = a^2 + b^2") + " pour tous les nombres " + M("a") + " et " + M("b") + " »", false, "Contre-exemple " + M("a = 2") + ", " + M("b = 3") + " : " + M("(2 + 3)^2 = 25") + " mais " + M("2^2 + 3^2 = 13") + ". Un seul contre-exemple suffit."],
+]),
+
+() => { let p, q, r, s; do { p = R.int(3, 6); q = R.int(2, 5); r = R.int(2, 7); s = R.int(2, 6); } while (p === r || Math.abs(p - r) === 1);
+const A = p - r, B = -p * q - r * s, ok1 = lin(A, B), wrong1 = lin(A, -p * q + r * s), wrong2 = lin(A, -q - s), ok2 = p + "x - " + p * q + " - " + r + "x - " + r * s, L = sh([[ok1, true], [wrong1, false], [wrong2, false], [ok2, true]]).map((l, i) => [String(i + 1)].concat(l)), xv = 1;
+const bad = L.find((l) => !l[2]), vBad = bad[1] === wrong1 ? A * xv - p * q + r * s : A * xv - q - s, vE = A * xv + B;
+return X({ id: "litconv", lv: 2, titre: "Sont-elles équivalentes ?",
+q: "On considère " + M("E = " + p + "(x - " + q + ") - " + r + "(x + " + s + ")") + " et quatre expressions : " + L.map((l) => "(" + l[0] + ") " + M(l[1])).join(" ; ") + ".",
+parts: [{ label: "Développe et réduis " + M("E") + ".", pts: 2 }, { label: "Lesquelles des quatre expressions sont égales à " + M("E") + " pour toutes les valeurs de " + M("x") + " ?", pts: 1 }, { label: "Pour l'expression (" + bad[0] + "), montre par un contre-exemple qu'elle n'est pas équivalente à " + M("E") + ".", pts: 1 }],
+sol: ul([M("E = " + p + "x - " + p * q + " - " + r + "x - " + r * s + " = " + ok1) + ".", "(" + L.filter((l) => l[2]).map((l) => l[0]).sort().join(") et (") + ") : la forme réduite et la forme développée non réduite.", "Pour " + M("x = 1") + " : " + M("E = " + vE) + ", mais l'expression (" + bad[0] + ") vaut " + M(vBad) + " (une valeur suffit)."]),
+chk: [[vBad !== vE, "contre-exemple"], [wrong1 !== ok1 && wrong2 !== ok1, "distinctes"]], vals: [A, B].filter((v) => Math.abs(v) > 1) }); },
+
+() => { let a, b, c, d, K; do { a = R.int(2, 5); b = R.int(2, 5); c = R.int(1, 9); d = R.int(1, 9); K = -a * c + b * d; } while (a === b || Math.abs(K) < 2);
+const xs = pk(["17{,}3", "-2{,}75", "125"]);
+return X({ id: "valnum", lv: 2, titre: "Deux méthodes",
+q: "On veut calculer " + M("E = " + a + "(" + b + "x - " + c + ") - " + b + "(" + a + "x - " + d + ")") + " pour " + M("x = " + xs) + ". Léa remplace tout de suite " + M("x") + " par " + M(xs) + ". Noé développe et réduit d'abord.",
+parts: [{ label: "Fais le calcul de Noé : développe et réduis " + M("E") + ".", pts: 2 }, { label: "Que vaut " + M("E") + " pour " + M("x = " + xs) + " ? Et pour " + M("x = -40") + " ?", pts: 1 }, { label: "Quelle méthode est la plus rapide ici ? Explique pourquoi la valeur ne dépend pas de " + M("x") + ".", pts: 1 }],
+sol: ul([M(a * b + "x - " + a * c + " - " + a * b + "x + " + b * d + " = " + K) + ".", M("E = " + K) + " dans les deux cas.", "La méthode de Noé : les termes en " + M("x") + " s'annulent (" + M(a * b + "x - " + a * b + "x = 0") + "), il reste le nombre " + M(K) + " pour toute valeur de " + M("x") + "."]),
+chk: [[a * (b * 3 - c) - b * (a * 3 - d) === K, "constante"]], vals: [a * b, K] }); },
+
+() => { const p = R.int(2, 6), q = R.int(3, 7), m = R.int(2, 4), n = R.int(3, 5), k = R.int(2, 4), w = who();
+return X({ id: "monomes", lv: 1, titre: "Trouve l'erreur",
+q: w.n + " a écrit : " + M(p + "x \\cdot " + q + "x = " + p * q + "x") + " ; " + M("x^{" + m + "} \\cdot x^{" + n + "} = x^{" + m * n + "}") + " ; " + M("(-" + k + "x)^2 = -" + k * k + "x^2") + ".",
+parts: [{ label: "Explique chaque erreur.", pts: 2 }, { label: "Écris les trois bons résultats.", pts: 2 }],
+sol: ul([M("x \\cdot x = x^2") + ", pas " + M("x") + " ; on additionne les exposants (" + m + " + " + n + "), on ne les multiplie pas ; " + M("(-" + k + "x)^2 = (-" + k + "x) \\cdot (-" + k + "x)") + " : moins par moins donne plus.", M(p * q + "x^2") + " ; " + M("x^{" + (m + n) + "}") + " ; " + M(k * k + "x^2") + "."]),
+chk: [[m + n !== m * n, "exposants"]], vals: [p * q, m + n, k * k] }); },
+];
+
+RICH.litt10 = { ids: ["litelab", "valnum", "reduire", "monomes", "distrib", "litconv"], label: "Calcul littéral (10e)", ex: EXL10, raison: RAISONL10, minutes: 45, grades: [10] };
+
+
+
+
+
+
+
+
+const EXE10 = [
+
+() => { let a, b, p, r2; do { a = pk([2, 3, 4]); b = a + pk([2, 3]); p = pk([12.5, 14.5, 15.5, 17.5, 18.5, 21.5]); r2 = pk([6, 8, 9.5, 11, 12.5]); } while (r2 >= p);
+const r1 = r6(r2 + (b - a) * p), S = r6(a * p + r1), w1 = who(), w2 = who(w1.n), ev = pk(["billets pour le match de hockey", "places pour le concert", "billets pour le spectacle de cirque"]);
+return X({ id: "probeq", lv: 1, titre: "Le prix du billet",
+q: w1.n + " et " + w2.n + " ont la même somme d'argent. " + w1.n + " achète " + a + " " + ev + " et il lui reste " + chf(r1) + ". " + w2.n + " en achète " + b + ", au même prix, et il lui reste " + chf(r2) + ".",
+parts: [{ label: "On appelle " + M("x") + " le prix d'un billet, en CHF. Écris, en fonction de " + M("x") + ", la somme que chacun avait au départ.", pts: 2 },
+{ label: "Écris une équation, puis résous-la.", pts: 2 }, { label: "Quelle somme chacun avait-il au départ ? Vérifie avec les deux achats.", pts: 1 },
+{ label: w2.n + " peut-" + w2.il + " encore acheter un billet ? Explique.", pts: 1 }],
+sol: ul([w1.n + " : " + M(a + "x + " + N(r1)) + " ; " + w2.n + " : " + M(b + "x + " + N(r2)) + ".",
+M(a + "x + " + N(r1) + " = " + b + "x + " + N(r2)) + " ; on soustrait " + M(a + "x") + " et " + M(N(r2)) + " des deux membres : " + M(N(r6(r1 - r2)) + " = " + (b - a) + "x") + ", donc " + M("x = " + N(r6(r1 - r2)) + " : " + (b - a) + " = " + N(p)) + ". Un billet coûte " + chf(p) + ".",
+M(a + " \\cdot " + N(p) + " + " + N(r1) + " = " + N(S)) + " CHF et " + M(b + " \\cdot " + N(p) + " + " + N(r2) + " = " + N(S)) + " CHF ✓.",
+"Non : il lui reste " + chf(r2) + ", moins que le prix d'un billet (" + chf(p) + ")."]),
+chk: [[Math.abs(b * p + r2 - S) < 1e-9, "même somme"], [r2 < p, "reste"]], vals: [p, S, r1] }); },
+
+() => { const C = pk([
+{ q: (n, T) => "Dans une ferme, on compte " + n + " têtes et " + T + " pattes : il n'y a que des poules et des lapins.", A: "poules", B: "lapins", a: 2, b: 4, n: [14, 30] },
+{ q: (n, T) => "Une tirelire contient " + n + " pièces : des pièces de 2 CHF et des pièces de 5 CHF, pour un total de " + T + " CHF.", A: "pièces de 2 CHF", B: "pièces de 5 CHF", a: 2, b: 5, n: [18, 36] },
+{ q: (n, T) => "Une caisse contient " + n + " billets de 10 CHF et de 50 CHF, pour un total de " + N(T) + " CHF.", A: "billets de 10 CHF", B: "billets de 50 CHF", a: 10, b: 50, n: [16, 40] }]);
+const n = R.int(C.n[0], C.n[1]), x = R.int(3, n - 3), T = C.a * x + C.b * (n - x), w = who(), D = C.b - C.a;
+return X({ id: "probeq", lv: 2, titre: pk(["Combien de chaque sorte ?", "Deux sortes"]),
+q: C.q(n, T),
+parts: [{ label: "On appelle " + M("x") + " le nombre de " + C.A + ". Écris le nombre de " + C.B + " en fonction de " + M("x") + ".", pts: 1 },
+{ label: "Écris une équation qui traduit l'énoncé.", pts: 2 }, { label: "Résous-la. Combien y a-t-il de " + C.A + " et de " + C.B + " ? Vérifie.", pts: 2 },
+{ label: w.n + " a écrit " + M(C.a + "x + " + C.b + " \\cdot " + n + " - x = " + N(T)) + ". Explique son erreur.", pts: 1 }],
+sol: ul([M(n + " - x") + ".", M(C.a + "x + " + C.b + "(" + n + " - x) = " + N(T)) + ".",
+M(C.a + "x + " + N(C.b * n) + " - " + C.b + "x = " + N(T)) + ", " + M("-" + D + "x = " + N(T) + " - " + N(C.b * n) + " = " + N(T - C.b * n)) + ", " + M("x = " + x) + " : " + x + " " + C.A + " et " + (n - x) + " " + C.B + ". Vérification : " + M(C.a + " \\cdot " + x + " + " + C.b + " \\cdot " + (n - x) + " = " + N(T)) + " ✓.",
+"Il manque les parenthèses : c'est le nombre de " + C.B + ", " + M(n + " - x") + ", qui est multiplié par " + C.b + " : " + M(C.b + "(" + n + " - x) = " + N(C.b * n) + " - " + C.b + "x") + ", et non " + M(N(C.b * n) + " - x") + "."]),
+chk: [[(T - C.b * n) / -D === x, "solution"], [n - x >= 3, "positif"]], vals: [x, n - x, T] }); },
+
+() => { const k = pk([16, 20, 24, 28, 32, 36, 40]), x = (180 - k) / 4; let y, d; do { y = R.int(4, 9); d = R.int(1, 3); } while (y <= d + 1);
+const P = r6(2.5 * y + 1.5 * d), g = y + d, p = r6(g / 2);
+return X({ id: "probeq", lv: 2, titre: "Angles et côtés",
+q: "<b>Triangle ABC.</b> L'angle " + M("\\widehat{B}") + " mesure " + k + "° de plus que l'angle " + M("\\widehat{A}") + ", et l'angle " + M("\\widehat{C}") + " mesure le double de l'angle " + M("\\widehat{A}") + ".<br><b>Triangle DEF.</b> Son périmètre est de " + Q(P, "cm") + ". Le plus grand côté mesure " + Q(d, "cm") + " de plus que le côté moyen, et le plus petit côté mesure la moitié du plus grand.",
+parts: [{ label: "Triangle ABC : avec " + M("x") + " la mesure de " + M("\\widehat{A}") + ", écris les trois angles en fonction de " + M("x") + ", puis une équation.", pts: 2 },
+{ label: "Calcule les trois angles. Le triangle ABC est-il rectangle ?", pts: 2 },
+{ label: "Triangle DEF : choisis une inconnue (dis ce qu'elle représente) et écris une équation.", pts: 2 },
+{ label: "Calcule les trois côtés de DEF et vérifie avec le périmètre.", pts: 2 }],
+sol: ul([M("\\widehat{A} = x") + ", " + M("\\widehat{B} = x + " + k) + ", " + M("\\widehat{C} = 2x") + " ; somme des angles : " + M("x + x + " + k + " + 2x = 180") + ".",
+M("4x + " + k + " = 180") + ", " + M("4x = " + (180 - k)) + ", " + M("x = " + x) + " : " + M("\\widehat{A} = " + x + "°") + ", " + M("\\widehat{B} = " + (x + k) + "°") + ", " + M("\\widehat{C} = " + 2 * x + "°") + ". Non, aucun angle ne mesure 90°.",
+"Avec " + M("y") + " le côté moyen (en cm) : grand côté " + M("y + " + d) + ", petit côté " + M("\\frac{y + " + d + "}{2}") + " ; " + M("y + (y + " + d + ") + \\frac{y + " + d + "}{2} = " + N(P)) + ".",
+"On multiplie chaque terme par 2 : " + M("2y + 2y + " + 2 * d + " + y + " + d + " = " + N(2 * P)) + ", " + M("5y = " + N(2 * P - 3 * d)) + ", " + M("y = " + y) + ". Côtés : " + Q(p, "cm") + ", " + Q(y, "cm") + " et " + Q(g, "cm") + " ; " + M(N(p) + " + " + y + " + " + g + " = " + N(P)) + " ✓."]),
+chk: [[x + x + k + 2 * x === 180 && Number.isInteger(x), "angles"], [p + y > g, "triangle"], [Math.abs(5 * y + 3 * d - 2 * P) < 1e-9, "périmètre"]], vals: [x, x + k, 2 * x, y, g, p] }); },
+
+() => { let a, b, c, d, g, A, s1, h; do { a = R.int(3, 6); b = R.int(1, 5); c = R.int(1, 4); d = R.int(1, 9); g = pk([-3, -2, 2, 3, 4]); A = a - c - g; s1 = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7]); h = A * s1 - a * b + d; } while (Math.abs(A) < 2 || h === 0 || Math.abs(h) > 40);
+let p, q, t, s2, r; do { p = pk([1.2, 1.5, 2.5, 0.8]); t = R.int(2, 5); q = R.int(1, 7); s2 = pk([-6, -4, -3, -2, 2, 3, 4, 5, 6, 8]); r = r6(p * (s2 + q) - t * s2); } while (Math.abs(r) < 0.5 || Math.abs(r6(p - t)) < 0.15);
+const k = R.int(2, 5), m = R.int(1, 6), n = k * m + pk([-3, -2, 2, 3, 5]), e = R.int(2, 5), f = R.int(2, 6), w = who();
+return X({ id: "eq1", lv: 2, titre: "Résous et vérifie",
+q: "On considère les équations " + ul([M(a + "(x - " + b + ") - (" + lin(c, -d) + ") = " + lin(g, h)), M(N(p) + "(x + " + q + ") = " + N(r) + " + " + t + "x"), M(k + "(x + " + m + ") - x = " + lin(k - 1, n)), M(e + "(x - " + f + ") + 2x = x - " + e * f + " + " + (e + 1) + "x")]).replace(/<ol type="a" class="mock-parts">/, "<ol type=\"1\" class=\"mock-parts\">"),
+parts: [{ label: "Résous l'équation 1, puis vérifie ta solution.", pts: 2 }, { label: "Résous l'équation 2.", pts: 2 },
+{ label: "Résous les équations 3 et 4. Que se passe-t-il ?", pts: 2 }, { label: "Pour l'équation 3, " + w.n + " écrit « " + M("x = 0") + " ». A-t-" + w.il + " raison ? Explique.", pts: 1 }],
+sol: ul([M(a + "x - " + a * b + " - " + cxT(c) + " + " + d + " = " + lin(g, h)) + " (le « − » change les deux signes), " + M(lin(A, 0) + " = " + N(h) + " + " + a * b + " - " + d + " = " + (A * s1)) + ", " + M("x = " + s1) + ". Vérification : " + M(a + " \\cdot " + sg(s1 - b) + " - " + sg(c * s1 - d) + " = " + (g * s1 + h)) + " et " + M(g + " \\cdot " + sg(s1) + " + " + sg(h) + " = " + (g * s1 + h)) + " ✓.",
+M(cxT(p) + " + " + N(r6(p * q)) + " = " + N(r) + " + " + t + "x") + ", " + M(N(r6(p - t)) + "x = " + N(r6(r - p * q))) + ", " + M("x = " + s2) + ".",
+"Équation 3 : " + M(k + "x + " + k * m + " - x = " + lin(k - 1, n)) + ", soit " + M(lin(k - 1, k * m) + " = " + lin(k - 1, n)) + " : les " + M("x") + " disparaissent et il reste " + M(k * m + " = " + n) + ", faux : <b>aucune solution</b>. Équation 4 : " + M(lin(e + 2, -e * f) + " = " + lin(e + 2, -e * f)) + " : il reste " + M("0 = 0") + ", vrai : <b>tous les nombres</b> sont solutions.",
+"Non : pour " + M("x = 0") + ", le membre de gauche vaut " + M(k * m) + " et celui de droite " + M(n) + ". « Aucune solution » n'est pas « la solution 0 »."]),
+chk: [[a * (s1 - b) - (c * s1 - d) === g * s1 + h, "vérif 1"], [Math.abs(p * (s2 + q) - (r + t * s2)) < 1e-9, "vérif 2"], [n !== k * m, "impossible"]], vals: [s1, s2, A] }); },
+
+() => { const [pa, pb, ta, tb, au] = pk([[3, 2, "le tiers", "la moitié", "au tiers"], [4, 3, "le quart", "le tiers", "au quart"], [6, 3, "le sixième", "le tiers", "au sixième"], [4, 2, "le quart", "la moitié", "au quart"]]), k = pk([6, 7, 8, 9, 12, 15]), L = lcm(pa, pb), D = L / pb - L / pa, x = (L * k) / D, w = who();
+const C = pk([["Un berger", "moutons", "son troupeau", "Ajoutez " + k + " moutons " + au + " de mon troupeau, et vous aurez " + tb + " de mon troupeau."], ["Une bibliothécaire", "livres", "son rayon de BD", "Si j'ajoute " + k + " livres " + au + " de mes BD, j'obtiens " + tb + " de mes BD."], ["Un collectionneur", "cartes", "sa collection", "Si j'ajoute " + k + " cartes " + au + " de ma collection, j'en ai " + tb + "."]]);
+const wrong = k / D;
+return X({ id: "eqfrac", lv: 3, titre: "Le tiers et la moitié",
+q: C[0] + " répond à qui lui demande combien de " + C[1] + " compte " + C[2] + " : « " + C[3] + " »",
+parts: [{ label: "On appelle " + M("x") + " le nombre total de " + C[1] + ". Écris une équation.", pts: 1 }, { label: "Résous-la.", pts: 2 },
+{ label: "Vérifie ta réponse dans l'énoncé (pas seulement dans l'équation).", pts: 1 },
+{ label: w.n + " a multiplié les deux membres par " + L + " et a écrit " + M((L / pa === 1 ? "" : L / pa) + "x + " + k + " = " + (L / pb) + "x") + ". Explique son erreur.", pts: 1 }],
+sol: ul([M("\\frac{x}{" + pa + "} + " + k + " = \\frac{x}{" + pb + "}") + ".",
+"On multiplie chaque terme par " + L + " : " + M((L / pa === 1 ? "" : L / pa) + "x + " + L * k + " = " + L / pb + "x") + ", " + M(L * k + " = " + (D === 1 ? "x" : D + "x")) + ", " + M("x = " + x) + ".",
+ta.charAt(0).toUpperCase() + ta.slice(1) + " de " + x + " : " + M(x / pa) + " ; " + M(x / pa + " + " + k + " = " + (x / pa + k)) + ", et " + tb + " de " + x + " vaut bien " + M(x / pb) + " ✓.",
+w.n + " n'a pas multiplié le nombre " + k + " par " + L + " : on multiplie <b>chaque terme</b> des deux membres. Avec son équation, il trouverait " + M("x = " + (Number.isInteger(wrong) ? wrong : frac(k, D))) + ", qui ne vérifie pas l'énoncé."]),
+chk: [[Number.isInteger(x) && x / pa + k === x / pb, "énoncé"], [wrong !== x, "erreur visible"]], vals: [x, x / pa, x / pb] }); },
+
+() => { let r1, r2, c0; do { r1 = R.int(2, 7); r2 = R.int(2, 9); c0 = pk([-4, -3, 1, 4, 5, 6, 8]); } while (r1 === r2 || r2 === -c0 || c0 === r1 || c0 === r2 || r1 * r2 > 45);
+const S = r1 + r2, P = r1 * r2, L = sh([r1, r2, -r2, c0]), w = who();
+let t, kk, e, f; do { t = pk([-4, -3, -2, 2, 3, 5]); kk = R.int(3, 6); e = R.int(1, 9); f = kk * t - e - t; } while (f === 0 || Math.abs(f) === 1);
+const mm = R.int(2, 5), nn = R.int(2, 6), val = (v) => v * v + P, rv = (v) => S * v;
+return X({ id: "eqverif", lv: 1, titre: "Est-ce une solution ?",
+q: "On considère l'équation " + M("x^2 + " + P + " = " + S + "x") + " et les nombres " + L.map((v) => M(v)).join(" ; ") + ".",
+parts: [{ label: "Teste chacun des quatre nombres. Lesquels sont solutions de l'équation ?", pts: 2 },
+{ label: w.n + " affirme : « " + M(-r2) + " est aussi solution, puisque " + M("(" + -r2 + ")^2 = " + r2 + "^2") + " ». Explique pourquoi c'est faux.", pts: 1 },
+{ label: "Teste les nombres " + M("0") + ", " + M("4") + " et " + M("-2") + " dans l'équation " + M(mm + "(x - " + nn + ") = " + mm + "x - " + mm * nn) + ". Que remarques-tu ? Explique.", pts: 2 },
+{ label: "Pour quelle valeur de " + M("k") + " le nombre " + M(t) + " est-il solution de l'équation " + M("kx - " + e + " = " + lin(1, f)) + " ?", pts: 1 }],
+sol: ul([L.map((v) => "Pour " + M(v) + " : " + M(val(v)) + " et " + M(rv(v)) + (val(v) === rv(v) ? " : solution" : " : non")).join(" ; ") + ". Les solutions sont " + M(Math.min(r1, r2)) + " et " + M(Math.max(r1, r2)) + ".",
+"Le membre de gauche est bien le même (" + M(val(r2)) + "), mais celui de droite change de signe : " + M(S + " \\cdot (" + -r2 + ") = " + -S * r2) + ". Il faut tester les <b>deux</b> membres.",
+"Pour les trois nombres, les deux membres sont égaux (" + M(mm * (0 - nn)) + ", " + M(mm * (4 - nn)) + ", " + M(mm * (-2 - nn)) + ") : en développant, " + M(mm + "(x - " + nn + ") = " + mm + "x - " + mm * nn) + " pour tout " + M("x") + ". Tous les nombres sont solutions.",
+"On remplace " + M("x") + " par " + M(t) + " : " + M(sg(t) + "k - " + e + " = " + sg(t) + " + " + sg(f) + " = " + (t + f)) + ", " + M(sg(t) + "k = " + (t + f + e)) + ", " + M("k = " + kk) + "."]),
+chk: [[val(r1) === rv(r1) && val(r2) === rv(r2) && val(-r2) !== rv(-r2) && val(c0) !== rv(c0), "solutions"], [kk * t - e === t + f, "k"]], vals: [r1, r2, kk] }); },
+];
+const RAISONE10 = [
+
+() => { const a = R.int(2, 5), m = R.int(1, 4), s = R.int(2, 7), b = a * m, c = a * s + b;
+let p, q, u, v, s2; do { p = R.int(3, 8); u = R.int(1, p - 2); q = R.int(1, 9); s2 = pk([2, 3, 4, 5, 6]); v = (p - u) * s2 - q; } while (v <= 0 || v === q);
+const k = R.int(2, 5), mm = R.int(2, 6), s3 = pk([-3, -2, 2, 3, 4, 5, 7, 8]), nn = k * (s3 - mm), w = who();
+return X({ id: "eq1", lv: 1, titre: "Cherche l'erreur",
+q: w.n + " a résolu trois équations. Chaque résolution contient <b>une</b> erreur." + tab(["", "résolution"], [["A", M(a + "x + " + b + " = " + c) + " ; " + M("x + " + b + " = " + c / a) + " ; " + M("x = " + (c / a - b))], ["B", M(p + "x - " + q + " = " + u + "x + " + v) + " ; " + M(p + "x - " + u + "x = " + v + " - " + q) + " ; " + M(lin(p - u, 0) + " = " + (v - q)) + " ; " + M("x = " + (Number.isInteger((v - q) / (p - u)) ? (v - q) / (p - u) : frac(v - q, p - u)))], ["C", M(k + "(x - " + mm + ") = " + nn) + " ; " + M(k + "x - " + mm + " = " + nn) + " ; " + M(k + "x = " + (nn + mm))]]),
+parts: [{ label: "Pour chaque résolution, trouve la ligne fausse et explique l'erreur.", pts: 3 }, { label: "Corrige les trois résolutions.", pts: 3 }, { label: "Vérifie ta solution de B dans l'équation de départ.", pts: 1 }],
+sol: ul(["A : on a divisé seulement " + M(a + "x") + " par " + a + " ; il faut diviser <b>chaque terme</b> (ou soustraire " + b + " d'abord). B : " + M(q) + " change de membre sans changer de signe ; il faut ajouter " + q + " des deux côtés. C : le " + k + " ne multiplie pas le " + mm + " ; il faut distribuer.",
+"A : " + M(a + "x = " + (c - b)) + ", " + M("x = " + s) + ". B : " + M(lin(p - u, 0) + " = " + v + " + " + q + " = " + (v + q)) + ", " + M("x = " + s2) + ". C : " + M(k + "x - " + k * mm + " = " + nn) + ", " + M(k + "x = " + (nn + k * mm)) + ", " + M("x = " + s3) + ".",
+M(p + " \\cdot " + s2 + " - " + q + " = " + (p * s2 - q)) + " et " + M(u + " \\cdot " + s2 + " + " + v + " = " + (u * s2 + v)) + " ✓."]),
+chk: [[p * s2 - q === u * s2 + v, "B"], [a * s + b === c && c / a - b !== s, "A"], [k * (s3 - mm) === nn, "C"]], vals: [s, s2, s3] }); },
+
+() => VF({ id: "eq1", titre: "Vrai ou faux ? Justifie" }, [
+() => { const a = R.int(2, 6), b = R.int(1, 5), c = b + R.int(1, 4); return ["L'équation " + M(a + "x + " + b + " = " + a + "x + " + c) + " n'a aucune solution.", true, "Pour tout " + M("x") + ", le membre de droite vaut " + (c - b) + " de plus : en soustrayant " + M(a + "x") + ", il reste " + M(b + " = " + c) + ", faux."]; },
+() => { const a = R.int(5, 9), b = R.int(2, 4); return ["L'équation " + M(a + "x = " + b + "x") + " n'a pas de solution.", false, M("x = 0") + " est solution : " + M(a + " \\cdot 0 = " + b + " \\cdot 0") + ". En effet " + M((a - b) + "x = 0") + " donne " + M("x = 0") + "."]; },
+() => { const a = pk([3, 4, 5]), b = R.int(2, 9); return ["Si " + M("\\frac{x}{" + a + "} = " + b) + ", alors " + M("x = \\frac{" + b + "}{" + a + "}") + ".", false, "On multiplie les deux membres par " + a + " : " + M("x = " + a * b) + "."]; },
+() => { const a = R.int(2, 6), b = R.int(2, 6); return ["Tous les nombres sont solutions de " + M(a + "(x + " + b + ") = " + a + "x + " + a * b) + ".", true, "En développant, les deux membres sont égaux pour tout " + M("x") + "."]; },
+() => ["Multiplier les deux membres d'une équation par 0 donne une équation équivalente.", false, "On obtient " + M("0 = 0") + ", vrai pour tout nombre : on a perdu l'information. On multiplie ou on divise seulement par un nombre <b>non nul</b>."],
+() => { const b = R.int(3, 9); return [M("-x = " + b) + " donne " + M("x = " + b) + ".", false, "On multiplie par " + M("-1") + " : " + M("x = -" + b) + "."]; },
+() => { const b = pk([4, 9, 16, 25]); return ["L'équation " + M("x^2 = " + b) + " a une seule solution, " + M(Math.sqrt(b)) + ".", false, M("(-" + Math.sqrt(b) + ")^2 = " + b) + " aussi : il y a deux solutions, " + M(Math.sqrt(b)) + " et " + M(-Math.sqrt(b)) + "."]; },
+]),
+
+() => { let k, m, n, p, x0, A, c0; do { k = R.int(2, 5); m = R.int(2, 3); n = R.int(1, 6); p = R.int(1, 7); x0 = pk([-5, -4, -3, -2, 2, 3, 4, 5, 6]); A = k * m - p; c0 = A * x0 - k * n; } while (A < 2 || c0 === 0 || c0 + k * n === 0 || p === k * m);
+const lines = [M(k + "(" + m + "x - " + n + ") = " + lin(p, c0)), M(k * m + "x - " + k * n + " = " + lin(p, c0)), M(lin(A, -k * n) + " = " + N(c0)), M(lin(A, 0) + " = " + N(c0 + k * n)), M("x = " + x0)];
+return X({ id: "eq1", lv: 2, titre: "Équivalentes, mais comment ?",
+q: "Voici une suite d'équations équivalentes :" + tab(["ligne", "équation"], lines.map((l, i) => [String(i + 1), l])),
+parts: [{ label: "Explique comment on passe de chaque ligne à la suivante.", pts: 3 }, { label: "Vérifie la solution dans l'équation de la ligne 1.", pts: 1 }, { label: "Pourquoi dit-on que ces cinq équations sont « équivalentes » ?", pts: 1 }],
+sol: ul(["1 → 2 : on développe (le " + k + " multiplie les deux termes). 2 → 3 : on soustrait " + M(p + "x") + " des deux membres. 3 → 4 : on ajoute " + k * n + " aux deux membres. 4 → 5 : on divise les deux membres par " + A + ".",
+M(k + " \\cdot (" + m + " \\cdot " + sg(x0) + " - " + n + ") = " + k * (m * x0 - n)) + " et " + M(p + " \\cdot " + sg(x0) + " + " + sg(c0) + " = " + (p * x0 + c0)) + " ✓.",
+"Elles ont les mêmes solutions (ici " + M("x = " + x0) + ") : chaque passage est une opération faite des deux côtés, qu'on peut défaire."]),
+chk: [[k * (m * x0 - n) === p * x0 + c0, "solution"]], vals: [x0, A] }); },
+
+() => { const K = pk([24, 30, 36, 42, 48]), E = [["La somme d'un nombre et de sa moitié vaut " + K + ".", "x + \\frac{x}{2} = " + K, (2 * K) / 3], ["Le double d'un nombre, diminué de " + K + ", est égal à ce nombre.", "2x - " + K + " = x", K], ["Le double de la différence entre un nombre et " + K + " est égal à ce nombre.", "2(x - " + K + ") = x", 2 * K], ["La différence entre un nombre et sa moitié vaut " + K + ".", "x - \\frac{x}{2} = " + K, 2 * K]];
+const eqs = sh(E.map((e, i) => [e[1], i]).concat([["\\frac{x}{2} - " + K + " = x", -1]])), lab = (i) => String.fromCharCode(97 + eqs.findIndex((e) => e[1] === i));
+return X({ id: "probeq", lv: 1, titre: "Trouve la bonne traduction",
+q: "Phrases : " + E.map((e, i) => "(" + (i + 1) + ") " + e[0]).join(" ") + "<br>Équations : " + eqs.map((e, j) => String.fromCharCode(97 + j) + ") " + M(e[0])).join(" ; ") + ".",
+parts: [{ label: "Associe chaque phrase à son équation (une équation est en trop).", pts: 2 }, { label: "Résous les équations des phrases 1 et 2.", pts: 2 }, { label: "Les phrases 3 et 4 ont-elles la même solution ? Leurs équations sont-elles équivalentes ?", pts: 1 }],
+sol: ul(["(1) → " + lab(0) + ", (2) → " + lab(1) + ", (3) → " + lab(2) + ", (4) → " + lab(3) + ".", "(1) " + M("\\frac{3x}{2} = " + K) + ", " + M("x = " + (2 * K) / 3) + ". (2) " + M("x = " + K) + ".", "(3) " + M("2x - " + 2 * K + " = x") + ", " + M("x = " + 2 * K) + " ; (4) " + M("\\frac{x}{2} = " + K) + ", " + M("x = " + 2 * K) + ". Même solution : les deux équations sont équivalentes, même si elles ne se ressemblent pas."]),
+chk: [[(2 * K) % 3 === 0, "entier"]], vals: [(2 * K) / 3, K, 2 * K] }); },
+
+() => { const t = pk([-7, -5, -4, -3, 3, 4, 6, 8, 9]), a = R.int(1, 5), w = who();
+return X({ id: "eq1", lv: 2, titre: "Construis une équation",
+q: "Il ne s'agit plus de résoudre, mais d'inventer des équations.",
+parts: [{ label: "Écris une équation avec des " + M("x") + " dans les deux membres et une parenthèse, dont la solution est " + M(t) + ". Vérifie-la.", pts: 2 }, { label: "Écris une équation qui n'a aucune solution.", pts: 1 }, { label: "Écris une équation dont tous les nombres sont solutions.", pts: 1 },
+{ label: w.n + " affirme : « Une équation du 1er degré a toujours exactement une solution. » Qu'en penses-tu ?", pts: 1 }],
+sol: ul(["Par exemple " + M("2(x + " + a + ") = " + lin(1, 2 * a + t)) + " : pour " + M("x = " + t) + ", " + M("2 \\cdot " + sg(t + a) + " = " + 2 * (t + a)) + " et " + M(sg(t) + " + " + sg(2 * a + t) + " = " + 2 * (t + a)) + " ✓ (autres réponses possibles).", "Par exemple " + M("x + 1 = x + 2") + " : on obtient " + M("1 = 2") + ", faux.", "Par exemple " + M("3(x + 1) = 3x + 3") + " : on obtient " + M("0 = 0") + ", vrai.", "Faux : les parties b) et c) donnent des contre-exemples (aucune solution, tous les nombres)."]),
+chk: [[2 * (t + a) === t + 2 * a + t, "exemple"]], vals: [t, 2 * (t + a)].filter((v) => Math.abs(v) > 1) }); },
+];
+
+RICH.eq10 = { ids: ["eqverif", "eq1", "eqfrac", "probeq"], label: "Équations (10e)", ex: EXE10, raison: RAISONE10, minutes: 45, grades: [10] };
+
+})();
+
+
+
+
+
+
+
+(function () {
+const { r6, N, Nk, A, Q, pk, sh, X, ul, who, VF } = RICHU;
+const rd = (v, s) => Math.round(v / s) * s;
+const Ad = (v, k) => Nk(v, k);
+const EXPY10 = [
+
+() => { const h = pk([5, 5.5, 6, 6.5]), d = pk([1.5, 2, 2.5]), L = Math.sqrt(h * h + d * d), L2 = pk([5, 6, 7].filter((v) => v < L && v > h - 1.2)), h2 = r6(Math.min(h - pk([0.5, 0.8, 1]), rd(L2 * 0.92, 0.1))), d2 = Math.sqrt(L2 * L2 - h2 * h2), q4 = L2 / 4, h4 = Math.sqrt(L2 * L2 - q4 * q4);
+return X({ id: "pyth", lv: 1, titre: "L'échelle sous la fenêtre",
+q: "Une fenêtre se trouve à " + Q(h, "m") + " au-dessus du sol. On appuie une échelle contre le mur vertical : son sommet doit arriver juste sous la fenêtre.",
+parts: [{ label: "Le pied de l'échelle est à " + Q(d, "m") + " du mur. Quelle doit être la longueur de l'échelle (au centième) ?", pts: 2 },
+{ label: "On n'a qu'une échelle de " + Q(L2, "m") + ". On veut atteindre " + Q(h2, "m") + " de haut. À quelle distance du mur faut-il placer le pied (au centième) ?", pts: 2 },
+{ label: "Par sécurité, le pied doit être à environ un quart de la longueur de l'échelle. Avec l'échelle de " + Q(L2, "m") + " placée ainsi, quelle hauteur atteint-on (au centième) ? Est-ce assez pour la fenêtre ?", pts: 2 },
+{ label: "Fais un croquis de la situation de la question a) et colorie l'hypoténuse.", pts: 1 }],
+sol: ul([M("L^2 = " + N(h) + "^2 + " + N(d) + "^2 = " + N(h * h + d * d)) + ", " + M("L = \\sqrt{" + N(h * h + d * d) + "} \\approx " + Ad(L, 2)) + " m.",
+"L'échelle est l'hypoténuse : on soustrait. " + M("x^2 = " + N(L2) + "^2 - " + N(h2) + "^2 = " + N(L2 * L2 - h2 * h2)) + ", " + M("x \\approx " + Ad(d2, 2)) + " m.",
+"Pied à " + M(N(L2) + " : 4 = " + N(q4)) + " m : " + M("\\sqrt{" + N(L2) + "^2 - " + N(q4) + "^2} \\approx " + Ad(h4, 2)) + " m. " + (h4 >= h ? "C'est assez : " + M(Ad(h4, 2) + " \\geq " + N(h)) + "." : "Ce n'est pas assez : " + M(Ad(h4, 2) + " < " + N(h)) + " m."),
+"Triangle rectangle formé par le mur (" + N(h) + " m), le sol (" + N(d) + " m) et l'échelle : l'échelle, en face de l'angle droit, est l'hypoténuse."]),
+chk: [[L2 < L && L2 > h2, "échelle possible"], [d2 > 0.3, "pied"]], vals: [L, d2, h4] }); },
+
+() => { const [a, b, c] = pk([[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20]]), s = pk([7.5, 6, 6.5]), dd = Math.sqrt(s * s - (s * 0.6) ** 2), w = who();
+return X({ id: "pythfig", lv: 1, titre: "Le losange",
+q: "Un carreau de vitrail a la forme d'un losange dont les diagonales mesurent " + Q(2 * a, "cm") + " et " + Q(2 * b, "cm") + ".",
+parts: [{ label: "Calcule la longueur d'un côté du losange.", pts: 2 }, { label: "Calcule son périmètre et son aire.", pts: 2 },
+{ label: w.n + " écrit : « le côté vaut " + M("\\sqrt{" + 2 * a + "^2 + " + 2 * b + "^2}") + " ». Explique son erreur.", pts: 1 },
+{ label: "Un autre losange a des côtés de " + Q(s, "cm") + " et une diagonale de " + Q(r6(2 * s * 0.6), "cm") + ". Calcule l'autre diagonale.", pts: 2 }],
+sol: ul(["Les diagonales se coupent en leur milieu à angle droit : " + M("c = \\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm.",
+"Périmètre " + M("4 \\cdot " + c + " = " + 4 * c) + " cm ; aire " + M("\\frac{" + 2 * a + " \\cdot " + 2 * b + "}{2} = " + 2 * a * b) + " cm².",
+w.n + " a pris les diagonales entières : les cathètes du triangle rectangle sont les <b>demi</b>-diagonales, " + M(a) + " et " + M(b) + " cm.",
+"Demi-diagonale connue " + M(N(s * 0.6)) + " cm : " + M("\\sqrt{" + N(s) + "^2 - " + N(s * 0.6) + "^2} = \\sqrt{" + N(s * s - (s * 0.6) ** 2) + "} = " + N(dd)) + " cm, donc l'autre diagonale vaut " + M(N(2 * dd)) + " cm."]),
+chk: [[Math.abs(dd - s * 0.8) < 1e-9, "3-4-5"]], vals: [c, 4 * c, 2 * a * b, 2 * dd] }); },
+
+() => { const [p, h, s] = pk([[9, 12, 15], [12, 16, 20], [15, 20, 25], [10, 24, 26], [18, 24, 30]]), b = pk([20, 25, 30, 35]), B = b + p, Ar = ((B + b) * h) / 2, P = B + b + h + s, px = pk([4.5, 6, 7.5]);
+const fig = GEO().pt("A", 0, 0, false).pt("B", B, 0, false).pt("C", b, h, false).pt("E", 0, h, false).poly(["A", "B", "C", "E"]).right("A", "B", "E").right("E", "A", "C").side("A", "B", B + " m").side("E", "C", b + " m").side("B", "C", s + " m").svg("parcelle en trapèze rectangle");
+return X({ id: "pythfig", lv: 2, titre: "La parcelle",
+q: "Une parcelle a la forme d'un trapèze rectangle (deux angles droits) : ses côtés parallèles mesurent " + Q(B, "m") + " et " + Q(b, "m") + ", et le côté oblique " + Q(s, "m") + "." + fig,
+parts: [{ label: "Calcule la largeur de la parcelle (la distance entre les deux côtés parallèles).", pts: 2 }, { label: "Calcule son aire.", pts: 1 },
+{ label: "On pose une clôture tout autour. Quelle longueur faut-il ?", pts: 1 }, { label: "Le gazon coûte " + M(Nk(px, 2) + "\\ \\text{CHF}") + " le m². Combien coûte le gazon pour toute la parcelle ?", pts: 1 }],
+sol: ul(["On abaisse la hauteur depuis l'extrémité du petit côté : triangle rectangle de cathètes " + M(B + " - " + b + " = " + p) + " m et " + M("h") + ", d'hypoténuse " + M(s) + " m. " + M("h = \\sqrt{" + s + "^2 - " + p + "^2} = \\sqrt{" + h * h + "} = " + h) + " m.",
+M("\\frac{(" + B + " + " + b + ") \\cdot " + h + "}{2} = " + N(Ar)) + " m².", M(B + " + " + b + " + " + h + " + " + s + " = " + P) + " m (le côté perpendiculaire mesure la largeur, " + h + " m).", M(N(Ar) + " \\cdot " + Nk(px, 2) + " = " + Nk(Ar * px, 2)) + " CHF."]),
+chk: [[p * p + h * h === s * s, "triplet"]], vals: [h, Ar, P, Ar * px] }); },
+
+() => { const [a, b, c] = pk([[6, 8, 10], [9, 12, 15], [5, 12, 13], [8, 15, 17], [12, 16, 20]]), h = (a * b) / c, [L, l] = pk([[15, 8], [24, 7], [12, 5], [21, 20]]), dg = Math.sqrt(L * L + l * l), x = (L * l) / dg;
+return X({ id: "pyth", lv: 2, titre: "La hauteur sur l'hypoténuse",
+q: "Le triangle " + M("ABC") + " est rectangle en " + M("C") + ", avec " + M("AC = " + a) + " cm et " + M("AB = " + c) + " cm.",
+parts: [{ label: "Quel côté est l'hypoténuse ? Calcule " + M("BC") + ".", pts: 2 }, { label: "Calcule l'aire du triangle.", pts: 1 },
+{ label: "Calcule la hauteur issue de " + M("C") + " (perpendiculaire à " + M("[AB]") + ") en écrivant l'aire d'une autre façon.", pts: 2 },
+{ label: "Un rectangle mesure " + Q(L, "cm") + " sur " + Q(l, "cm") + ". Quelle est la distance d'un sommet à la diagonale qui ne passe pas par ce sommet (au centième) ?", pts: 2 }],
+sol: ul([M("[AB]") + ", en face de l'angle droit. " + M("BC = \\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + b * b + "} = " + b) + " cm.",
+M("\\frac{" + a + " \\cdot " + b + "}{2} = " + (a * b) / 2) + " cm² (les cathètes sont perpendiculaires : l'une est la hauteur de l'autre).",
+M("\\frac{" + c + " \\cdot h}{2} = " + (a * b) / 2) + ", donc " + M("h = \\frac{" + a * b + "}{" + c + "} = " + N(h)) + " cm.",
+"Diagonale " + M("\\sqrt{" + L + "^2 + " + l + "^2} = " + N(dg)) + " cm ; le demi-rectangle est un triangle rectangle d'aire " + M("\\frac{" + L + " \\cdot " + l + "}{2} = " + (L * l) / 2) + " cm², donc " + M("x = \\frac{" + L * l + "}{" + N(dg) + "} \\approx " + Ad(x, 2)) + " cm."]),
+chk: [[Number.isInteger(dg), "diagonale entière"]], vals: [b, (a * b) / 2, h, x] }); },
+
+() => { const [w, H, p] = pk([[80, 150, 60], [60, 120, 45], [50, 160, 40], [70, 140, 55]]), df0 = Math.sqrt(w * w + H * H + p * p), S = Math.round(df0) + pk([-7, -4, 4, 7]), df = Math.sqrt(w * w + H * H), D = Math.sqrt(w * w + H * H + p * p), b = Math.sqrt(w * w + p * p), ok = S < D;
+return X({ id: "pythfig", lv: 3, titre: "Le casier de consigne",
+q: "Dans une gare, les casiers de consigne sont des pavés de " + Q(w, "cm") + " de large, " + Q(H, "cm") + " de haut et " + Q(p, "cm") + " de profondeur." + FIG.box(w + " cm", p + " cm", H + " cm"),
+parts: [{ label: "Calcule la diagonale de la face avant (largeur × hauteur), au dixième.", pts: 1 }, { label: "Calcule la grande diagonale du casier (d'un coin du bas au coin opposé du haut), au dixième.", pts: 2 },
+{ label: "Peut-on y ranger une paire de skis de " + Q(S, "cm") + " ? Justifie.", pts: 1 }, { label: "Quelle est la plus longue canne qu'on peut poser à plat sur le fond du casier (au dixième) ?", pts: 1 }],
+sol: ul([M("\\sqrt{" + w + "^2 + " + H + "^2} = \\sqrt{" + (w * w + H * H) + "} \\approx " + Ad(df, 1)) + " cm.",
+"Triangle rectangle (diagonale de la face avant, profondeur) : " + M("\\sqrt{" + (w * w + H * H) + " + " + p + "^2} = \\sqrt{" + (w * w + H * H + p * p) + "} \\approx " + Ad(D, 1)) + " cm.",
+ok ? "Oui : " + M(S + " < " + Ad(D, 1)) + ", en les plaçant selon la grande diagonale." : "Non : " + M(S + " > " + Ad(D, 1)) + " ; même en diagonale, les skis sont trop longs.",
+"Diagonale du fond : " + M("\\sqrt{" + w + "^2 + " + p + "^2} = \\sqrt{" + (w * w + p * p) + "} \\approx " + Ad(b, 1)) + " cm."]),
+chk: [[Math.abs(S - D) > 3, "écart net"]], vals: [df, D, b] }); },
+
+() => { const [c, s, h] = pk([[8, 9, 7], [12, 11, 7], [16, 12, 4], [12, 9, 3]]), ap = Math.sqrt(s * s - (c / 2) ** 2);
+return X({ id: "pythfig", lv: 3, titre: "La pyramide",
+q: "Une pyramide régulière a une base carrée de " + Q(c, "cm") + " de côté ; ses quatre arêtes latérales mesurent " + Q(s, "cm") + ". Son sommet est à la verticale du centre de la base." + FIG.pyramid(c + " cm", "h"),
+parts: [{ label: "Calcule la diagonale de la base (valeur exacte et valeur au dixième).", pts: 1 }, { label: "Calcule la hauteur de la pyramide.", pts: 2 },
+{ label: "Calcule l'apothème (hauteur d'une face triangulaire), au dixième.", pts: 2 }, { label: "Pourquoi utilise-t-on la demi-diagonale pour la hauteur, mais le demi-côté pour l'apothème ?", pts: 1 }],
+sol: ul([M("d = \\sqrt{" + c + "^2 + " + c + "^2} = \\sqrt{" + 2 * c * c + "} \\approx " + Ad(Math.sqrt(2 * c * c), 1)) + " cm.",
+"Triangle rectangle (hauteur, demi-diagonale, arête) : " + M("\\left(\\frac{d}{2}\\right)^2 = \\frac{" + 2 * c * c + "}{4} = " + c * c / 2) + ", " + M("h = \\sqrt{" + s + "^2 - " + c * c / 2 + "} = \\sqrt{" + h * h + "} = " + h) + " cm.",
+"Triangle rectangle (apothème, demi-côté, arête) : " + M("\\sqrt{" + s + "^2 - " + c / 2 + "^2} = \\sqrt{" + (s * s - c * c / 4) + "} \\approx " + Ad(ap, 1)) + " cm.",
+"Sous l'arête, le pied de la hauteur est le centre, au bout d'une demi-diagonale ; l'apothème tombe au milieu d'un côté de la base, à un demi-côté du coin."]),
+chk: [[s * s - c * c / 2 === h * h, "hauteur entière"]], vals: [h, ap] }); },
+];
+const RAISONPY10 = [
+
+() => { const [a, b, c] = pk([[6, 8, 10], [9, 12, 15], [5, 12, 13], [8, 15, 17]]), w = who(), w2 = who(w.n);
+return X({ id: "pyth", lv: 1, titre: "Trouve l'erreur",
+q: "Dans un triangle rectangle, les cathètes mesurent " + Q(a, "cm") + " et " + Q(b, "cm") + ". " + w.n + " répond « l'hypoténuse mesure " + M(a + b) + " cm », " + w2.n + " répond « elle mesure " + M(c * c) + " cm ». Puis, pour un triangle d'hypoténuse " + Q(c, "cm") + " et de cathète " + Q(a, "cm") + ", ils calculent l'autre cathète : " + M("\\sqrt{" + c + "^2 + " + a + "^2} \\approx " + Ad(Math.sqrt(c * c + a * a), 2)) + " cm.",
+parts: [{ label: "Explique l'erreur de " + w.n + ", puis celle de " + w2.n + ".", pts: 2 }, { label: "Quelle est l'erreur dans le calcul de l'autre cathète ? Comment pouvait-on voir, sans calculer, que le résultat est faux ?", pts: 2 }, { label: "Donne les bonnes réponses.", pts: 1 }],
+sol: ul([w.n + " a additionné les côtés : on additionne leurs <b>carrés</b>. " + w2.n + " a trouvé " + M("c^2 = " + c * c) + " mais a oublié la racine carrée.",
+"On a additionné les carrés alors qu'on cherche une cathète : il faut soustraire. Une cathète est toujours plus courte que l'hypoténuse : " + M(Ad(Math.sqrt(c * c + a * a), 2) + " > " + c) + ", c'est impossible.",
+"Hypoténuse " + M("\\sqrt{" + a * a + " + " + b * b + "} = " + c) + " cm ; autre cathète " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " cm."]),
+vals: [a + b, c * c, c, b] }); },
+
+() => VF({ id: "pyth", titre: "Vrai ou faux ? Justifie" }, [
+() => ["Dans n'importe quel triangle, le carré du plus grand côté est égal à la somme des carrés des deux autres.", false, "Seulement dans un triangle <b>rectangle</b>. Contre-exemple : le triangle équilatéral de côté 2 : " + M("2^2 = 4") + " mais " + M("2^2 + 2^2 = 8") + "."],
+() => { const [a, b] = pk([[9, 16], [36, 64], [25, 144]]); return [M("\\sqrt{" + a + " + " + b + "} = \\sqrt{" + a + "} + \\sqrt{" + b + "}"), false, M("\\sqrt{" + (a + b) + "} = " + N(Math.sqrt(a + b))) + " mais " + M("\\sqrt{" + a + "} + \\sqrt{" + b + "} = " + (Math.sqrt(a) + Math.sqrt(b))) + " : la racine d'une somme n'est pas la somme des racines."]; },
+() => ["Dans un triangle rectangle, une cathète peut être plus longue que l'hypoténuse.", false, "Non : " + M("c^2 = a^2 + b^2 > a^2") + ", donc " + M("c > a") + " ; l'hypoténuse est toujours le plus long côté."],
+() => { const s = pk([5, 10, 20]); return ["La diagonale d'un carré de côté " + s + " cm mesure " + 2 * s + " cm.", false, M("\\sqrt{" + s + "^2 + " + s + "^2} = \\sqrt{" + 2 * s * s + "} \\approx " + Nk(Math.sqrt(2 * s * s), 1)) + " cm, moins que " + 2 * s + " cm (le chemin par deux côtés est plus long)."]; },
+() => ["Si on double les deux cathètes d'un triangle rectangle, l'hypoténuse double aussi.", true, "Exemple : cathètes 3 et 4 → hypoténuse 5 ; cathètes 6 et 8 → " + M("\\sqrt{36 + 64} = 10") + ". En général " + M("(2a)^2 + (2b)^2 = 4(a^2 + b^2) = (2c)^2") + "."],
+() => ["L'hypoténuse d'un triangle rectangle de cathètes 5 cm et 7 cm mesure entre 8 cm et 9 cm.", true, M("5^2 + 7^2 = 74") + ", et " + M("64 < 74 < 81") + " : " + M("8 < \\sqrt{74} < 9") + "."],
+]),
+
+() => { const [a, b] = pk([[4, 7], [5, 9], [3, 8], [6, 7]]), n = a * a + b * b, lo = Math.floor(Math.sqrt(n)), w = who();
+return X({ id: "pyth", lv: 2, titre: "Estime avant de calculer",
+q: "Un triangle rectangle a des cathètes de " + Q(a, "cm") + " et " + Q(b, "cm") + ".",
+parts: [{ label: "Sans calculatrice, entre quels nombres entiers consécutifs se trouve l'hypoténuse ? Explique.", pts: 2 },
+{ label: "Explique pourquoi l'hypoténuse est forcément plus longue que " + Q(b, "cm") + " et plus courte que " + Q(a + b, "cm") + ".", pts: 2 },
+{ label: w.n + " trouve " + M(N(rd(Math.sqrt(n) * 1.4, 0.1))) + " cm. Sans refaire le calcul, comment sais-tu que c'est faux ? Donne la valeur exacte et la valeur au dixième.", pts: 1 }],
+sol: ul([M(a + "^2 + " + b + "^2 = " + n) + " ; " + M(lo * lo + " < " + n + " < " + (lo + 1) ** 2) + ", donc l'hypoténuse est entre " + lo + " et " + (lo + 1) + " cm.",
+"L'hypoténuse est le plus long côté (" + M("c^2 = " + b + "^2 + " + a + "^2 > " + b + "^2") + ") ; et le chemin direct est plus court que le chemin par les deux cathètes (" + M(n + " < (" + a + " + " + b + ")^2 = " + (a + b) ** 2) + ").",
+M(N(rd(Math.sqrt(n) * 1.4, 0.1))) + " n'est pas entre " + lo + " et " + (lo + 1) + ". Valeur exacte " + M("\\sqrt{" + n + "}") + ", soit " + M("\\approx " + Nk(Math.sqrt(n), 1)) + " cm."]),
+chk: [[!Number.isInteger(Math.sqrt(n)), "non entier"], [rd(Math.sqrt(n) * 1.4, 0.1) > lo + 1, "réponse fausse hors encadrement"]], vals: [n, lo, lo + 1] }); },
+
+() => { const [P, Qn, Rn] = sh(["P", "Q", "R"]), [a, b, c] = pk([[20, 21, 29], [9, 40, 41], [12, 35, 37], [7, 24, 25]]);
+return X({ id: "pyth", lv: 2, titre: "Où est l'hypoténuse ?",
+q: "Le triangle " + M(P + Qn + Rn) + " est rectangle en " + M(Qn) + ". On connaît " + M(P + Qn + " = " + a) + " cm et " + M(P + Rn + " = " + c) + " cm.",
+parts: [{ label: "Quel côté est l'hypoténuse ? Écris l'égalité de Pythagore pour ce triangle.", pts: 2 }, { label: "Calcule " + M(Qn + Rn) + ".", pts: 2 }, { label: "Calcule le périmètre et l'aire du triangle.", pts: 1 }],
+sol: ul(["L'hypoténuse est le côté opposé à l'angle droit en " + M(Qn) + " : " + M("[" + P + Rn + "]") + ". " + M(P + Rn + "^2 = " + P + Qn + "^2 + " + Qn + Rn + "^2") + ".",
+M(Qn + Rn + "^2 = " + c + "^2 - " + a + "^2 = " + (c * c - a * a)) + ", donc " + M(Qn + Rn + " = " + b) + " cm.",
+"Périmètre " + M(a + " + " + b + " + " + c + " = " + (a + b + c)) + " cm ; aire " + M("\\frac{" + a + " \\cdot " + b + "}{2} = " + (a * b) / 2) + " cm²."]),
+vals: [b, a + b + c, (a * b) / 2] }); },
+];
+
+RICH.pyth10 = { ids: ["pyth", "pythfig"], label: "Théorème de Pythagore (10e)", ex: EXPY10, raison: RAISONPY10, minutes: 45, grades: [10] };
 })();
 

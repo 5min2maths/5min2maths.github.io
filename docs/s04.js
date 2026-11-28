@@ -160,12 +160,12 @@ const VIT = {
 const v = c[3] + R.int(-2, 2) * (c[3] >= 50 ? 5 : 1), t = c[4] + R.int(0, 2), d = v * t;
 return Qv(c[0] + " " + Q(d, c[1]) + " en " + Q(t, c[2]) + ". Quelle est sa vitesse moyenne (en " + c[6] + ") ?", v,
 M("v = \\frac{d}{t} = \\frac{" + N(d) + "}{" + t + "} = " + N(v)) + " " + c[6] + ".",
-{ ctx: c[5], fig: c[1] === "km" ? FIG.road(N(d).replace("\\text{'}", "'") + " km", t + " h", c[5]) : undefined,
+{ ctx: c[5],
 guide: [GS("La vitesse est la distance parcourue en une unité de temps : " + M("v = \\frac{d}{t}") + ". Calcule " + M(N(d) + " : " + t) + ".", v, M(N(d) + " : " + t + " = " + N(v)) + " " + c[6] + ".")],
 traps: [TRAP(d * t, "On ne multiplie pas : la vitesse, c'est la distance divisée par la durée."), TRAP(r6(t / d), "C'est l'inverse : distance divisée par durée.")] }); },
 () => { const c = pickBy([["Pendant un orage, on entend le tonnerre", "s", "après avoir vu l'éclair. Le son va à 340 m/s. À quelle distance (en m) la foudre est-elle tombée ?", 340, [3, 4, 5, 6, 7, 9], "m", "orage"], ["Un train roule à 120 km/h pendant", "h", ". Quelle distance parcourt-il (en km) ?", 120, [1.5, 2.5, 3.5, 0.75], "km", "train"], ["Une hirondelle vole à 15 m/s pendant", "s", ". Quelle distance parcourt-elle (en m) ?", 15, [12, 25, 40, 75], "m", "oiseau"]]);
 const t = pickBy(c[4]), v = c[3], d = r6(v * t);
-return Qv(c[0] + " " + Q(t, c[1]) + " " + c[2], d, M("d = v \\cdot t = " + v + " \\cdot " + N(t) + " = " + N(d)) + " " + c[5] + ".",
+return Qv(c[0] + " " + Q(t, c[1]) + (/^[.,]/.test(c[2]) ? "" : " ") + c[2] , d, M("d = v \\cdot t = " + v + " \\cdot " + N(t) + " = " + N(d)) + " " + c[5] + ".",
 { ctx: c[6], guide: [GS("En une " + (c[1] === "h" ? "heure" : "seconde") + ", on parcourt " + v + " " + c[5] + ". Et en " + Q(t, c[1]) + " ? (" + M("d = v \\cdot t") + ")", d, M(v + " \\cdot " + N(t) + " = " + N(d)) + " " + c[5] + ".")],
 traps: [TRAP(r6(v / t), "La distance augmente avec la durée : on multiplie la vitesse par la durée.")] }); },
 () => { const c = pickBy([[80, [260, 340, 180, 300], "Une voiture roule à 80 km/h. Combien d'heures lui faut-il pour parcourir", "voiture"], [12, [30, 54, 42], "Un randonneur à vélo roule à 12 km/h. Combien d'heures lui faut-il pour parcourir", "rando"], [900, [3150, 2250, 4950], "Un avion de ligne vole à 900 km/h. Combien d'heures dure un vol de", "avion"]]);
@@ -202,7 +202,7 @@ return Qv(c[1] + " " + Q(c[0], c[2]) + ". Quelle distance parcourt-il en une heu
 const V1 = c[1] === "velo" ? v1 / 4 : v1, V2 = c[1] === "velo" ? v2 / 4 : v2, D = c[1] === "velo" ? dd / 4 : dd;
 return Qv(c[0] + " de " + Q(D, "km") + " à " + Q(V1, "km/h") + " et le retour à " + Q(V2, "km/h") + ". Quelle est sa vitesse moyenne sur l'aller-retour (en km/h) ?", (2 * D) / (D / V1 + D / V2),
 "Durées : " + M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h et " + M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h. Total " + M(N(r6(D / V1 + D / V2))) + " h pour " + M(N(2 * D)) + " km : " + M("v = " + N(r6(vm * D / dd))) + " km/h (et non la moyenne des deux vitesses).",
-{ ctx: c[1], fig: FIG.road(N(D) + " km", "aller-retour", c[1]),
+{ ctx: c[1],
 guide: [GSd("Durée de l'aller (en h) ?", D / V1, M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h."), GSd("Durée du retour (en h) ?", D / V2, M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h."), GS("Vitesse moyenne = distance totale ÷ durée totale. Combien ?", (2 * D) / (D / V1 + D / V2), M(N(2 * D) + " : " + N(r6(D / V1 + D / V2)) + " = " + N(r6(vm * D / dd))) + " km/h.")],
 traps: [TRAP((V1 + V2) / 2, "On ne fait jamais la moyenne des vitesses : on roule plus longtemps à la vitesse la plus lente. Divise la distance totale par la durée totale.")] }); },
 () => { const [m1, v1, m2, v2] = pickBy([[30, 60, 90, 100], [20, 90, 40, 60], [45, 80, 15, 120], [40, 45, 80, 90], [30, 50, 90, 110]]), d1 = v1 * m1 / 60, d2 = v2 * m2 / 60, vm = (d1 + d2) / ((m1 + m2) / 60), c = pickBy([["Un car roule", "car"], ["Une voiture roule", "voiture"], ["Un train régional roule", "train"]]);
@@ -231,7 +231,7 @@ const GQ = {
 () => { const m = pickBy(MET), V = R.int(12, 80), mass = r6(m[1] * V);
 return Qv("Un cube " + m[0] + " a un volume de " + Q(V, "cm^3") + " et une masse de " + Q(mass, "g") + ". Calcule sa masse volumique (en " + M("\\text{g/cm}^3") + ").", m[1],
 M("\\rho = \\frac{m}{V} = \\frac{" + N(mass) + "}{" + V + "} = " + N(m[1])) + " g/cm³ : chaque cm³ pèse " + N(m[1]).replace("{,}", ",") + " g.",
-{ ctx: m[2], fig: FIG.cube(""), guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
+{ ctx: m[2], guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
 traps: [TRAP(r6(V / mass), "C'est l'inverse : masse divisée par volume."), TRAP(r6(mass * V), "On divise la masse par le volume.")] }); },
 () => { const c = pickBy([["L'huile d'olive", 0.92, "L", "kg", "Quelle est la masse de", "huile"], ["Le lait", 1.03, "L", "kg", "Quelle est la masse de", "lait"], ["L'essence", 0.75, "L", "kg", "Quelle est la masse de", "essence"], ["Le miel", 1.4, "L", "kg", "Quelle est la masse de", "miel"]]), V = pickBy([5, 12, 20, 25, 8]), mass = r6(c[1] * V);
 return Qv(c[0] + " a une masse volumique de " + M(N(c[1]) + u("kg/L")) + ". " + c[4] + " " + Q(V, "L") + " (en kg) ?", mass, M("m = \\rho \\cdot V = " + N(c[1]) + " \\cdot " + V + " = " + N(mass)) + " kg.",
@@ -351,7 +351,7 @@ return P(null, "Une pompe vide une piscine de " + Q(V, "m^3") + " avec un débit
 ],
 vitesse: [
 () => { const d = 10 * R.int(6, 18), v1 = pickBy([60, 80, 90, 100, 120]), v2 = pickBy([40, 50, 60, 75].filter((v) => v !== v1)), t1 = d / v1, t2 = d / v2, vm = (2 * d) / (t1 + t2);
-return P(FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
+return P(undefined, "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
 [["a) Durée de l'aller (min)", t1 * 60, 0.01], ["b) Durée du retour (min)", t2 * 60, 0.01], ["c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", vm, 0.01]],
 ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
 "a) " + M(N(+(t1 * 60).toFixed(2))) + " min. b) " + M(N(+(t2 * 60).toFixed(2))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + N(+(t1 + t2).toFixed(4)) + "} \\approx " + N(+vm.toFixed(2))) + " km/h (et non " + String((v1 + v2) / 2).replace(".", ",") + ")."); },
@@ -1040,12 +1040,12 @@ const EQ1 = {
 1: [
 () => { const a = pk([2, 3, 4, 5, 6, 7, 8, 9, -2, -3, -4, -5]), s = nz(-9, 9), b = nz(-12, 12), c = a * s + b;
 return Qv("Résous : " + M(L(a, b) + " = " + c) + ".", s, "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M(L(a, 0) + " = " + (c - b)) + ", puis on divise par " + M(P(a)) + " : " + M("x = " + s) + ".",
-{ ctx: "simple", fig: FIG.balance(L(a, b), String(c)),
+{ ctx: "simple",
 guide: [GS((b > 0 ? "Soustrais " + b : "Ajoute " + -b) + " des deux côtés : " + M(L(a, 0) + " = \\ ?"), c - b, M(L(a, 0) + " = " + c + sgn(-b) + " = " + (c - b)) + "."), GS("Divise les deux côtés par " + M(P(a)) + " : " + M("x = \\ ?"), s, M("x = \\frac{" + (c - b) + "}{" + a + "} = " + s) + ".")],
 traps: [TV((c + b) / a, "Pour enlever " + M(b) + " à gauche, on " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des <b>deux</b> côtés : " + M(c + sgn(-b) + " = " + (c - b)) + "."), TV((c - b) * a, "Pour défaire « fois " + a + " », on divise par " + a + " : on ne multiplie pas."), TV((c - b) / -a, "Attention au signe : on divise par " + M(P(a)) + ", avec son signe.")] }); },
 () => { let a, c; do { a = R.int(2, 9); c = R.int(1, 9); } while (a === c); const s = nz(-9, 9), b = nz(-12, 12), d = (a - c) * s + b;
 return Qv("Résous : " + M(L(a, b) + " = " + L(c, d)) + ".", s, "Les " + M("x") + " à gauche, les nombres à droite : " + M(L(a - c, 0) + " = " + (d - b)) + ", donc " + M("x = " + s) + ".",
-{ ctx: "deuxcotes", fig: FIG.balance(L(a, b), L(c, d)),
+{ ctx: "deuxcotes",
 guide: [GS("Soustrais " + M(L(c, 0)) + " des deux côtés. Combien reste-t-il de " + M("x") + " à gauche (coefficient) ?", a - c, M(a + "x - " + L(c, 0) + " = " + L(a - c, 0)) + "."), GS("Soustrais " + M(b) + " des deux côtés : " + M(L(a - c, 0) + " = \\ ?"), d - b, M(L(a - c, 0) + " = " + d + sgn(-b) + " = " + (d - b)) + "."), GS("Divise : " + M("x = \\ ?"), s, M("x = " + s) + ".")],
 traps: [TV((d - b) / (a + c), "Pour faire passer " + M(L(c, 0)) + " à gauche, on le <b>soustrait</b> des deux côtés : " + M(a + "x - " + L(c, 0) + " = " + L(a - c, 0)) + "."), TV((d + b) / (a - c), "Le nombre " + M(b) + " change de membre : on " + (b > 0 ? "soustrait" : "ajoute") + " " + Math.abs(b) + " des deux côtés.")] }); },
 () => { const a = R.int(2, 9), s = nz(-9, 9), k = R.int(3, 20), c = k - a * s;
@@ -1079,7 +1079,7 @@ return Qv("Résous : " + M("(" + L(1, a) + ")(" + L(1, b) + ") = (" + L(1, c) + 
 { ctx: "carres-elimines",
 guide: [GS("Développe le membre de gauche : coefficient de " + M("x") + " ?", a + b, M("(" + L(1, a) + ")(" + L(1, b) + ") = " + T2(1, a + b, a * b)) + "."), GS("Développe à droite (sans oublier " + M(e) + "), puis soustrais " + M("x^2") + " des deux côtés : " + M(L(k, 0) + " = \\ ?"), c * d + e - a * b, M(T2(1, c + d, c * d + e)) + " ; il reste " + M(L(k, 0) + " = " + (c * d + e - a * b)) + "."), GS(M("x = \\ ?"), s, M("x = " + s) + " : l'équation avait l'air du 2e degré, mais elle est du 1er degré.")],
 traps: [TV((c * d - a * b) / k, "N'oublie pas le terme " + M(e) + " du membre de droite.")] }); },
-() => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a <= c); const s = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
+() => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a - c < 2);  const s = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
 if (Math.abs(wrong - s) < 1e-9) return EQ1[2][3]();
 return Qv(w + " résout " + M(L(a, b) + " = " + L(c, d)) + " ainsi : " + M(L(a - c, 0) + " = " + (d + b)) + ", donc " + M("x = " + tn(wrong)) + ". Trouve l'erreur, puis donne la bonne solution.", s, "Erreur : " + M(b) + " change de membre, donc de signe : " + M(L(a - c, 0) + " = " + d + sgn(-b) + " = " + (d - b)) + ", et " + M("x = " + s) + ". Vérification : " + M(a + " \\cdot " + P(s) + sgn(b) + " = " + (a * s + b)) + " et " + M(c + " \\cdot " + P(s) + sgn(d) + " = " + (c * s + d)) + ".",
 { ctx: "erreur",
@@ -1524,7 +1524,7 @@ return Qv("Le produit de deux nombres entiers positifs consécutifs vaut " + M(P
 traps: [TV(-(n + 1), "L'énoncé demande des nombres positifs : on écarte la solution négative."), TV(Pr / 2, "On cherche deux nombres consécutifs dont le <b>produit</b> vaut " + Pr + ".")] }); },
 () => { const l = R.int(3, 12), d = R.int(2, 7), A = l * (l + d), obj = pk(["un rectangle", "un potager rectangulaire", "une affiche rectangulaire"]);
 return Qv("La longueur d'" + obj.slice(3) + " dépasse sa largeur de " + d + " cm. Son aire vaut " + A + " cm². Quelle est sa largeur (en cm) ?", l, M("x(x + " + d + ") = " + A) + ", soit " + M("x^2 + " + d + "x - " + A + " = 0") + " ; " + M("\\Delta = " + (d * d + 4 * A)) + ", " + M("x = " + l) + " (l'autre solution, " + M(-(l + d)) + ", est négative).",
-{ ctx: "rectangle", fig: FIG.rectFig(9, 5, "x + " + d, "x"), guide: [GS("Équation " + M("x^2 + " + d + "x - " + A + " = 0") + " : " + M("\\Delta = \\ ?"), d * d + 4 * A, M(d * d + " + " + 4 * A + " = " + (d * d + 4 * A)) + "."), GS(M("\\sqrt{\\Delta} = \\ ?"), 2 * l + d, M(2 * l + d) + "."), GS("Largeur ?", l, M("\\frac{-" + d + " + " + (2 * l + d) + "}{2} = " + l) + " cm.")],
+{ ctx: "rectangle", guide: [GS("Équation " + M("x^2 + " + d + "x - " + A + " = 0") + " : " + M("\\Delta = \\ ?"), d * d + 4 * A, M(d * d + " + " + 4 * A + " = " + (d * d + 4 * A)) + "."), GS(M("\\sqrt{\\Delta} = \\ ?"), 2 * l + d, M(2 * l + d) + "."), GS("Largeur ?", l, M("\\frac{-" + d + " + " + (2 * l + d) + "}{2} = " + l) + " cm.")],
 traps: [TV(-(l + d), "Une largeur est positive : on écarte cette solution."), TV(l + d, "C'est la longueur : on demande la largeur.")] }); },
 () => { const k = R.int(1, 5), x = R.int(3, 15), A = 2 * k * x + k * k;
 return Qv("Si l'on augmente de " + k + " cm le côté d'un carré, son aire augmente de " + A + " cm². Quel est le côté du carré (en cm) ?", x, M("(x + " + k + ")^2 - x^2 = " + A) + ", soit " + M(2 * k + "x + " + k * k + " = " + A) + " : les " + M("x^2") + " s'éliminent, " + M("x = " + x) + " cm.",
@@ -1539,11 +1539,11 @@ traps: [TV(b - n0, "On cherche un entier <b>positif</b>."), TV(Math.sqrt(a + c),
 () => { const w = pk([10, 12, 15, 18, 20]), h = pk([8, 10, 12, 15]), x = R.int(1, 5), A = (w + 2 * x) * (h + 2 * x), c = w * h - A;
 return Qv("Une photo de " + w + " cm sur " + h + " cm est entourée d'un cadre de largeur constante " + M("x") + ". L'ensemble (photo et cadre) a une aire de " + A + " cm². Quelle est la largeur du cadre (en cm) ?", x,
 M("(" + w + " + 2x)(" + h + " + 2x) = " + A) + ", soit " + M("4x^2 + " + 2 * (w + h) + "x " + sgn(c).trim() + " = 0") + " : " + M("x = " + x) + " cm (l'autre solution est négative).",
-{ ctx: "cadre", fig: FIG.rectFig(10, 7, Math.max(w, h) + " + 2x", Math.min(w, h) + " + 2x"), guide: [GS("Dimensions extérieures : " + M("(" + w + " + 2x)") + " sur " + M("(" + h + " + 2x)") + ". Développe : coefficient de " + M("x") + " ?", 2 * (w + h), M("2 \\cdot " + w + " + 2 \\cdot " + h + " = " + 2 * (w + h)) + " (avec " + M("4x^2") + ")."), GS("Ramène à 0 : terme constant ?", c, M(w * h + " - " + A + " = " + c) + "."), GS("Largeur positive du cadre ?", x, M("x = " + x) + " cm.")],
+{ ctx: "cadre", guide: [GS("Dimensions extérieures : " + M("(" + w + " + 2x)") + " sur " + M("(" + h + " + 2x)") + ". Développe : coefficient de " + M("x") + " ?", 2 * (w + h), M("2 \\cdot " + w + " + 2 \\cdot " + h + " = " + 2 * (w + h)) + " (avec " + M("4x^2") + ")."), GS("Ramène à 0 : terme constant ?", c, M(w * h + " - " + A + " = " + c) + "."), GS("Largeur positive du cadre ?", x, M("x = " + x) + " cm.")],
 traps: [TV(-(w + h) / 2 - x, "Une largeur est positive : on écarte cette solution."), TV((A - w * h) / (2 * (w + h)), "N'oublie pas le terme " + M("4x^2") + " (les quatre coins).")] }); },
 () => { const [a, b, c] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [20, 21, 29], [7, 24, 25], [12, 16, 20]]), d = b - a;
 return Qv("Dans un triangle rectangle, l'hypoténuse mesure " + c + " cm et l'un des côtés de l'angle droit dépasse l'autre de " + d + " cm. Combien mesure le plus petit côté (en cm) ?", a, M("x^2 + (x + " + d + ")^2 = " + c * c) + ", soit " + M("2x^2 + " + 2 * d + "x - " + (c * c - d * d) + " = 0") + ", ou " + M("x^2 + " + d + "x - " + (c * c - d * d) / 2 + " = 0") + " : " + M("x = " + a) + " cm.",
-{ ctx: "pythagore", fig: FIG.rightTriangle(["x", "x + " + d, c + " cm"]), guide: [GS("Pythagore : " + M("x^2 + (x + " + d + ")^2 = " + c * c) + ". Divise par 2 après avoir ramené à 0 : terme constant ?", -(c * c - d * d) / 2, M("x^2 + " + d + "x - " + (c * c - d * d) / 2 + " = 0") + "."), GS("Solution positive ?", a, M("x = " + a) + " cm (l'autre côté : " + b + " cm).")],
+{ ctx: "pythagore", guide: [GS("Pythagore : " + M("x^2 + (x + " + d + ")^2 = " + c * c) + ". Divise par 2 après avoir ramené à 0 : terme constant ?", -(c * c - d * d) / 2, M("x^2 + " + d + "x - " + (c * c - d * d) / 2 + " = 0") + "."), GS("Solution positive ?", a, M("x = " + a) + " cm (l'autre côté : " + b + " cm).")],
 traps: [TV(b, "C'est le plus grand côté de l'angle droit."), TV(-b, "Une longueur est positive.")] }); },
 () => { let p, q; do { p = R.int(2, 15); q = R.int(2, 15); } while (p === q); const S = p + q, Pr = p * q;
 return Qv("Deux nombres positifs ont pour somme " + S + " et pour produit " + Pr + ". Quel est le plus grand ?", Math.max(p, q), M("x(" + S + " - x) = " + Pr) + ", soit " + M("x^2 - " + S + "x + " + Pr + " = 0") + " : " + M("x = " + Math.min(p, q)) + " ou " + M("x = " + Math.max(p, q)) + ". Les deux nombres sont " + Math.min(p, q) + " et " + Math.max(p, q) + ".",
@@ -4195,7 +4195,7 @@ M(N(c) + " \\cdot " + e + " = " + N(c * e)) + " cm, soit " + M(N(m)) + " m.", { 
 2: [
 () => { const k = pk([1.5, 2, 2.5, 3, 4]), A = R.int(3, 20);
 return Qv("On agrandit une figure de rapport " + T(k) + ". Son aire était de " + M(A) + " cm². Quelle est la nouvelle aire (en cm²) ?", r6(A * k * k), "Les aires sont multipliées par " + M(N(k) + "^2 = " + N(k * k)) + " : " + M(A + " \\cdot " + N(k * k) + " = " + N(A * k * k)) + " cm².",
-{ ctx: "aire", fig: FIG.scaling(k, ""), guide: [GS("Les aires sont multipliées par " + M("k^2") + ". " + M(N(k) + "^2") + " = ?", r6(k * k), M(N(k * k)) + "."), GS("Nouvelle aire ?", r6(A * k * k), M(N(A * k * k)) + " cm².")], traps: [TR(r6(A * k), "Les aires ne sont pas multipliées par k, mais par k²."), TR(r6(A * k * k * k), "k³, c'est pour les volumes.")] }); },
+{ ctx: "aire", guide: [GS("Les aires sont multipliées par " + M("k^2") + ". " + M(N(k) + "^2") + " = ?", r6(k * k), M(N(k * k)) + "."), GS("Nouvelle aire ?", r6(A * k * k), M(N(A * k * k)) + " cm².")], traps: [TR(r6(A * k), "Les aires ne sont pas multipliées par k, mais par k²."), TR(r6(A * k * k * k), "k³, c'est pour les volumes.")] }); },
 () => { const k = pk([2, 3, 4, 5]), A = R.int(2, 12);
 return Qv("Deux figures semblables ont pour aires " + M(A) + " cm² et " + M(A * k * k) + " cm². Quel est le rapport d'agrandissement des longueurs ?", k, "Rapport des aires " + M(A * k * k + " : " + A + " = " + k * k) + " = " + M("k^2") + ", donc " + M("k = " + k) + ".",
 { ctx: "kdepuisaire", guide: [GS("Rapport des aires ?", k * k, M(k * k) + "."), GS("Les longueurs : racine carrée. " + M("k") + " = ?", k, M("\\sqrt{" + k * k + "} = " + k) + ".")], traps: [TR(k * k, "C'est le rapport des aires ; celui des longueurs est sa racine carrée.")] }); },
@@ -4319,7 +4319,7 @@ const DN = {
 a = R.int(2, 5), b = R.int(3, 6), c = R.int(2, 4), n = a * b * c;
 return Qv(x[0] + " " + M(a) + " " + x[1] + ", " + M(b) + " " + x[2] + " et " + M(c) + " " + x[3] + ". Combien de " + x[4] + " peut-on composer ?", n,
 "Arbre : " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + n) + ".",
-{ ctx: x[5], fig: tree(a, b, x[1], x[2]), guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
+{ ctx: x[5], guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
 traps: [TR(a + b + c, "On ne les additionne pas : chaque choix se combine avec tous les autres (arbre), on multiplie."), TR(a * b, "N'oublie pas le 3e choix (" + x[3] + ").")] }); },
 () => { const n = pk([4, 5, 6, 10]), k = pk([3, 4]), v = n ** k, x = pk([["Un cadenas a " + M(k) + " molettes portant chacune les chiffres de " + M(1) + " à " + M(n), "cadenas"], ["Un code secret est formé de " + M(k) + " symboles, chacun choisi parmi " + M(n) + " (on peut répéter)", "code"]]);
 if (n === 10 && k === 4) return null;
@@ -4328,7 +4328,7 @@ return Qv(x[0] + ". Combien de codes différents existe-t-il ?", v, M(Array(k).f
 traps: [TR(n * k, "On ne multiplie pas par le nombre de molettes : chaque molette multiplie les possibilités par " + n + "."), TR(k ** n, "C'est " + n + "^" + k + " : " + k + " positions, " + n + " choix chacune.")] }); },
 () => { const a = R.int(2, 4), b = R.int(3, 5), x = pk([["Pour aller de A à B, il y a " + M(a) + " chemins ; de B à C, il y a " + M(b) + " chemins. Combien de trajets différents de A à C passant par B ?", "chemins", "A → B", "B → C", "trajet"], ["Une glace : on choisit un cornet parmi " + M(a) + " et un parfum parmi " + M(b) + ". Combien de glaces différentes ?", "glaces", "cornet", "parfum", "glace"]]);
 return Qv(x[0], a * b, M(a + " \\cdot " + b + " = " + a * b) + " " + x[1] + ".",
-{ ctx: x[4], fig: tree(a, b, x[2], x[3]), guide: [GS("Compte les branches au bout de l'arbre : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
+{ ctx: x[4], guide: [GS("Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie. " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
 ],
 2: [
 () => { const n = R.int(6, 12), v = n * (n - 1) * (n - 2);
@@ -4376,7 +4376,7 @@ const PB = {
 () => { const c = { rouges: R.int(2, 6), bleues: R.int(2, 6), vertes: R.int(1, 4) }, n = c.rouges + c.bleues + c.vertes, col = pk(["rouges", "bleues", "vertes"]), f = c[col];
 return Qv("Une urne contient " + M(c.rouges) + " boules rouges, " + M(c.bleues) + " bleues et " + M(c.vertes) + " vertes. On tire une boule au hasard. Quelle est la probabilité qu'elle soit " + col.slice(0, -1) + " ?" + FA, f / n,
 "Cas favorables sur cas possibles : " + M(FS(f, n)) + ".",
-{ ctx: "urne", fig: FIG.urn(c), guide: [GS("Nombre de boules en tout (cas possibles) ?", n, M(n) + "."), GS("Probabilité" + FA + " ?", f / n, M(FS(f, n)) + ".")],
+{ ctx: "urne", guide: [GS("Nombre de boules en tout (cas possibles) ?", n, M(n) + "."), GS("Probabilité" + FA + " ?", f / n, M(FS(f, n)) + ".")],
 traps: [TR(f / (n - f), "On divise par le nombre TOTAL de boules, pas par les autres."), TR(1 / 3, "Les couleurs n'ont pas la même chance : il y a plus de boules de certaines couleurs.")] }); },
 () => { const fc = pk([6, 8, 12, 20]), ev = pk([["un nombre pair", (k) => k % 2 === 0, "pair"], ["un multiple de 3", (k) => k % 3 === 0, "mult3"], ["un nombre premier", (k) => [2, 3, 5, 7, 11, 13, 17, 19].includes(k), "premier"], ["un nombre supérieur à 4", (k) => k > 4, "sup4"]]);
 const fav = Array.from({ length: fc }, (_, i) => i + 1).filter(ev[1]), f = fav.length;
@@ -4414,25 +4414,25 @@ traps: [TR(1 / (k + 1), "Les nombres de piles (0 à " + k + ") ne sont pas équi
 () => { const r = R.int(2, 5), b = R.int(2, 6), n = r + b;
 return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " bleues. On tire une boule, on la remet, puis on en tire une deuxième. Quelle est la probabilité d'obtenir deux rouges ?" + FA, (r * r) / (n * n),
 "Avec remise : " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + r + "}{" + n + "} = " + FS(r * r, n * n)) + ".",
-{ ctx: "remise", fig: FIG.urn({ rouges: r, bleues: b }), guide: [GS("Probabilité d'une rouge au 1er tirage" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("Deux rouges (on multiplie sur l'arbre)" + FA + " ?", (r * r) / (n * n), M(FS(r * r, n * n)) + ".")],
+{ ctx: "remise", guide: [GS("Probabilité d'une rouge au 1er tirage" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("Deux rouges (on multiplie sur l'arbre)" + FA + " ?", (r * r) / (n * n), M(FS(r * r, n * n)) + ".")],
 traps: [TR((2 * r) / n, "Sur un arbre, on multiplie les probabilités le long d'un chemin."), TR((r * (r - 1)) / (n * (n - 1)), "La boule est remise : le 2e tirage se fait avec la même urne.")] }); },
 ],
 3: [
 () => { const r = R.int(3, 6), b = R.int(2, 5), n = r + b;
 return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules rouges ?" + FA, (r * (r - 1)) / (n * (n - 1)),
 M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + FS(r * (r - 1), n * (n - 1))) + ".",
-{ ctx: "sans-remise-rr", fig: FIG.urn({ rouges: r, vertes: b }), guide: [GS("1re rouge" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("2e rouge sachant la 1re rouge (il reste " + (n - 1) + " boules)" + FA + " ?", (r - 1) / (n - 1), M(FS(r - 1, n - 1)) + "."), GS("Deux rouges" + FA + " ?", (r * (r - 1)) / (n * (n - 1)), M(FS(r * (r - 1), n * (n - 1))) + ".")],
+{ ctx: "sans-remise-rr", guide: [GS("1re rouge" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("2e rouge sachant la 1re rouge (il reste " + (n - 1) + " boules)" + FA + " ?", (r - 1) / (n - 1), M(FS(r - 1, n - 1)) + "."), GS("Deux rouges" + FA + " ?", (r * (r - 1)) / (n * (n - 1)), M(FS(r * (r - 1), n * (n - 1))) + ".")],
 traps: [TR((r * r) / (n * n), "Sans remise : au 2e tirage, il reste une rouge et une boule de moins."), TR((r / n) + ((r - 1) / (n - 1)), "Le long d'un chemin de l'arbre, on multiplie.")] }); },
 () => { const r = R.int(2, 6), b = R.int(2, 5), n = r + b, v = (2 * r * b) / (n * (n - 1));
 return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir une boule de chaque couleur ?" + FA, v,
 "Rouge puis verte ou verte puis rouge : " + M("2 \\cdot \\frac{" + r + " \\cdot " + b + "}{" + n + " \\cdot " + (n - 1) + "} = " + FS(2 * r * b, n * (n - 1))) + ".",
-{ ctx: "sans-remise-rv", fig: FIG.urn({ rouges: r, vertes: b }), guide: [GS("Rouge puis verte" + FA + " ?", (r * b) / (n * (n - 1)), M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + FS(r * b, n * (n - 1))) + "."), GS("Verte puis rouge : même valeur. Total" + FA + " ?", v, M(FS(2 * r * b, n * (n - 1))) + ".")],
+{ ctx: "sans-remise-rv", guide: [GS("Rouge puis verte" + FA + " ?", (r * b) / (n * (n - 1)), M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + FS(r * b, n * (n - 1))) + "."), GS("Verte puis rouge : même valeur. Total" + FA + " ?", v, M(FS(2 * r * b, n * (n - 1))) + ".")],
 traps: [TR((r * b) / (n * (n - 1)), "Il y a deux chemins : rouge-verte ET verte-rouge."), TR((2 * r * b) / (n * n), "Sans remise : le 2e tirage se fait parmi " + (n - 1) + " boules.")] }); },
 () => { const r = R.int(3, 6), b = R.int(2, 5), n = r + b, num = r * (r - 1) + b * (b - 1), den = n * (n - 1);
 if (r === b) return null;
 return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " bleues. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules de la même couleur ?" + FA, num / den,
 "Deux rouges ou deux bleues : " + M("\\frac{" + r * (r - 1) + " + " + b * (b - 1) + "}{" + den + "} = " + FS(num, den)) + ".",
-{ ctx: "meme-couleur", fig: FIG.urn({ rouges: r, bleues: b }), guide: [GS("Deux rouges" + FA + " ?", (r * (r - 1)) / den, M(FS(r * (r - 1), den)) + "."), GS("Deux bleues" + FA + " ?", (b * (b - 1)) / den, M(FS(b * (b - 1), den)) + "."), GS("Total" + FA + " ?", num / den, M(FS(num, den)) + ".")],
+{ ctx: "meme-couleur", guide: [GS("Deux rouges" + FA + " ?", (r * (r - 1)) / den, M(FS(r * (r - 1), den)) + "."), GS("Deux bleues" + FA + " ?", (b * (b - 1)) / den, M(FS(b * (b - 1), den)) + "."), GS("Total" + FA + " ?", num / den, M(FS(num, den)) + ".")],
 traps: [TR((r * (r - 1)) / den, "N'oublie pas le cas « deux bleues »."), TR((r * r + b * b) / (n * n), "Sans remise : le dénominateur est " + n + " · " + (n - 1) + ".")] }); },
 () => { const x = pk([["On lance deux dés équilibrés. Quelle est la probabilité d'obtenir au moins un 6 ?", 25, 36, "aucun 6 : " + M("\\frac{5}{6} \\cdot \\frac{5}{6} = \\frac{25}{36}"), "de2"], ["On lance trois pièces équilibrées. Quelle est la probabilité d'obtenir au moins une fois pile ?", 1, 8, "aucun pile : " + M("\\left(\\frac{1}{2}\\right)^3 = \\frac{1}{8}"), "pieces3"], ["On lance trois dés équilibrés. Quelle est la probabilité d'obtenir au moins un 6 ?", 125, 216, "aucun 6 : " + M("\\left(\\frac{5}{6}\\right)^3 = \\frac{125}{216}"), "de3"]]);
 const v = 1 - x[1] / x[2];
@@ -4819,7 +4819,7 @@ return QN("Soit " + M("f(x) = \\sqrt{" + xm(-k) + "}") + ". Calcule " + M("f(" +
 { ctx: "image-racine", guide: [GS("Sous la racine, " + M((r * r - k) + sg(k)) + " = ?", r * r, M(r * r) + "."), GS("Racine ?", r, M(r) + ".")], traps: [TR(Math.sqrt(r * r - k) + k, "On calcule d'abord tout ce qui est sous la racine."), TR(r * r, "N'oublie pas la racine.")] }); },
 () => { const c = R.int(-6, 4), v = R.int(2, 7), y = v * v + c;
 return QSet("Soit " + M("f(x) = x^2" + (c ? sg(c) : "")) + ". Détermine les préimages de " + M(y) + ".", [v, -v], M("x^2" + (c ? sg(c) : "") + " = " + y + " \\iff x^2 = " + v * v) + " : " + M("x = " + v) + " ou " + M("x = -" + v) + ".",
-{ ctx: "preimage-carre", fig: FIG.parabola((t) => (t * t + c) / 3, [], null, false), guide: [GS(M("x^2") + " = ?", v * v, M(v * v) + "."), GSet("Préimages ?", [v, -v], M(v) + " et " + M(-v) + ".")], traps: [TSet([v], "Un carré a deux racines : " + v + " et −" + v + "."), TSet([y * y + c], "On cherche x tel que f(x) = " + y + ", pas f(" + y + ").")] }); },
+{ ctx: "preimage-carre", guide: [GS(M("x^2") + " = ?", v * v, M(v * v) + "."), GSet("Préimages ?", [v, -v], M(v) + " et " + M(-v) + ".")], traps: [TSet([v], "Un carré a deux racines : " + v + " et −" + v + "."), TSet([y * y + c], "On cherche x tel que f(x) = " + y + ", pas f(" + y + ").")] }); },
 () => { const p = R.int(-4, 1), q = p + R.int(2, 5), f = (x) => 0.5 * (x - p) * (x - q), xs = [-6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6].filter((x) => x < (p + q) / 2 && Number.isInteger(f(x)) && f(x) > 0 && f(x) <= 5); if (!xs.length) return null; const x1 = pk(xs), k = f(x1), x2 = p + q - x1;
 return QSet("La courbe représente une fonction " + M("f") + ". Lis les solutions de " + M("f(x) = " + k) + " (la droite " + M("y = " + k) + " est en pointillé).", [x1, x2], "La droite horizontale " + M("y = " + k) + " coupe la courbe en " + M("x = " + x1) + " et " + M("x = " + x2) + ".",
 { ctx: "lire-preimages", fig: PL([{ f }], { hlines: [k] }), guide: [GS("Abscisse du point d'intersection de gauche ?", x1, M(x1) + "."), GSet("Solutions ?", [x1, x2], M(x1) + " et " + M(x2) + ".")], traps: [TSet([x1], "La droite coupe la courbe deux fois."), TSet([p, q], "Ça, ce sont les zéros (f(x) = 0) ; on cherche f(x) = " + k + ".")] }); },
@@ -4880,24 +4880,24 @@ const RI = {
 1: [
 () => { const a = pk([1, -1]) * R.int(2, 12), x = nz(-6, 6); if (Number.isInteger(a / x) && Math.abs(x) === 1) return null;
 return QN("Soit " + M("f(x) = \\frac{" + a + "}{x}") + ". Calcule " + M("f(" + x + ")") + FA + ".", a / x, M("\\frac{" + a + "}{" + x + "} = " + fT(a / x)) + ".",
-{ ctx: "image-inv", fig: FIG.plot([{ f: (t) => a / t }], [], { ticks: true }), guide: [GS("Image" + FA + " ?", a / x, M(fT(a / x)) + ".")], traps: [TR(x / a, "C'est " + a + " divisé par x, pas l'inverse."), TR(a * x, "On divise par x.")] }); },
+{ ctx: "image-inv", guide: [GS("Image" + FA + " ?", a / x, M(fT(a / x)) + ".")], traps: [TR(x / a, "C'est " + a + " divisé par x, pas l'inverse."), TR(a * x, "On divise par x.")] }); },
 () => { const a = pk([1, -1]) * R.int(2, 12), y = pk([2, 3, 4, 6, -2, -3, 5]);
 return QN("Soit " + M("f(x) = \\frac{" + a + "}{x}") + ". Détermine la préimage de " + M(y) + FA + ".", a / y, M("\\frac{" + a + "}{x} = " + y + " \\iff x = \\frac{" + a + "}{" + y + "} = " + fT(a / y)) + ".",
 { ctx: "preimage-inv", guide: [GS("On résout " + M("\\frac{" + a + "}{x} = " + y) + " : " + M("x") + FA + " ?", a / y, M(fT(a / y)) + ".")], traps: [TR(y / a, "x = " + a + " ÷ " + y + " (on multiplie par x puis divise par " + y + ")."), TR(a * y, "Ça, c'est a · y ; il faut diviser.")] }); },
 () => { const c = nz(-5, 5), r = R.int(2, 9);
 return QN("Soit " + M("f(x) = \\sqrt{x}" + sg(c)) + ". Calcule " + M("f(" + r * r + ")") + ".", r + c, M("\\sqrt{" + r * r + "}" + sg(c) + " = " + r + sg(c) + " = " + (r + c)) + ".",
-{ ctx: "image-sqrt", fig: FIG.plot([{ f: (t) => Math.sqrt(t) + c, from: 0 }], [], { xr: [-2, 30], yr: [-6, 10], grid: false, ticks: false }), guide: [GS(M("\\sqrt{" + r * r + "}") + " = ?", r, M(r) + "."), GS("Image ?", r + c, M(r + c) + ".")], traps: [TR(Math.sqrt(r * r + c), "La racine porte seulement sur x : on ajoute " + c + " après."), TR(r * r + c, "N'oublie pas la racine.")] }); },
+{ ctx: "image-sqrt", guide: [GS(M("\\sqrt{" + r * r + "}") + " = ?", r, M(r) + "."), GS("Image ?", r + c, M(r + c) + ".")], traps: [TR(Math.sqrt(r * r + c), "La racine porte seulement sur x : on ajoute " + c + " après."), TR(r * r + c, "N'oublie pas la racine.")] }); },
 ],
 2: [
 () => { const t = R.int(2, 5), c = t * t - t;
 return QSet("Résous " + M("\\sqrt{x} = x - " + c) + ". (Attention aux solutions parasites.)", [t * t], "On élève au carré : " + M("x = (x - " + c + ")^2") + ", d'où " + M(t * t) + " et " + M((1 - t) ** 2) + ". Vérification : seule " + M("x = " + t * t) + " convient.",
-{ ctx: "sqrt-lin", fig: FIG.plot([{ f: (x) => Math.sqrt(x), from: 0 }, { f: (x) => x - c }], [], { xr: [-2, 30], yr: [-3, 7], grid: false, ticks: false }), guide: [GSet("Solutions de " + M("x = (x - " + c + ")^2") + " ?", [t * t, (1 - t) ** 2], M(t * t) + " et " + M((1 - t) ** 2) + "."), GSet("Celles qui vérifient l'équation de départ ?", [t * t], M("\\sqrt{" + (1 - t) ** 2 + "} = " + (t - 1) + " \\ne " + ((1 - t) ** 2 - c)) + " : seule " + M(t * t) + ".")], traps: [TSet([t * t, (1 - t) ** 2], "Vérifie chaque solution : élever au carré peut ajouter des solutions parasites.")] }); },
+{ ctx: "sqrt-lin", guide: [GSet("Solutions de " + M("x = (x - " + c + ")^2") + " ?", [t * t, (1 - t) ** 2], M(t * t) + " et " + M((1 - t) ** 2) + "."), GSet("Celles qui vérifient l'équation de départ ?", [t * t], M("\\sqrt{" + (1 - t) ** 2 + "} = " + (t - 1) + " \\ne " + ((1 - t) ** 2 - c)) + " : seule " + M(t * t) + ".")], traps: [TSet([t * t, (1 - t) ** 2], "Vérifie chaque solution : élever au carré peut ajouter des solutions parasites.")] }); },
 () => { const k = nz(-6, 8), m = R.int(2, 7), x = m * m - k;
 return QN("Résous " + M("\\sqrt{" + xm(-k) + "} = " + m) + ".", x, "On élève au carré : " + M(xm(-k) + " = " + m * m) + ", donc " + M("x = " + x) + ".",
 { ctx: "sqrt-const", guide: [GS("Après avoir élevé au carré : " + M(xm(-k)) + " = ?", m * m, M(m * m) + "."), GS(M("x") + " = ?", x, M(x) + ".")], traps: [TR(m - k, "Il faut élever au carré pour enlever la racine."), TR(m * m + k, "Attention au signe : " + xm(-k) + " = " + m * m + ".")] }); },
 () => { const r = R.int(2, 6), k = r * r, a = R.rand() < 0.5 ? 1 : 4, kk = k * a;
 return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = \\frac{" + kk + "}{x}") + " et " + M("g(x) = " + (a === 1 ? "" : a) + "x") + " se coupent-ils ?", [r, -r], M("\\frac{" + kk + "}{x} = " + (a === 1 ? "" : a) + "x \\iff x^2 = " + k) + " : " + M("x = \\pm " + r) + ".",
-{ ctx: "inv-lin", fig: FIG.plot([{ f: (x) => kk / x }, { f: (x) => a * x }], [], { grid: false, ticks: false, fit: [r, -r, 2 * r, -2 * r, r / 2, -r / 2], maxH: 280 }), guide: [GS("Après avoir multiplié par x : " + M("x^2") + " = ?", k, M(k) + "."), GSet("Solutions ?", [r, -r], M(r) + " et " + M(-r) + ".")], traps: [TSet([r], "x² = " + k + " a deux solutions."), TSet([k, -k], "On cherche x tel que x² = " + k + ".")] }); },
+{ ctx: "inv-lin", guide: [GS("Après avoir multiplié par x : " + M("x^2") + " = ?", k, M(k) + "."), GSet("Solutions ?", [r, -r], M(r) + " et " + M(-r) + ".")], traps: [TSet([r], "x² = " + k + " a deux solutions."), TSet([k, -k], "On cherche x tel que x² = " + k + ".")] }); },
 ],
 3: [
 () => { let p, q; do { p = nz(-5, 5); q = nz(-5, 5); } while (p === q || p + q === 0); const k = p * q, m = -(p + q);
@@ -5378,7 +5378,7 @@ const F2 = {
 1: [
 () => { const p = nz(-6, 6), q = nz(-6, 6), a0 = pk([1, -1, 2, -2, 3]); if (p === q) return null;
 return QSet("Détermine les zéros de " + M("f(x) = " + P2([a0, -a0 * (p + q), a0 * p * q])) + ".", [p, q], M("f(x) = " + fx(a0, p, q)) + " : zéros " + M(p) + " et " + M(q) + ".",
-{ ctx: "zeros", fig: FIG.parabola((x) => a0 * (x - p) * (x - q) / 3, [], null, false), guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
+{ ctx: "zeros", guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
 () => { const h = nz(-5, 5), k = nz(-6, 6), a = pk([1, -1, 2, -3]);
 return QP("Quel est le sommet de la parabole " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ? Réponds « x ; y ».", [h, k], "Forme canonique " + M("a(x - h)^2 + k") + " : sommet " + M("(" + h + " ; " + k + ")") + ".",
 
@@ -5392,7 +5392,7 @@ return QN("Quelle est l'ordonnée à l'origine de la parabole " + M("f(x) = " + 
 2: [
 () => { const h = nz(-4, 4), k = R.int(-6, 6), a = pk([1, -1, 2, -2, 3]);
 return QP("Détermine le sommet de la parabole " + M("f(x) = " + P2([a, -2 * a * h, a * h * h + k])) + ". Réponds « x ; y ».", [h, k], M("x_S = -\\frac{b}{2a} = -\\frac{" + -2 * a * h + "}{" + 2 * a + "} = " + h) + " ; " + M("y_S = f(" + h + ") = " + k) + ".",
-{ ctx: "sommet-dev", fig: FIG.parabola((x) => (a * (x - h) ** 2 + k) / 3, [], null, false), guide: [GS(M("x_S = -\\frac{b}{2a}") + " ?", h, M(h) + "."), GS(M("y_S = f(x_S)") + " ?", k, M(k) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "x_S = −b ÷ (2a) : attention au signe."), TP([h, a * h * h + k], "y_S = f(" + h + "), pas le terme constant.")] }); },
+{ ctx: "sommet-dev", guide: [GS(M("x_S = -\\frac{b}{2a}") + " ?", h, M(h) + "."), GS(M("y_S = f(x_S)") + " ?", k, M(k) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "x_S = −b ÷ (2a) : attention au signe."), TP([h, a * h * h + k], "y_S = f(" + h + "), pas le terme constant.")] }); },
 () => { let p, q, a; do { a = pk([2, 3, -2]); p = nz(-5, 5); q = nz(-5, 5); } while (p === q);
 return QSet("Résous " + M(P2([a, -a * (p + q), a * p * q]) + " = 0") + ".", [p, q], "On divise par " + M(a) + " : " + M(P2([1, -(p + q), p * q]) + " = 0") + ", soit " + M("(" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M(p) + " et " + M(q) + ".",
 { ctx: "equation-a", guide: [GX("Après division par " + M(a), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes.")] }); },
@@ -5654,7 +5654,7 @@ const IN = {
 1: [
 () => { const p = R.int(-3, 0), q = R.int(1, 4);
 return QSet("Pour quelles valeurs de " + M("x") + " les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q, -p * q])) + " se coupent-ils ?", [p, q], M("x^2 = " + P2([p + q, -p * q]) + " \\iff " + P2([1, -(p + q), p * q]) + " = 0 \\iff (" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
-{ ctx: "x2-droite", fig: FIG.plot([{ f: (x) => x * x }, { f: (x) => (p + q) * x - p * q }], [], { xr: [Math.min(p, -1) - 2, Math.max(q, 1) + 2], yr: [-2, Math.max(p * p, q * q, 1) + 2], grid: false, ticks: false, minH: 170, maxH: 260, label: "parabole et droite" }), guide: [GX("Ramène à « … = 0 »", P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q]) + " = 0") + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes en factorisant."), TSet([p * p, q * q], "On demande les abscisses x.")] }); },
+{ ctx: "x2-droite", guide: [GX("Ramène à « … = 0 »", P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q]) + " = 0") + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes en factorisant."), TSet([p * p, q * q], "On demande les abscisses x.")] }); },
 () => { const k = pk([-4, -1, 0, 1, 4, 9]), n = k > 0 ? 2 : k === 0 ? 1 : 0, c = R.int(-3, 3);
 return QN("Combien de points d'intersection ont la parabole " + M("y = x^2" + (c ? sg(c) : "")) + " et la droite horizontale " + M("y = " + (k + c)) + " ?", n, M("x^2" + (c ? sg(c) : "") + " = " + (k + c) + " \\iff x^2 = " + k) + " : " + (n === 2 ? "deux solutions." : n === 1 ? "une seule (x = 0)." : "aucune (un carré n'est jamais négatif)."),
 { ctx: "horizontale", guide: [GS(M("x^2") + " = ?", k, M(k) + "."), GS("Nombre de points ?", n, M(n) + ".")], traps: [TR(n === 2 ? 1 : 2, "x² = k a deux solutions si k > 0, une si k = 0, aucune si k < 0.")] }); },
@@ -5665,7 +5665,7 @@ return QP("Les graphes de " + M("f(x) = x^2") + " et " + M("g(x) = " + P2([p + q
 2: [
 () => { const p = nz(-4, 3), q = p + R.int(1, 5), m = nz(-3, 3), c = R.int(-5, 5), B = m - (p + q), k = c - p * q;
 return QSet("Détermine les abscisses des points d'intersection de " + M("f(x) = " + P2([1, B, c])) + " et " + M("g(x) = " + P2([m, k])) + ".", [p, q], M("f(x) = g(x) \\iff " + P2([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + ".",
-{ ctx: "general", fig: FIG.parabola((x) => (x * x + B * x + c) / 4, [], (x) => (m * x + k) / 4, false), guide: [GX(M("f(x) - g(x)"), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes."), TSet([p, q, 0], "Il n'y a que deux solutions.")] }); },
+{ ctx: "general", guide: [GX(M("f(x) - g(x)"), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes."), TSet([p, q, 0], "Il n'y a que deux solutions.")] }); },
 () => { const m = nz(-4, 4), c = R.int(-4, 4), D = R.int(0, 2), dl = D === 0 ? -pk([4, 8, 12]) : D === 1 ? 0 : pk([4, 8, 16, 20]), k = c - (m * m - dl) / 4 * 0; const kk = c + (dl - m * m) / 4 * -1;
 
 const kv = c - (m * m - dl) / 4, n = dl > 0 ? 2 : dl === 0 ? 1 : 0; if (!Number.isInteger(kv)) return null; void k; void kk;
@@ -5704,7 +5704,7 @@ return QSet("Pour quelles valeurs de " + M("x") + " les paraboles " + M("f(x) = 
 2: [
 () => { const m = nz(-5, 5), n = Math.abs(m) < 2 ? 0 : Math.abs(m) === 2 ? 1 : 2;
 return QN("Combien de points d'intersection l'hyperbole " + M("y = \\frac{1}{x}") + " et la droite " + M("y = -x" + sg(m)) + " ont-elles ?", n, M("\\frac{1}{x} = -x" + sg(m) + " \\iff x^2 " + (m < 0 ? "+ " + -m : "- " + m) + "x + 1 = 0") + ", " + M("\\Delta = " + (m * m - 4)) + " : " + (n === 0 ? M("0") + " point : aucun." : n === 1 ? M("1") + " seul point (droite tangente)." : M("2") + " points."),
-{ ctx: "hyperbole", fig: FIG.plot([{ f: (x) => 1 / x }, { f: (x) => -x + m }], [], { grid: false, ticks: false }), guide: [GS(M("\\Delta") + " ?", m * m - 4, M(m * m - 4) + "."), GS("Nombre de points ?", n, M(n) + ".")], traps: [TR(n === 2 ? 0 : 2, "Signe de Δ : > 0 → 2, = 0 → 1, < 0 → 0.")] }); },
+{ ctx: "hyperbole", guide: [GS(M("\\Delta") + " ?", m * m - 4, M(m * m - 4) + "."), GS("Nombre de points ?", n, M(n) + ".")], traps: [TR(n === 2 ? 0 : 2, "Signe de Δ : > 0 → 2, = 0 → 1, < 0 → 0.")] }); },
 () => { const p = nz(-3, 3), b2 = R.int(-3, 3), c2 = R.int(-4, 4), d = nz(-3, 3), b1 = b2 + d, c1 = c2 - d * p;
 return QN("Les paraboles " + M("f(x) = " + P2([1, b1, c1])) + " et " + M("g(x) = " + P2([1, b2, c2])) + " se coupent en un seul point. Quelle est son abscisse ?", p, "Les termes en " + M("x^2") + " s'annulent : " + M(P2([d, -d * p]) + " = 0 \\iff x = " + p) + ".",
 { ctx: "meme-a", guide: [GX(M("f(x) - g(x)") + " (de degré 1)", P2([d, -d * p]), M(P2([d, -d * p])) + "."), GS(M("x") + " ?", p, M(p) + ".")], traps: [TR(-p, "Résous " + P2([d, -d * p]) + " = 0 : attention au signe."), TR(d * p, "Divise par " + d + ".")] }); },
@@ -5733,7 +5733,7 @@ const IQ = {
 1: [
 () => { const op = pk(["<", "<=", ">", ">="]), p = nz(-6, 4), q = p + R.int(1, 7), f = (x) => (x - p) * (x - q), ivs = signSet(f, [p, q], [], op);
 return QS("Résous " + M("(" + xm(p) + ")(" + xm(q) + ") " + opLabel(op) + " 0") + ".", ivs, "Parabole tournée vers le haut, zéros " + M(p) + " et " + M(q) + " : " + M("S = " + IT(ivs)) + ".",
-{ ctx: "produit", fig: FIG.parabola((x) => f(x) / 3, [], null, false), guide: [GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + "."), GSS("Solution ?", ivs, M(IT(ivs)) + ".")], traps: [TS(signSet(f, [p, q], [], opp[op]), "a > 0 : négatif entre les zéros, positif à l'extérieur."), TS(signSet(f, [p, q], [], op.length === 2 ? op[0] : op + "="), op.length === 2 ? "≤ ou ≥ : les zéros sont compris." : "Inégalité stricte : zéros exclus.")] }); },
+{ ctx: "produit", guide: [GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + "."), GSS("Solution ?", ivs, M(IT(ivs)) + ".")], traps: [TS(signSet(f, [p, q], [], opp[op]), "a > 0 : négatif entre les zéros, positif à l'extérieur."), TS(signSet(f, [p, q], [], op.length === 2 ? op[0] : op + "="), op.length === 2 ? "≤ ou ≥ : les zéros sont compris." : "Inégalité stricte : zéros exclus.")] }); },
 () => { const op = pk(["<", "<=", ">", ">="]), k = R.int(1, 6), f = (x) => x * x - k * k, ivs = signSet(f, [-k, k], [], op);
 return QS("Résous " + M("x^2 - " + k * k + " " + opLabel(op) + " 0") + ".", ivs, M("x^2 - " + k * k + " = (x - " + k + ")(x + " + k + ")") + " : " + M("S = " + IT(ivs)) + ".",
 { ctx: "diff-carres", guide: [GSet("Zéros ?", [-k, k], M(-k) + " et " + M(k) + "."), GSS("Solution ?", ivs, M(IT(ivs)) + ".")], traps: [TS(signSet(f, [-k, k], [], opp[op]), "x² − " + k * k + " est négatif entre −" + k + " et " + k + "."), TS(op[0] === "<" ? [[-Infinity, false, k, op === "<="]] : [[k, op === ">=", Infinity, false]], "N'oublie pas la solution négative : x² = " + k * k + " ⇔ x = ±" + k + ".")] }); },
@@ -5755,7 +5755,7 @@ return QS("Résous " + M(P2([1, -2 * p, p * p]) + (gt ? " > " : " < ") + "0") + 
 3: [
 () => { const op = pk(["<", "<=", ">", ">="]), p = nz(-4, 2), q = p + pk([1, 2, 3, 4, 5]), a = pk([-2, 2, -1, 1]), m = nz(-3, 3), k = R.int(-4, 4), D = pmul([1, -p], [1, -q]).map((v) => v * a), fc = padd(D, [m, k]), f = (x) => a * (x - p) * (x - q), ivs = signSet(f, [p, q], [], op);
 return QS("Soit " + M("f(x) = " + P2(fc)) + " et " + M("g(x) = " + P2([m, k])) + ". Résous " + M("f(x) " + opLabel(op) + " g(x)") + ".", ivs, M("f(x) - g(x) = " + P2(D) + " = " + co(a) + "(" + xm(p) + ")(" + xm(q) + ")") + " : " + M("S = " + IT(ivs)) + ".",
-{ ctx: "f-g", fig: FIG.parabola((x) => quad(fc)(x) / 4, [], (x) => (m * x + k) / 4, false), guide: [GX(M("f(x) - g(x)"), P2(D), M(P2(D)) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + "."), GSS("Solution ?", ivs, M(IT(ivs)) + ".")], traps: [TS(signSet((x) => -f(x), [p, q], [], op), "Regarde le signe de a = " + a + ".")] }); },
+{ ctx: "f-g", guide: [GX(M("f(x) - g(x)"), P2(D), M(P2(D)) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + "."), GSS("Solution ?", ivs, M(IT(ivs)) + ".")], traps: [TS(signSet((x) => -f(x), [p, q], [], op), "Regarde le signe de a = " + a + ".")] }); },
 () => { const p = nz(-5, 3), q = p + R.int(3, 8), lg = R.rand() < 0.5, n = q - p - 1 + (lg ? 2 : 0);
 return QN("Combien de nombres entiers vérifient " + M("(" + xm(p) + ")(" + xm(q) + ") " + (lg ? "\\le" : "<") + " 0") + " ?", n, "Solution " + M((lg ? "[" : "]") + p + " \\,;\\, " + q + (lg ? "]" : "[")) + " : " + M(n) + " entiers.",
 { ctx: "compte-entiers", guide: [GSS("Solution ?", [[p, lg, q, lg]], M((lg ? "[" : "]") + p + " \\,;\\, " + q + (lg ? "]" : "[")) + "."), GS("Nombre d'entiers ?", n, M(n) + ".")], traps: [TR(lg ? n - 2 : n + 2, lg ? "≤ : les zéros sont compris." : "< : les zéros sont exclus."), TR(q - p, "Compte les entiers un par un.")] }); },
@@ -5907,7 +5907,7 @@ const RE = {
 1: [
 () => { let a, b; do { a = nz(-12, 12); b = nz(-12, 12); } while (a > 0 && b > 0); const A = Math.abs(a), B = Math.abs(b), same = a * b > 0;
 return Qv("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".",
-{ ctx: "addition", fig: FIG.numberLine(a, [], { span: [a + b] }), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
+{ ctx: "addition", guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
 traps: [TR(-(a + b), "Signe du résultat : celui du nombre le plus loin de zéro."), TR(A + B === Math.abs(a + b) ? a - b : (a < 0 ? -1 : 1) * (A + B), "Signes contraires : on soustrait les distances.")] }); },
 () => { const a = nz(-12, 12), b = -R.int(2, 12);
 return Qv("Calcule : " + M(par(a) + " - " + par(b)), a - b, "Soustraire un nombre négatif, c'est ajouter son opposé : " + M(par(a) + " + " + -b + " = " + (a - b)) + ".",
@@ -6007,7 +6007,7 @@ const RA0 = {
 1: [
 () => { const k = R.int(2, 20);
 return Qv("Calcule " + M("\\sqrt{" + k * k + "}") + ".", k, M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
-{ ctx: "carre-parfait", fig: FIG.areaSquare("aire " + k * k), guide: [GS("Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) ** 2) + " : un peu moins que " + M(k * k) + "."), GS("Donc " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")], traps: [TR((k * k) / 2, "La racine n'est pas la moitié."), TR(k * k, "Il faut le nombre qui, au carré, donne " + k * k + ".")] }); },
+{ ctx: "carre-parfait", guide: [GS("Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) ** 2) + " : un peu moins que " + M(k * k) + "."), GS("Donc " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")], traps: [TR((k * k) / 2, "La racine n'est pas la moitié."), TR(k * k, "Il faut le nombre qui, au carré, donne " + k * k + ".")] }); },
 () => { const [k, kind] = pk([[pk([3, 4, 5, 6, 7, 8, 9]) / 10, "dec"], [pk([1, 2, 3]) / 10, "dec"], [0, "frac"]]); if (kind === "frac") { const n = R.int(1, 6), d = n + R.int(1, 6); return Qv("Calcule " + M("\\sqrt{\\frac{" + n * n + "}{" + d * d + "}}") + FA + ".", n / d, M("\\frac{\\sqrt{" + n * n + "}}{\\sqrt{" + d * d + "}} = \\frac{" + n + "}{" + d + "}") + ".", { ctx: "racine-fraction", guide: [GS(M("\\sqrt{" + n * n + "}") + " ?", n, M(n) + "."), GS(M("\\sqrt{" + d * d + "}") + " ?", d, M(d) + "."), GS("Résultat" + FA + " ?", n / d, M("\\frac{" + n + "}{" + d + "}") + ".")], traps: [TR((n * n) / (d * d) / 2, "On prend la racine du numérateur et du dénominateur."), TR(n * n / d, "Racine du dénominateur aussi.")] }); }
 const sq = r6(k * k);
 return Qv("Calcule " + M("\\sqrt{" + N(sq) + "}") + ".", k, M(N(k) + "^2 = " + N(sq)) + ", donc " + M("\\sqrt{" + N(sq) + "} = " + N(k)) + ".",
@@ -6675,7 +6675,7 @@ return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\sin\\alpha = " + fr
 traps: [TR(q / p, "tan α = sin α ÷ cos α : opposé sur adjacent."), TR(q / c, "C'est cos α ; il faut encore diviser.")] }); },
 () => { const [p, q, c] = pick3(), ask = pk(["sin", "cos"]), v = ask === "sin" ? p / c : q / c;
 return Qx("L'angle " + M("\\alpha") + " est aigu et " + M("\\tan\\alpha = " + fr(p, q)) + ". Calcule " + M("\\" + ask + "\\alpha") + " (fraction).", v, "On dessine un triangle rectangle avec opposé " + M(p) + " et adjacent " + M(q) + " : hypoténuse " + M("\\sqrt{" + p * p + " + " + q * q + "} = " + c) + ". " + M("\\" + ask + "\\alpha = " + (ask === "sin" ? fr(p, c) : fr(q, c))) + ".",
-{ ctx: "tan-vers-" + ask, canon: (ask === "sin" ? p : q) + "/" + c, fig: F([String(q), String(p), "?"], "α"), guide: [GS("Triangle d'opposé " + M(p) + " et d'adjacent " + M(q) + ". Hypoténuse ?", c, M("\\sqrt{" + p * p + " + " + q * q + "} = " + c) + "."), GS(M("\\" + ask + "\\alpha") + " = ?", v, M(ask === "sin" ? fr(p, c) : fr(q, c)) + (ask === "sin" ? " (opposé sur hypoténuse)." : " (adjacent sur hypoténuse)."))],
+{ ctx: "tan-vers-" + ask, canon: (ask === "sin" ? p : q) + "/" + c, guide: [GS("Triangle d'opposé " + M(p) + " et d'adjacent " + M(q) + ". Hypoténuse ?", c, M("\\sqrt{" + p * p + " + " + q * q + "} = " + c) + "."), GS(M("\\" + ask + "\\alpha") + " = ?", v, M(ask === "sin" ? fr(p, c) : fr(q, c)) + (ask === "sin" ? " (opposé sur hypoténuse)." : " (adjacent sur hypoténuse)."))],
 traps: [TR(ask === "sin" ? q / c : p / c, ask === "sin" ? "Le sinus, c'est l'opposé sur l'hypoténuse." : "Le cosinus, c'est l'adjacent sur l'hypoténuse."), TR(ask === "sin" ? p / (p + q) : q / (p + q), "L'hypoténuse se calcule avec Pythagore, pas en additionnant.")] }); },
 () => { let p, q; do { q = R.int(3, 7); p = R.int(1, q - 1); } while (gcd(p, q) !== 1 || Number.isInteger(Math.sqrt(q * q - p * p)));
 const r = q * q - p * p; let k = 1, m = r; for (let i = 2; i * i <= m; i++) while (m % (i * i) === 0) { m /= i * i; k *= i; }
@@ -7377,7 +7377,7 @@ const RA = {
 1: [
 () => { const a = nz(-15, 15), b = nz(-15, 15); if (a > 0 && b > 0) return null; const v = a + b, A = Math.abs(a), B = Math.abs(b), same = a * b > 0, fmt = pk([0, 1, 2]), sa = fmt === 1 ? par(a) : String(a), sb = fmt ? par(b) : par(b);
 return Qv("Calcule : " + M(sa + " + " + sb), v, M(sa + " + " + sb + " = " + v) + (same ? " : même signe, on additionne les distances à zéro." : " : signes contraires, on soustrait les distances et on garde le signe du plus éloigné de zéro."),
-{ ctx: same ? "meme-signe" : "signes-contraires", fig: FIG.numberLine(a, [], { span: [v] }), guide: same ? [G("Même signe : " + M(A + " + " + B) + " = ?", A + B, M(A + B) + "."), G("Avec le signe commun ?", v, M(v) + ".")] : [G("Signes contraires : " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), G("Signe du plus éloigné de zéro (" + M(A > B ? a : b) + ") : résultat ?", v, M(v) + ".")],
+{ ctx: same ? "meme-signe" : "signes-contraires", guide: same ? [G("Même signe : " + M(A + " + " + B) + " = ?", A + B, M(A + B) + "."), G("Avec le signe commun ?", v, M(v) + ".")] : [G("Signes contraires : " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), G("Signe du plus éloigné de zéro (" + M(A > B ? a : b) + ") : résultat ?", v, M(v) + ".")],
 traps: [TR(-v, "Signe : celui du nombre le plus éloigné de zéro."), TR(same ? (a > 0 ? 1 : -1) * Math.abs(A - B) : (Math.abs(a) > Math.abs(b) ? Math.sign(a) : Math.sign(b)) * (A + B), same ? "Même signe : on additionne les distances." : "Signes contraires : on soustrait les distances.")] }); },
 () => { const s = nz(-8, 8), m = nz(-12, 12), v = s + m;
 return Qv("Sur une droite graduée, on part de " + M(s) + " et on se déplace de " + M(Math.abs(m)) + (Math.abs(m) > 1 ? " unités" : " unité") + " vers la " + (m > 0 ? "droite" : "gauche") + ". Où arrive-t-on ?", v, M(par(s) + (m > 0 ? " + " : " - ") + Math.abs(m) + " = " + v) + ".",
@@ -7397,7 +7397,8 @@ return Qv(c[0], vv, M(bb + " - " + par(a) + " = " + bb + " + " + -a + " = " + vv
 { ctx: c[1], guide: [G("Écart = plus grand − plus petit : " + M(bb + " - " + par(a)) + " = ?", vv, M(bb + " + " + -a + " = " + vv) + ".")], traps: [TR(bb + a, "Soustraire un négatif, c'est ajouter : " + bb + " − (" + a + ") = " + bb + " + " + -a + "."), TR(-vv, "Un écart est positif.")] }); },
 ],
 3: [
-() => { const xs = Array.from({ length: 5 }, () => nz(-12, 12)), v = xs.reduce((s, x) => s + x, 0), pos = xs.filter((x) => x > 0).reduce((s, x) => s + x, 0), neg = xs.filter((x) => x < 0).reduce((s, x) => s + x, 0);
+() => { let xs; do xs = Array.from({ length: 5 }, () => nz(-12, 12)); while (xs.filter((x) => x < 0).length < 2 || xs.filter((x) => x > 0).length < 2);
+const v = xs.reduce((s, x) => s + x, 0), pos = xs.filter((x) => x > 0).reduce((s, x) => s + x, 0), neg = xs.filter((x) => x < 0).reduce((s, x) => s + x, 0);
 const e = xs.map((x, i) => (i === 0 ? String(x) : x < 0 ? " - " + -x : " + " + x)).join("");
 return Qv("Calcule : " + M(e), v, "On regroupe les positifs (" + M(pos) + ") et les négatifs (" + M(neg) + ") : " + M(pos + " + " + par(neg) + " = " + v) + ".",
 { ctx: "regrouper", guide: [G("Somme des termes positifs ?", pos, M(pos) + "."), G("Somme des termes négatifs ?", neg, M(neg) + "."), G("Total ?", v, M(v) + ".")], traps: [TR(pos - neg, "Les termes négatifs se soustraient : total = " + pos + " + (" + neg + ")."), TR(-v, "Vérifie le signe.")] }); },
@@ -7667,7 +7668,7 @@ const TC = {
 1: [
 () => { const deg = pk([30, 45, 60, 90, 120, 135, 150, 180, 210, 240, 270, 300, 315, 330, 360]), v = deg * D2R, f = deg / 180;
 return mk("Convertis " + M(deg + "°") + " en radians (valeur exacte, avec " + M("\\pi") + ").", { kind: "value", value: v }, M(deg + "° = " + deg + " \\cdot \\frac{\\pi}{180} = " + radTeX(deg)) + " rad.",
-{ ctx: "deg-rad", canon: radE(deg), fig: FIG.unitCircle(deg), guide: [G(M("180° = \\pi") + " rad. Quelle fraction de 180° vaut " + M(deg + "°") + " ? (fraction)", f, M("\\frac{" + deg + "}{180} = " + fT(f)) + "."), G("En radians (avec π) ?", v, M(radTeX(deg)) + ".")],
+{ ctx: "deg-rad", canon: radE(deg), guide: [G(M("180° = \\pi") + " rad. Quelle fraction de 180° vaut " + M(deg + "°") + " ? (fraction)", f, M("\\frac{" + deg + "}{180} = " + fT(f)) + "."), G("En radians (avec π) ?", v, M(radTeX(deg)) + ".")],
 traps: [TR(deg * Math.PI / 360, "180° = π (et non 360° = π)."), TR(180 / deg * Math.PI, "On multiplie par π/180 : " + deg + "/180, pas 180/" + deg + "."), TR(deg / 180, "N'oublie pas π.")] }); },
 () => { const deg = pk([30, 45, 60, 90, 120, 135, 150, 210, 240, 270, 300, 330]);
 return QN("Convertis " + M(radTeX(deg)) + " radians en degrés.", deg, M("\\pi = 180°") + " : " + M(radTeX(deg) + " = " + deg + "°") + ".",
@@ -7710,14 +7711,14 @@ const TF = {
 1: [
 () => { const a = pk([1, 2, 3, 4, 0.5]), d = R.int(-3, 3), f = pk(["sin", "cos"]), ask = pk(["max", "min"]), v = ask === "max" ? d + a : d - a; if ([0, 1, -1].includes(v)) return null;
 return QN("Quelle est la valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("f(x) = " + sinTxt(a, f, 1, d)) + " ?", v, M("\\" + f + "(x)") + " varie entre −1 et 1, donc " + M("f") + " varie entre " + M(N(d - a)) + " et " + M(N(d + a)) + ".",
-{ ctx: "extremum", fig: PL([{ f: (x) => a * (f === "sin" ? Math.sin(x) : Math.cos(x)) + d }], [], { xr: [-1, 7], yr: [-8, 8], squash: 0.6 }), guide: [G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("\\" + f + "(x)") + " ?", ask === "max" ? 1 : -1, ask === "max" ? "1." : "−1."), G("Donc " + M("f") + " vaut au " + (ask === "max" ? "maximum" : "minimum") + " ?", v, M(N(a) + " \\cdot " + (ask === "max" ? "1" : "(-1)") + sg(d) + " = " + N(v)) + ".")],
+{ ctx: "extremum", guide: [G("Valeur " + (ask === "max" ? "maximale" : "minimale") + " de " + M("\\" + f + "(x)") + " ?", ask === "max" ? 1 : -1, ask === "max" ? "1." : "−1."), G("Donc " + M("f") + " vaut au " + (ask === "max" ? "maximum" : "minimum") + " ?", v, M(N(a) + " \\cdot " + (ask === "max" ? "1" : "(-1)") + sg(d) + " = " + N(v)) + ".")],
 traps: [TR(ask === "max" ? a : -a, "N'oublie pas le décalage vertical " + d + "."), TR(ask === "max" ? d - a : d + a, ask === "max" ? "Le maximum, c'est d + a." : "Le minimum, c'est d − a.")] }); },
 () => { const a = pk([2, 3, 4, 5, 0.5, 1.5]), d = R.int(-4, 4), b = pk([1, 2, 3]), f = pk(["sin", "cos"]);
 return QN("Quelle est l'amplitude de " + M("f(x) = " + sinTxt(a, f, b, d)) + " ?", a, "L'amplitude est le coefficient devant " + M("\\" + f) + " (en valeur absolue) : " + M(N(a)) + ". La courbe monte jusqu'à " + M(N(d + a)) + " et descend jusqu'à " + M(N(d - a)) + ".",
 { ctx: "amplitude", guide: [G("Maximum de " + M("f") + " ?", d + a, M(N(d + a)) + "."), G("Minimum de " + M("f") + " ?", d - a, M(N(d - a)) + "."), G("Amplitude = (max − min) ÷ 2 ?", a, M(N(a)) + ".")], traps: [TR(2 * a, "L'amplitude est la moitié de l'écart entre max et min."), TR(d, "d décale la courbe ; il ne change pas l'amplitude."), TR(b, "b agit sur la période, pas sur l'amplitude.")] }); },
 () => { const f = pk(["sin", "cos"]), a = pk([2, 3, 4]), ask = pk(["min", "max"]), neg = R.rand() < 0.3, x = f === "sin" ? ((ask === "max") !== neg ? 90 : 270) : ((ask === "max") !== neg ? 360 : 180), xx = x === 360 ? 0 : x;
 return QN("Sur l'intervalle " + M("0° \\le x < 360°") + ", en quel " + M("x") + " la fonction " + M("f(x) = " + (neg ? "-" : "") + a + "\\" + f + "(x)") + " atteint-elle son " + (ask === "max" ? "maximum" : "minimum") + " ? (en degrés)", xx, M("\\" + f + "(x)") + " vaut " + (((ask === "max") !== neg) ? "1" : "−1") + " en " + M(xx + "°") + (neg ? " ; avec le signe moins, le " + (ask === "max" ? "maximum de f correspond au minimum" : "minimum de f correspond au maximum") + " de " + M("\\" + f) : "") + ".",
-{ ctx: "position-" + ask, fig: PL([{ f: (u) => (neg ? -a : a) * (f === "sin" ? Math.sin(u * 30 * D2R) : Math.cos(u * 30 * D2R)) }], [], { xr: [-1, 13], yr: [-5, 5], squash: 0.6, numbers: false }) , guide: [G("Pour le " + (ask === "max" ? "maximum" : "minimum") + " de " + M("f") + ", " + M("\\" + f + "(x)") + " doit valoir 1 ou −1 ?", ((ask === "max") !== neg) ? 1 : -1, neg ? "Avec le signe moins, c'est l'inverse." : "Le coefficient " + a + " est positif."), G("En quel " + M("x") + " (entre 0° et 360°) ?", xx, M(xx + "°") + ".")],
+{ ctx: "position-" + ask, guide: [G("Pour le " + (ask === "max" ? "maximum" : "minimum") + " de " + M("f") + ", " + M("\\" + f + "(x)") + " doit valoir 1 ou −1 ?", ((ask === "max") !== neg) ? 1 : -1, neg ? "Avec le signe moins, c'est l'inverse." : "Le coefficient " + a + " est positif."), G("En quel " + M("x") + " (entre 0° et 360°) ?", xx, M(xx + "°") + ".")],
 traps: [TR(f === "sin" ? (xx === 90 ? 270 : 90) : (xx === 0 ? 180 : 0), "Maximum de " + f + " : 1 ; minimum : −1. Vérifie aussi le signe devant."), TR(f === "sin" ? (xx === 90 ? 0 : 180) : (xx === 0 ? 90 : 270), f === "sin" ? "Le sinus vaut 1 en 90° et −1 en 270°." : "Le cosinus vaut 1 en 0° et −1 en 180°.")] }); },
 ],
 2: [
@@ -7795,11 +7796,11 @@ const TQ = {
 1: [
 () => { const r = pk([30, 45, 60]), neg = R.rand() < 0.4, v = neg ? -sinD(r) : sinD(r), s1 = neg ? 180 + r : r, s2 = neg ? 360 - r : 180 - r;
 return QSet("Résous " + M("\\sin x = " + exT(v)) + IV, [s1, s2], "Angle de référence " + M(r + "°") + ". Le sinus est " + (neg ? "négatif dans les quadrants 3 et 4 : " + M("180° + " + r + "° = " + s1 + "°") + " et " + M("360° - " + r + "° = " + s2 + "°") : "positif dans les quadrants 1 et 2 : " + M(r + "°") + " et " + M("180° - " + r + "° = " + s2 + "°")) + ".",
-{ ctx: neg ? "sin-neg" : "sin-pos", fig: FIG.unitCircle(s1, "x"), guide: [G("Angle de référence (aigu) dont le sinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Le sinus est " + (neg ? "négatif" : "positif") + " dans deux quadrants. Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + ".")],
+{ ctx: neg ? "sin-neg" : "sin-pos", guide: [G("Angle de référence (aigu) dont le sinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Le sinus est " + (neg ? "négatif" : "positif") + " dans deux quadrants. Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + ".")],
 traps: [TSet([s1], "Il y a deux solutions sur un tour : sin(180° − x) = sin x."), TSet(neg ? [-r, 180 + r] : [r, 360 - r], neg ? "Les solutions doivent être entre 0° et 360°." : "Pour le sinus, l'autre solution est 180° − x (360° − x, c'est pour le cosinus).")] }); },
 () => { const r = pk([30, 45, 60]), neg = R.rand() < 0.4, v = neg ? -cosD(r) : cosD(r), s1 = neg ? 180 - r : r, s2 = neg ? 180 + r : 360 - r;
 return QSet("Résous " + M("\\cos x = " + exT(v)) + IV, [s1, s2], "Angle de référence " + M(r + "°") + ". Le cosinus est " + (neg ? "négatif dans les quadrants 2 et 3 : " + M(s1 + "°") + " et " + M(s2 + "°") : "positif dans les quadrants 1 et 4 : " + M(r + "°") + " et " + M("360° - " + r + "° = " + s2 + "°")) + ".",
-{ ctx: neg ? "cos-neg" : "cos-pos", fig: FIG.unitCircle(s1, "x"), guide: [G("Angle de référence (aigu) dont le cosinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + " (le cosinus est symétrique par rapport à l'axe horizontal).")],
+{ ctx: neg ? "cos-neg" : "cos-pos", guide: [G("Angle de référence (aigu) dont le cosinus vaut " + M(exT(Math.abs(v))) + " ?", r, M(r + "°") + "."), GSet("Les deux solutions ?", [s1, s2], M(s1 + "°") + " et " + M(s2 + "°") + " (le cosinus est symétrique par rapport à l'axe horizontal).")],
 traps: [TSet([s1], "Il y a deux solutions sur un tour : cos(360° − x) = cos x."), TSet(neg ? [180 - r, 180 + r].map((x) => 360 - x) : [r, 180 - r], "Pour le cosinus, l'autre solution est 360° − x (180° − x, c'est pour le sinus).")] }); },
 () => { const k = pk([0, 1, -1]), fn = pk(["sin", "cos"]), sols = fn === "sin" ? (k === 0 ? [0, 180] : k === 1 ? [90] : [270]) : (k === 0 ? [90, 270] : k === 1 ? [0] : [180]);
 return QSet("Résous " + M("\\" + fn + " x = " + k) + IV, sols, "Sur le cercle trigonométrique, " + (fn === "sin" ? "l'ordonnée" : "l'abscisse") + " vaut " + k + " en " + sols.map((x) => M(x + "°")).join(" et ") + ".",
@@ -7980,13 +7981,13 @@ return QN("Nombre de pièces d'un appartement, dans un immeuble : " + tab(vals, 
 3: [
 () => { const n = pk([20, 24, 30, 36, 40, 60, 72]), k = R.int(2, n - 2), a = r6(360 * k / n); if (!Number.isInteger(a)) return null;
 return QN("Sur " + M(n) + " personnes interrogées, " + M(k) + " ont choisi la réponse A. Dans un diagramme circulaire, quel est l'angle (en degrés) du secteur « A » ?", a, M("\\frac{" + k + "}{" + n + "} \\cdot 360° = " + a + "°") + ".",
-{ ctx: "angle", fig: FIG.sector("", a, "?"), guide: [G("Fréquence " + M("\\frac{" + k + "}{" + n + "}") + " (fraction ou décimal) ?", k / n, M(fT(k / n)) + "."), G("Angle = fréquence × 360° ?", a, M(a + "°") + ".")], traps: [TR(r6(100 * k / n), "C'est un pourcentage ; un tour complet fait 360°."), TR(r6(180 * k / n), "Le cercle entier fait 360°, pas 180°.")] }); },
+{ ctx: "angle", guide: [G("Fréquence " + M("\\frac{" + k + "}{" + n + "}") + " (fraction ou décimal) ?", k / n, M(fT(k / n)) + "."), G("Angle = fréquence × 360° ?", a, M(a + "°") + ".")], traps: [TR(r6(100 * k / n), "C'est un pourcentage ; un tour complet fait 360°."), TR(r6(180 * k / n), "Le cercle entier fait 360°, pas 180°.")] }); },
 () => { const a = pk([36, 54, 72, 90, 108, 126, 144, 162, 18]), f = r6(100 * a / 360);
 return QN("Dans un diagramme circulaire, un secteur mesure " + M(a + "°") + ". Quelle fréquence (en %) représente-t-il ?", f, M("\\frac{" + a + "}{360} = " + N(r6(a / 360)) + " = " + N(f) + "\\,\\%") + ".",
-{ ctx: "angle-vers-pourcent", fig: FIG.sector("", a, a + "°"), guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " en décimal ?", a / 360, M(N(r6(a / 360))) + "."), G("En pour cent ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(a, "C'est l'angle ; divise par 360."), TR(r6(100 * a / 180), "Un tour complet fait 360°.")] }); },
+{ ctx: "angle-vers-pourcent", guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " en décimal ?", a / 360, M(N(r6(a / 360))) + "."), G("En pour cent ?", f, M(N(f) + "\\,\\%") + ".")], traps: [TR(a, "C'est l'angle ; divise par 360."), TR(r6(100 * a / 180), "Un tour complet fait 360°.")] }); },
 () => { const n = pk([120, 180, 240, 360, 600]), a = pk([30, 45, 60, 90, 120, 150].filter((x) => (n * x) % 360 === 0)) , k = n * a / 360;
 return QN("Un diagramme circulaire représente les " + M(n) + " élèves d'une école. Le secteur « vélo » mesure " + M(a + "°") + ". Combien d'élèves viennent à vélo ?", k, M("\\frac{" + a + "}{360} \\cdot " + n + " = " + k) + " élèves.",
-{ ctx: "angle-vers-effectif", fig: FIG.sector("", a, a + "°"), guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " (fraction ou décimal) ?", a / 360, M(fT(a / 360)) + "."), G("Effectif ?", k, M(k) + " élèves.")], traps: [TR(a, "C'est l'angle, pas un nombre d'élèves."), TR(r6(n * a / 100), "L'angle se compare à 360°, pas à 100.")] }); },
+{ ctx: "angle-vers-effectif", guide: [G("Fraction du tour " + M("\\frac{" + a + "}{360}") + " (fraction ou décimal) ?", a / 360, M(fT(a / 360)) + "."), G("Effectif ?", k, M(k) + " élèves.")], traps: [TR(a, "C'est l'angle, pas un nombre d'élèves."), TR(r6(n * a / 100), "L'angle se compare à 360°, pas à 100.")] }); },
 ],
 };
 
