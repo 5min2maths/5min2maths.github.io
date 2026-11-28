@@ -13,12 +13,12 @@ bad = []
 if not {"APP_NAME", "APP_SPOKEN", "APP_TAGLINE", "APP_SHORT", "APP_TITLE"} <= set(APP):  # 27.11 : APP_SPOKEN « Pépite au carré »
     bad.append("constantes APP_NAME, APP_SPOKEN, APP_TAGLINE, APP_SHORT, APP_TITLE absentes de src/curriculum.js")
 # 27.11 : ancien nom (« 5 minutes de maths », « 5 min maths ») et nouveau nom / slogan (« Pépite² », « Deviens une pépite »)
-PAT = re.compile(r"5\s*min(?:utes)?\s*(?:de\s*|2\s*)?maths|Pépite²|Pépite au carré|Deviens une pépite", re.I)
+PAT = re.compile(r"5\s*min(?:utes)?\s*(?:de\s*|2\s*)?maths|Pépite²|Pépite au carré|Deviens (?:carrément )?une pépite", re.I)  # 28.11 : variante « carrément »
 for f in sorted(SRC.rglob("*")):
     if f.suffix not in (".js", ".css", ".html"):
         continue
     for i, line in enumerate(f.read_text(errors="replace").splitlines(), 1):
-        if f.name == "curriculum.js" and re.match(r'^(const APP_[A-Z]+ = "|/\* )', line):
+        if f.name == "curriculum.js" and re.match(r'^(const APP_[A-Z_]+ = "|/\* )', line):  # 28.11 : APP_[A-Z_] pour APP_TAGLINE_FUN
             continue
         if PAT.search(line):
             bad.append(f"{f.relative_to(ROOT)}:{i} : {PAT.search(line).group(0)!r} écrit en dur")

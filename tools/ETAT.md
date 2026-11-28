@@ -78,6 +78,13 @@ puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux d�
   un seul déménagement, directement vers le domaine `pepiteaucarre.ch` (branché d'abord sur GitHub Pages, puis hébergement
   suisse sans changer d'adresse), avec une page de transfert de la progression (stockage lié à l'adresse : sinon les
   testeurs repartent de zéro). Jamais par `pepiteaucarre.github.io` (deux déménagements).
+  Précision de l'enseignant : pas encore d'élèves (seulement ses appareils et quelques testeurs) → pas de page de transfert
+  nécessaire SI c'est fait AVANT l'ouverture à la 11LS (échéance), avec la séparation en deux dépôts ; l'enseignant réserve
+  `pepiteaucarre.ch` (recommandé) ou on passe par github.io.
+  Infomaniak (vérifié le 28.11) : domaine seul suffit (1 adresse mail gratuite incluse, alias et redirections illimités) ;
+  « Domain Plus » inutile. Hébergement : GitHub Pages d'abord (domaine branché), hébergement suisse plus tard sans
+  changer d'adresse. Priorité « données en Suisse » le jour des écoles : statistiques et commentaires (Google Apps Script)
+  avant l'hébergement de l'app (la progression reste sur l'appareil).
 
 ### Avant le 28.11
 

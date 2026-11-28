@@ -383,7 +383,7 @@ function demoQuestion() {
 function screenWelcome() {
   const q = demoQuestion(), n = NOTIONS.find((x) => x.id === q.id), fine = window.matchMedia("(pointer: fine)").matches;
   h(`${brand}
-  <div class="stack"><h1>${APP_TAGLINE_HTML}.</h1>
+  <div class="stack"><h1>${APP_TAGLINE_FUN_HTML}.</h1>
   <p class="small muted app-spoken">${APP_NAME} se dit <i>${APP_SPOKEN}</i></p> <!-- 27.11 : nom dit, discret, au premier lancement -->
   <p class="muted"><b>Chaque jour, environ 5 minutes, à ton niveau.</b> Une question du jour choisie pour toi, une figure, une correction immédiate. Ton grade monte avec ton travail. Pas de compte, pas de nom : ta progression reste sur ton téléphone ; rien n'est envoyé sans ton accord, seulement des statistiques anonymes si tu dis oui (<a href="#" id="envoie-lien">ce que l'app envoie</a>).</p></div>
   <div class="row welcome-pz"><a class="btn-sec small" href="#decouvrir">▶ Découvrir l'app en 1 minute</a><a class="btn-ghost small" href="#parents">👪 Je suis parent</a></div> <!-- 25.11 soir (revue d'un testeur : présentations introuvables pour un nouveau visiteur) -->
@@ -3313,13 +3313,13 @@ if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(w
 else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
 else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
 /* 28.11 (commentaires de l'auteur : « au lancement, l'icône de pépite en gros, comme pour les grades, encerclée et pas dans un
-   carré bleu, avec en dessous Deviens une pépite en maths ») : écran d'ouverture, app installée seulement (lancement depuis
+   carré bleu, avec le slogan en dessous ») : écran d'ouverture, app installée seulement (lancement depuis
    l'écran d'accueil du téléphone), 1,2 s au plus, un appui le ferme ; décoratif (aria-hidden), jamais pendant une séance. */
 (() => {
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
   if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
   const d = document.createElement("div"); d.className = "splash"; d.setAttribute("aria-hidden", "true");
-  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE}</div>`;
+  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE_FUN}</div>`;
   document.body.appendChild(d);
   const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
   d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 700 : 1200);
