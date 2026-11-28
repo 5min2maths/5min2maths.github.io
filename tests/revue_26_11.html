@@ -146,7 +146,7 @@
     ok(app.querySelectorAll(".btn-big").length === 1 && document.getElementById("go"), "accueil, J−2 (sujet au choix) : la séance reste le seul grand bouton");
     /* 12. veille du test : pas de « Test rapide final ». 26.11 (décision de l'enseignant, n° 11) : J−1 = tes erreurs */
     state.prep = { ids: P3, date: addDays(day(), 1), start: addDays(day(), -3) }; state.autotest = null; screenHome();
-    ok(!/Test rapide final/.test(app.textContent) && /Tes erreurs/.test(app.textContent), "J−1 : « Tes erreurs », pas « Test rapide final »");
+    ok(!/Test rapide final/.test(app.textContent) && /Tes pépites à polir/.test(app.textContent), "J−1 : « Tes pépites à polir », pas « Test rapide final »"); /* 28.11 : J−1 « Tes erreurs » → « Tes pépites à polir » (enseignant) */
     state.prep = null;
     /* 7. notion réussie au positionnement : vue, pas de leçon « Nouvelle notion » ; libellé réservé à l'année */
     fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });

@@ -19,7 +19,7 @@ ok(state.resume&&state.resume.s.i===1&&state.resume.s.answered===1,"1 séance ga
 session=null;homeTab="today";screenHome();ok(/étape <b>2 sur 3<\/b>/.test(app.innerHTML),"1 carte Reprendre"); /* 25.11 : « étape » (la leçon compte dans le compteur) */
 document.getElementById("resgo").click();ok(session&&session.i===1&&session.ids instanceof Set&&/2 sur 3/.test(app.textContent),"1 reprise à la question 2");
 document.getElementById("idk").click();document.getElementById("nx").click();document.getElementById("idk").click();document.getElementById("nx").click();
-ok(/Score/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise");
+ok(/Réussies/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise"); /* 28.11 : « Score » → « Réussies » (enseignant) */
 // 5. format de demain
 ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addDays(day(),1),"5 format de demain annoncé");
 const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");

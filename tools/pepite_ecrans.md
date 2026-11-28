@@ -55,7 +55,7 @@ Le moteur l'utilise comme avant (aucun calcul changé, clés m2m-* inchangées).
 - Les écrans de données (sauvegarde, reprise, Tout effacer, Ce que l'app envoie) citent encore le Mathélo comme donnée
   gardée : exact, laissé.
 
-**Paliers en mots (PROPOSITION à valider)** — écart entre le Mathélo et le Mathélo typique de *fin d'année* de la classe
+**Paliers en mots (validés le 28.11, « de fin d'année » → « au niveau attendu »)** — écart entre le Mathélo et le Mathélo typique de *fin d'année* de la classe
 (`ELO_REF`, src/engine.js ; ex. 11e : 1300) ; un élève qui commence l'année (départ = repère − 50) est « en bonne voie » :
 
 | Écart au repère de fin d'année | Palier affiché |
@@ -63,7 +63,7 @@ Le moteur l'utilise comme avant (aucun calcul changé, clés m2m-* inchangées).
 | < −300 | Niveau à consolider |
 | −300 à −151 | Niveau en construction |
 | −150 à −41 | Niveau en bonne voie |
-| −40 à +59 | Niveau de fin d'année |
+| −40 à +59 | Au niveau attendu |
 | +60 à +199 | Niveau solide |
 | ≥ +200 | Niveau très solide |
 
@@ -102,3 +102,19 @@ le 28.11) ni les boutons « Retour à l'accueil » du bilan (homeTab = "today" s
 6. Présentations (#decouvrir) : « Ni trop facile, ni impossible : ton Mathélo monte quand tu progresses » — à aligner sur
    la décision « pépites seul score » par l'agent des présentations (src/presente.js, hors de cette branche).
 7. Paliers de niveau en mots (tableau du § 2) : mots, seuils, et le repère « fin d'année » (plutôt que « milieu d'année »).
+
+## Décisions de l'enseignant sur ce rapport (28.11, appliquées)
+
+1. Paliers validés ; « de fin d'année » → « au niveau attendu » (titre de la carte : « Au niveau attendu »).
+2. Badge « 3 jours d'affilée » → « Filon de 3 jours » (pas d'autre badge de jours d'affilée : « Un mois fidèle » parle
+   de semaines pleines « pas forcément d'affilée », gardé).
+3. Bilan « Score 3 / 4 » → « Réussies 3 / 4 » (« Parties justes » des problèmes inchangé).
+4. Jour J, J−1 : « Tes erreurs, une dernière fois » → « Tes pépites à polir, une dernière fois ».
+5. « Ton point de départ » gardé ; « reprendre le fil » → « Une séance de quelques minutes suffit pour t'y remettre. »
+
+« Ton filon : 0 jour » sur la capture du bilan : **artefact de la page de captures**, pas un bug. `Engine.finishDay` est
+appelé à chaque réponse (src/app.js, onDone) : après une vraie séance, le filon vaut au moins 1. La page appelait
+`screenSummary()` sans réponse ; elle pose maintenant le filon comme après une séance.
+
+Tests mis à jour (commentaire « 28.11 ») : carnet, ux_2111b (« Réussies »), lot_26_11 (badge, palier), p3_26_11 et
+revue_26_11 (J−1 « Tes pépites à polir »), test.html (commentaire). Pages touchées + suite rapide (37 pages) : vertes.

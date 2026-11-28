@@ -549,11 +549,11 @@ function screenPlacementDone() {
    positionnement ni dans Mes grades. Le moteur l'utilise comme avant (aucun calcul changé).
    Paliers (proposition, tools/pepite_ecrans.md) : écart au Mathélo typique de FIN d'année de la classe (ELO_REF, engine.js) ;
    une rentrée normale (départ = repère − 50) tombe sur « en bonne voie ». */
-const NIVEAUX = [[-Infinity, "à consolider"], [-300, "en construction"], [-150, "en bonne voie"], [-40, "de fin d'année"], [60, "solide"], [200, "très solide"]];
+const NIVEAUX = [[-Infinity, "à consolider"], [-300, "en construction"], [-150, "en bonne voie"], [-40, "au niveau attendu"] /* 28.11 : validé par l'enseignant (« de fin d'année » → « au niveau attendu ») */, [60, "solide"], [200, "très solide"]];
 function niveauOf(st) {
   const p = st.profile, h = harmos(p.system, p.grade), ref = (ELO_REF.find((x) => x[0] === h) || ELO_REF[ELO_REF.length - 1])[1];
   const r = st.elo.r, gap = r - ref, mot = NIVEAUX.filter(([at]) => gap >= at).pop()[1];
-  return { r, mot, pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
+  return { r, mot, titre: /^au /.test(mot) ? "A" + mot.slice(1) : "Niveau " + mot /* « Au niveau attendu », « Niveau solide » */, pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
 }
 function niveauCard() {
   const e = state.elo, nv = niveauOf(state), log = e.log || [], today = day();
@@ -569,8 +569,8 @@ function niveauCard() {
     spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/></svg>`;
   }
   const prov = Engine.isProvisional(state) ? ` <span class="badge">se précise</span>` : "";
-  return `<div class="card flat stack niv-card"><div class="eyebrow">📈 Mon niveau</div><h3>Niveau ${esc(nv.mot)}${prov}</h3>
-    <span class="pbar niv-bar" role="img" aria-label="Niveau ${esc(nv.mot)}"><i style="width:${nv.pct}%"></i></span>
+  return `<div class="card flat stack niv-card"><div class="eyebrow">📈 Mon niveau</div><h3>${esc(nv.titre)}${prov}</h3>
+    <span class="pbar niv-bar" role="img" aria-label="${esc(nv.titre)}"><i style="width:${nv.pct}%"></i></span>
     <p class="small">${evo}</p>${spark}
     <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais. <span class="niv-num">Mathélo ${e.r}</span></p></div>`;
 }
@@ -1809,7 +1809,7 @@ const PREP_TASK = {
   revision: { ic: "🎯", label: "Révision ciblée", text: "4 questions sur les notions où tu es le moins sûr·e." },
   mock: { ic: "📝", label: "Sujet de préparation", text: "Au choix, si tu as du temps : un sujet comme le vrai, sur une feuille, puis tu te corriges avec le corrigé." },
   apres: { ic: "📋", label: "Test rapide final", text: "Où en es-tu maintenant ? Refais le test rapide : ta grille compare avec le début. Puis révise ce qui coince encore." },
-  tour: { ic: "✨", label: "Tes erreurs, une dernière fois", text: "4 questions : tes erreurs sur ces notions, puis ce qui reste à consolider, avec d'autres nombres." },
+  tour: { ic: "✨", label: "Tes pépites à polir, une dernière fois" /* 28.11 (enseignant) */, text: "4 questions : tes erreurs sur ces notions, puis ce qui reste à consolider, avec d'autres nombres." },
   jourj: { ic: "✏️", label: "Échauffement, puis l'évaluation", text: "3 questions pour te mettre en route. Tu es prêt·e : bonne chance !" },
 };
 /* 26.11 (revue élèves : « Test rapide final … compare avec le début » sans autoévaluation de départ) : sans grille de
@@ -3078,7 +3078,7 @@ function weekText(w) {
   if (w.fixed) parts.push(plur(w.fixed, "pépite polie", "pépites polies"));
   if (!parts.length && w.first.length) parts.push(isFR() ? plur(w.first.length, "premier niveau de maîtrise", "premiers niveaux de maîtrise") : plur(w.first.length, "première note de compétence", "premières notes de compétences")); /* 26.11 soir : vocabulaire LSU pour la France */
   // Jours et questions : toujours sur 7 jours (historique) ; comparaisons de notes : depuis le premier instantané.
-  if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour reprendre le fil.", sub: "" };
+  if (!parts.length && !w.n) return { main: "Une séance de quelques minutes suffit pour t'y remettre." /* 28.11 (enseignant) : « reprendre le fil » voisinait avec « filon » */, sub: "" };
   if (!parts.length) return { main: `Cette semaine : ${plur(w.days, "jour", "jours")} de pratique, ${plur(w.n, "question", "questions")} en séance.` /* 26.11 : les questions du positionnement de départ ne comptent pas (state.history ne reçoit que les séances) */, sub: "Les notes bougent au fil des réponses : chaque séance compte pour la suite." };
   const last = parts.pop(), main = `${w.since ? "Depuis le " + ddmm(w.since) : "Cette semaine"} : ${parts.length ? parts.join(", ") + " et " : ""}${last}.`;
   const top = w.ups[0];
@@ -3126,7 +3126,7 @@ function scoreRow(n, sc) {
   /* 26.11 soir (revue des élèves joués, n° 17 : défi refait avec d'autres valeurs, « Score 0,6 / 2 ») : séance faite de
      problèmes seulement (le défi et sa reprise) : parties justes aussi. */
   if (P && (n === 1 || session.nP === n)) return `<div class="spread"><span>Parties justes</span><b>${P[0]} / ${P[1]}</b></div>`;
-  return `<div class="spread"><span>Score</span><b>${String(Math.round(sc * 10) / 10).replace(".", ",")} / ${n}</b></div>`;
+  return `<div class="spread"><span>Réussies</span><b>${String(Math.round(sc * 10) / 10).replace(".", ",")} / ${n}</b></div>`;
 }
 /* 27.11 (décision de l'enseignant, n° 31 ; tools/eleves_faibles_26-11.md, proposition 5 : « Séance faite : c'est en
    pratiquant qu'on progresse. » 4 fois sur 4 chez l'élève très faible) : titre du bilan centré sur ce qui a été réussi. */
