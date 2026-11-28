@@ -34,7 +34,14 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
 
 ## File d'attente (28.11)
 
-**EN TÊTE (décision 28.11) : « nickel » 11e Équations 1 (1er degré, mise en équation) et Équations 2 (2e degré,
+**EN TÊTE (demain 29.11, décisions 28.11)** :
+1. **Factorisation 11e** (testée par l'enseignant : il n'a vu que de la mise en évidence) : niveaux = difficulté, pas type
+   de technique ; chaque niveau mélange mise en évidence, identités (x² − 16, carrés parfaits), puis au maximum / trinômes
+   / « trouve l'erreur » ; question « quelle méthode ? » ; même vérification pour toutes les notions de 11e.
+2. **Couverture du Jour J = plan d'études** (règle générale) : pour chaque chapitre, le parcours Jour J (séances de
+   préparation, test rapide, sujet, grille « Je sais… ») touche CHAQUE objectif du plan d'études ; contrôle automatique
+   objectifs ↔ formes servies ; 11e d'abord (tests 7 et 8 : Calcul littéral 1 et 2), puis 1re Collège.
+3. « nickel » 11e Équations 1 (1er degré, mise en équation) et Équations 2 (2e degré,
 factorisation, Viète)**, à finir avant mi-janvier (11LS y arrive après Calcul littéral 2, test du 22.01) ;
 puis « nickel » 10e (ch. 6 après décisions, 10, 11, 4, reprises 3-1-2, courts) et « nickel » 9e ;
 
