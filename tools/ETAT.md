@@ -26,6 +26,12 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 
 ## À faire
 
+0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
+   (tout : sources, tests, tools, historique complet) ; dépôt public `5min2maths.github.io` réduit à l'app publiée
+   (`docs/`), historique neuf (les rapports, qui citent les écoles et classes, ne doivent plus être lisibles) ;
+   `tools/publier.sh` pousse les sources au privé et docs/ au public ; adresse inchangée. Vérifier le dépôt privé complet
+   AVANT de réécrire le public (opération irréversible). Retirer les `__pycache__` suivis.
+
 1. Commentaires des testeurs restants : l'icône de pépite en grand au lancement, avec « Deviens une pépite en maths » en dessous
    et dans un cercle, pas dans un carré bleu (2 commentaires du 27–28.11) ; « Je prépare une évaluation » : une liste à cocher,
    est-ce le bon choix ? Les traiter après la fusion de Pépite² écrans.
