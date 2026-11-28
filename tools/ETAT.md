@@ -19,6 +19,13 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 **Règle générale (enseignant, 28.11) : une seule publication par jour**, en fin de journée, avec tout ce qui est
 fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Exception : bug bloquant, avec son accord.
 
+## À montrer à l'enseignant (non fusionné)
+
+- **Mine « Creuser encore »** (`/app mine`, branche `agent/app3`, commit e65c492, rapport dans la branche :
+  `tools/archive/app_mine_28-11.md`) : captures `~/Projets/5min2maths-wt/app3/tests/_shots/app/mine/voir_mine.html`.
+  Questions : (1) titre des lignes = début de l'énoncé ou chapitre seul ? (2) garder « ⛏️ Encore un ? » au bilan ?
+  Fusionner après validation → publication du lendemain.
+
 ## En cours
 
 - **Univers Pépite²** : accueil fait (27.11, `pepite_accueil.md`) ; écrans et présentations / PDF en cours (agents du
