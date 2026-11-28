@@ -94,8 +94,18 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
   et relu ; la 9e (9C10) tire encore la banque de 11e (à traiter au « nickel » 9e). Prochain : ch. 9 Équations (ou ch. 6
   après décisions).
 
+- **« Nickel » 10e, ch. 8 Pythagore** (28.11, `/contenu`, rapport `archive/contenu_nickel10_ch8_28-11.md`, branche
+  `agent/contenu9`, à fusionner) : pyth et pythfig ; + 11 formes de 10e et 2 défis (MER 10e GM62–GM70 : échelle sous la
+  fenêtre, tyrolienne, rampe, hauteur issue de l'angle droit, jogging, losange, trapèze rectangle, armoire, chalet,
+  hexagone, antenne) ; **racines en √n en 10e partout** (corrigés et étapes des formes de 11e écrivaient « 2√34 »,
+  `racine10`, engine.js) ; rappel, indice et leçon active de 10e sans a√b ni réciproque ; **sujet de préparation de 10e =
+  `RICH.pyth10`** (6 exercices, 4 raisonnements ; avant : banque de 11e avec réciproque). Blocs séparés en fin de
+  `variantes.js` et de `riche_10.js` (l'agent du ch. 9 écrit aux mêmes fichiers). Contrôle à faire : un sujet de 10e imprimé.
+
 ## À décider
 
+- **10e ch. 8 (28.11)** : réciproque exclue (plan) alors que les MER 10e la travaillent (GM53–GM61) : d'accord ? ; formes de 11e
+  gardées en 10e : distance dans un repère, carré inscrit dans un cercle, triangle rectangle isocèle (x² = 8) ?
 - **10e ch. 7 (28.11)** : défis de calcul littéral qui font résoudre une équation simple (« x pour un périmètre de 38 cm ») avant le
   chapitre 9 : gardés ? ; monomes N3 « quotient » en 10e LS ?
 - **10e (28.11)** : arith, premiers (« CT » au plan, travaillés dans les MER 10e) gardés ou retirés de l'année ? ; dec10 et

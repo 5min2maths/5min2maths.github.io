@@ -255,6 +255,37 @@ function racineCO(q) {
   if (q.q) q.q = q.q.replace(/écris par exemple \\\(3\\sqrt\{5\}\\\)/g, "écris par exemple \\(\\sqrt{13}\\)");
   return q;
 }
+/* ======================= 28.11 : nickel 10e, chapitre 8 Pythagore (archive/contenu_nickel10_ch8_28-11.md) =======================
+   Plan de cheminement 10e : « valeur exacte √n » (a√b = 11e). Les formes de 11e (ch11_gm.js) écrivent leurs corrigés et leurs
+   étapes avec la racine simplifiée (« √136 = 2√34 », « d = 7√3 », « Le plus grand carré qui divise 136 ? », « (simplifiée) ») :
+   en 9e–10e, pour pyth et pythfig, la racine reste √n partout (corrigé, étapes, réponse affichée). Appelé par finalize. */
+const RAC10 = ["pyth", "pythfig"];
+function racine10(id, q) {
+  if (!q || !RAC10.includes(id)) return q;
+  const t = (s) => typeof s !== "string" ? s : s
+    .replace(/\\sqrt\{(\d+)\}\s*=\s*\d+\s*\\sqrt\{\d+\}/g, "\\sqrt{$1}")
+    .replace(/(^|[^\d}^{_.,])(\d+)\s*\\sqrt\{(\d+)\}/g, (m, b, k, n) => b + "\\sqrt{" + k * k * n + "}")
+    .replace(/\\sqrt\{(\d+)\}\s*=\s*\\sqrt\{\1\}/g, "\\sqrt{$1}")
+    .replace(/\s*\((?:simplifiée|simplifie la racine)\)/g, "")
+    .replace(/\s+simplifiée\s*\?/g, " = ?")
+    .replace(/\s*(?:<br>⁣?)?\s*:?\s*[Ss]implifie(?: la racine)?\s*\.?/g, ".").replace(/\.\./g, ".");
+  q.sol = t(q.sol);
+  if (q.guide) q.guide = q.guide.filter((g) => !/plus grand carré qui divise/.test(g.ask || "")).map((g) => ({ ...g, ask: t(g.ask), sol: t(g.sol) }));
+  if (q.traps) q.traps = q.traps.map((x) => ({ ...x, m: t(x.m) }));
+  const m = /^(\d+)√(\d+)$/.exec(String(q.canon || ""));
+  if (m) q.canon = "√" + m[1] * m[1] * m[2];
+  return q;
+}
+/* Rappel de cours et indice de 10e (TXT_CO, lus par les accesseurs de la fin du fichier) : sans « a√b » (11e), sans réciproque
+   (plan de cheminement 10e : « ⚠️ Pas de réciproque »), avec les deux calculs du chapitre (hypoténuse, cathète). */
+TXT_CO[10].pyth = {
+  hint: "Repère l'hypoténuse : le plus grand côté, en face de l'angle droit. Hypoténuse² = somme des carrés des deux cathètes ; pour une cathète, on soustrait. N'oublie pas la racine carrée à la fin.",
+  lesson: {
+    regle: "Dans un triangle <b>rectangle</b>, l'hypoténuse est le plus grand côté, en face de l'angle droit. Son carré vaut la somme des carrés des deux autres côtés (les cathètes) : \\(c^2 = a^2 + b^2\\). Pour l'hypoténuse : on additionne les carrés, puis on prend la racine. Pour une cathète : on soustrait les carrés, \\(b^2 = c^2 - a^2\\), puis on prend la racine. La valeur exacte s'écrit \\(\\sqrt{n}\\) ; sinon, on arrondit (au dixième, au centième).",
+    exemple: ["Cathètes 6 cm et 8 cm : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\) cm.", "Hypoténuse 13 cm, cathète 5 cm : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\) cm.", "Échelle de 4 m, pied à 1,5 m du mur : \\(h^2 = 16 - 2{,}25 = 13{,}75\\), \\(h = \\sqrt{13{,}75} \\approx 3{,}71\\) m."],
+    piege: "On additionne les carrés, pas les côtés : \\(6 + 8 = 14\\) n'est pas l'hypoténuse. Et \\(c^2 = 100\\) n'est pas la réponse : il faut encore la racine, \\(c = 10\\). Le théorème ne s'applique que dans un triangle rectangle.",
+  },
+};
 /* 25.11 (commentaire de l'enseignant sur vol-4-lsr, 11e : « Dans un cas comme calculer l'aire d'un disque, taper π r² dans
    la calculatrice ça va bien ! Calcule −7 + 19 : si l'élève peut taper tel quel et que la valeur est acceptée ça va pas »).
    Calcul tapé (le champ évalue l'expression et l'aperçu affiche « ≈ … », c'est la calculatrice de l'app) :
@@ -779,7 +810,7 @@ const Engine = {
   // Résultat exigé ou calcul tapé permis : règle par notion et par question (CALC_*, 25.11 ; avant : tout le CO en résultat).
   finalize(state, id, q) {
     const p = state && state.profile;
-    if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) racineCO(q);
+    if (q && p && p.system === "CH" && p.track !== "mp" && p.grade <= 10) { racineCO(q); racine10(id, q); } /* racine10 : 28.11, nickel 10e ch. 8 */
     if (!q) return q;
     const txt0 = String(q.q || "");
     const mark = (sp, txt, own, step) => {

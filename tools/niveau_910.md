@@ -222,6 +222,7 @@ la 10e : vérifié en 11e (prio, valnum, distrib, eq1, fracadd, litelab : aucune
 | Ch. | Notions | État | Rapport |
 |---|---|---|---|
 | 7 Calcul littéral | litelab, valnum, reduire, monomes, distrib, litconv | cases 1–9, 11, 12 ✓ ; test de préparation `RICH.litt10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch7_28-11.md` |
+| 8 Pythagore | pyth, pythfig | cases 1–9, 11, 12 ✓ ; test de préparation `RICH.pyth10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch8_28-11.md` |
 | 6 Puissances et racines | carres, rac, racenc, sci, scicalc, puiss, ensco | attend les décisions § 5 n° 5 | — |
 
 Ch. 7 (28.11, branche `agent/contenu7`) : + 8 formes de 10e (`q.co = [10]`, `variantes.js`) et 2 défis (programme de
@@ -229,3 +230,13 @@ calcul, allée autour d'un jardin) ; HORS_CO[10] : valnum « trapeze », litelab
 pour « Développer » (TXT_CO, `engine.js` : exemple, indice, rappel sans double distributivité ; leçon active à simple
 distributivité, `act_manip2.js`) ; sujet de préparation de 10e = `RICH.litt10` (avant : banque de 11e). Contrôle :
 `tests/parcours.html#section=nickel10_ch7`. Reste : 9e (9C10) tire encore la banque de 11e ; monomes N3 quotient à valider.
+
+Ch. 8 (28.11, branche `agent/contenu9`) : plan « ⚠️ Pas de réciproque », plan (LC/LS) et espace (LS), √n (a√b en 11e).
++ 11 formes de 10e (`q.co = [10]`, fin de `variantes.js` : échelle sous la fenêtre, randonnée, tyrolienne, rampe, hauteur
+issue de l'angle droit, jogging, losange, trapèze rectangle, armoire, chalet, hexagone ; modelées sur MER 10e GM62–GM70)
+et 2 défis (antenne, armoire) ; `racine10` (engine.js) : corrigés, étapes et réponse en √n en 9e–10e ; rappel et indice de
+10e (TXT_CO) ; leçon active sans réciproque en 10e ; sujet de préparation `RICH.pyth10` (avant : banque de 11e). Étalons :
+E10-8-1 (MER GM62) : échelle, fenêtre à 6 m, pied à 2 m → √40 ≈ 6,32 m. E10-8-2 (GM68, GM69) : trapèze rectangle (côté
+oblique → hauteur → aire) ; losange de diagonales 15 et 20 cm → côté 12,5 cm. E10-8-3 (GM63, GM64, LS) : armoire
+236 × 60 cm à redresser sous 2,5 m ; casier 80 × 150 × 60 cm et skis de 1,70 m. E10-8-4 (GM70) : hauteur issue de
+l'angle droit (AC = 6, AB = 10 → 4,8 cm). Contrôle : `tests/parcours.html#section=nickel10_ch8`.

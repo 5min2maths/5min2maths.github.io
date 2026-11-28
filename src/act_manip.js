@@ -68,6 +68,7 @@
     const d2 = (P, Q) => (P[0] - Q[0]) ** 2 + (P[1] - Q[1]) ** 2;
     let lastC = null;
     const right = (C) => near((A[0] - C[0]) * (B[0] - C[0]) + (A[1] - C[1]) * (B[1] - C[1]), 0);
+    let PYCFG; /* 28.11 (nickel 10e, ch. 8) : configuration gardée pour la version de 10e (plus bas) */
     ACTIVE.pyth = {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). L'égalité n'est vraie que pour un angle droit : si l'angle est obtus, \\(c^2 > a^2 + b^2\\). Pour trouver une cathète, on soustrait : \\(b^2 = c^2 - a^2\\).", exemple: ["Cathètes 6 et 8 : \\(c^2 = 36 + 64 = 100\\), \\(c = 10\\).", "Hypoténuse 13, cathète 5 : \\(b^2 = 169 - 25 = 144\\), \\(b = 12\\)."] },
@@ -75,7 +76,7 @@
       plus: [{ d: "Triangle rectangle : l'hypoténuse mesure 13 cm et une cathète 5 cm. Longueur de l'autre cathète, en cm ?", ans: 12, ok: "Le carré de l'hypoténuse est la somme des deux autres : b² = 13² − 5² = 169 − 25 = 144, donc b = 12 cm.", no: "Cette fois, on soustrait : 13² − 5², puis la racine carrée." }],
       predict: { q: "Un triangle rectangle a des cathètes de 6 cm et 8 cm. Son hypoténuse mesure…", choices: ["14 cm", "10 cm", "48 cm"], good: 1, why: "6² + 8² = 36 + 64 = 100, et √100 = 10. Ce sont les carrés qui s'additionnent, pas les côtés : tu vas le voir avec les aires des carrés." },
       defis: ["Déplace le sommet C pour que l'angle en C soit droit. Compare l'aire du grand carré à celle des deux autres.", "Trouve une autre position de C où l'angle en C est droit.", "Place C pour que l'angle en C soit plus grand qu'un angle droit (obtus). Que devient l'égalité ?"],
-      play: manip({ W: 320, H: 300,
+      play: manip(PYCFG = { W: 320, H: 300,
         note: "Glisse le point C. On vérifie quand tu le lâches.",
         init: (s) => ({ C: s === 2 ? [2.5, 3.5] : [3, 3] }),
         handles: (st) => [{ x: X(st.C[0]), y: Y(st.C[1]), label: "sommet C", text: "C" }],
@@ -102,6 +103,20 @@
           { q: "Un triangle a des côtés 5, 7 et 9. Est-il rectangle ? Tape 1 pour oui, 0 pour non.", ans: 0, ok: "25 + 49 = 74, différent de 81 : pas d'égalité, donc pas rectangle (réciproque de Pythagore).", no: "Compare 5² + 7² et 9²." },
         ] }),
     };
+    /* 28.11 (nickel 10e, ch. 8 ; plan de cheminement 10e : « ⚠️ Pas de réciproque ») : en 10e, la dernière question ne demande
+       plus si un triangle 5, 7, 9 est rectangle (réciproque, 11e) mais une cathète ; l'angle obtus montre seulement que le
+       théorème exige un angle droit ; le Retiens n'énonce pas l'inégalité c² > a² + b² (règle du 15.11 : ce que la leçon présente). */
+    {
+      const P11 = ACTIVE.pyth, g = PYCFG.goal;
+      const P10 = Object.assign({}, P11, {
+        retiens: Object.assign({}, P11.retiens, { regle: "L'hypoténuse est le plus grand côté, en face de l'angle droit. Dans un triangle rectangle, l'aire du carré construit sur l'hypoténuse est la somme des aires des carrés construits sur les deux autres côtés : \\(c^2 = a^2 + b^2\\). Le théorème ne s'applique que dans un triangle rectangle. Pour trouver une cathète, on soustrait : \\(b^2 = c^2 - a^2\\)." }),
+        play: manip(Object.assign({}, PYCFG, {
+          goal: [g[0], g[1], (st) => ((A[0] - st.C[0]) * (B[0] - st.C[0]) + (A[1] - st.C[1]) * (B[1] - st.C[1]) < -1e-9 ? "Angle obtus : la somme des deux petits carrés n'est plus égale au grand. Le théorème de Pythagore ne s'applique que dans un triangle rectangle." : "")],
+          ask: [PYCFG.ask[0], PYCFG.ask[1], { q: "Un triangle rectangle a une hypoténuse de 10 et une cathète de 6. Combien mesure l'autre cathète ?", ans: 8, ok: "Pour une cathète, on soustrait : 10² − 6² = 100 − 36 = 64, et √64 = 8.", no: "L'hypoténuse est le plus grand côté : 10² − 6², puis la racine." }] })),
+      });
+      const co10 = () => typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10;
+      Object.defineProperty(ACTIVE, "pyth", { get: () => (co10() ? P10 : P11), set: () => {}, enumerable: true, configurable: true });
+    }
   }
 
   // ===================== Fonctions affines : on déplace deux points =====================

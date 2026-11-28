@@ -538,5 +538,69 @@ try {
 state = keep;
 document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
 });
+Lot.section("nickel10_ch8", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* 28.11 (/contenu nickel 10e, chapitre 8 Pythagore, tools/archive/contenu_nickel10_ch8_28-11.md) : liste de contrôle
+   « nickel » (tools/chantier_11e.md) appliquée à pyth et pythfig en 10e (plan de cheminement : plan et espace, pas de
+   réciproque, valeur exacte √n). Chaque contrôle échoue sans la correction : formes et défis de 10e (q.co = [10]),
+   racines non simplifiées en 10e (racine10, engine.js), indice et rappel de 10e (TXT_CO), leçon active sans réciproque en
+   10e (act_manip.js), banque du sujet de préparation RICH.pyth10 (avant : RICH.pyth11, avec réciproque et a√b). */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const st = (g) => { const x = Engine.newState({ system: "CH", grade: g, track: "co", minutes: 5 }); Engine.autoInit(x); return x; };
+const txt = (q) => String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\ \\text\{([^}]*)\}/g, " $1").replace(/\\\(|\\\)/g, "").replace(/\{,\}/g, ",");
+const cnt = (S, id, d, n = 80) => { const c = {}; for (let k = 0; k < n; k++) { const q = Engine.make(S, id, d); c[q.ctx || "-"] = (c[q.ctx || "-"] || 0) + 1; } return c; };
+const keep = typeof state !== "undefined" ? state : null;
+try {
+  const S10 = st(10), S11 = st(11);
+  const F = [["pyth", 1, ["echelle-fenetre", "rando"]], ["pyth", 2, ["tyrolienne", "rampe-sol"]], ["pyth", 3, ["jogging", "hauteur-angle-droit"]], ["pythfig", 1, ["losange-panneau", "losange-vitrail", "losange-carreau"]], ["pythfig", 2, ["trapeze-rect", "armoire"]], ["pythfig", 3, ["chalet", "hexagone"]], ["pyth", 4, ["antenne"]], ["pythfig", 4, ["armoire"]]];
+  for (const [id, d, cs] of F) { const c = cnt(S10, id, d, 120), c11 = cnt(S11, id, d, 60);
+    ok(cs.every((k) => c[k] >= 3) && cs.every((k) => !c11[k]), id + " " + d + " : formes de 10e tirées en 10e (≥ 3 sur 120 chacune), jamais en 11e " + JSON.stringify(c)); }
+  /* valeur exacte √n en 10e (a√b = 11e) : corrigé, étapes, réponse affichée */
+  const simp = (q) => [q.sol, q.canon || "", ...(q.guide || []).flatMap((g) => [g.ask, g.sol])].join(" ");
+  const AB = /(^|[^\d}^{_.,])\d+\s*\\sqrt\{|\d√|implifi|plus grand carré qui divise/;
+  let b10 = [], b11 = 0; for (const id of ["pyth", "pythfig"]) for (const d of [1, 2, 3]) for (let k = 0; k < 60; k++) { const q = Engine.make(S10, id, d); if (AB.test(simp(q))) b10.push(q.code); if (AB.test(simp(Engine.make(S11, id, d)))) b11++; }
+  ok(!b10.length && b11 > 10, "racines en 10e : √n partout (corrigé, étapes, réponse), a√b gardé en 11e (" + b11 + ") " + b10.slice(0, 4).join(" "));
+  /* recalcul indépendant (nombres relus dans l'énoncé) */
+  const bad = [], n = (z) => +String(z).replace(",", "."), near = (a, b) => Math.abs(a - b) < 1e-6 * Math.max(1, Math.abs(b)), H = Math.hypot;
+  const R1 = { "echelle-fenetre": [/située à ([\d,]+) m du sol.*pied est à ([\d,]+) m du mur/, (m) => H(n(m[1]), n(m[2]))],
+    rando: [/marche ([\d,]+) km vers le nord, puis ([\d,]+) km/, (m) => H(n(m[1]), n(m[2]))],
+    tyrolienne: [/de (\d+) m et (\d+) m de haut, plantés à (\d+) m/, (m) => H(n(m[3]), n(m[1]) - n(m[2]))],
+    "rampe-sol": [/mesure ([\d,]+) m de long \(la pente\) et permet de monter de (\d+) cm/, (m) => Math.sqrt(n(m[1]) ** 2 - (n(m[2]) / 100) ** 2)],
+    jogging: [/mesure (\d+) m sur (\d+) m.* fait (\d+) tours/, (m) => (n(m[3]) * 2 * (n(m[1]) + n(m[2]))) / (n(m[1]) + n(m[2]) + H(n(m[1]), n(m[2])))],
+    "hauteur-angle-droit": [/AC = (\d+) cm et AB = (\d+) cm/, (m) => (n(m[1]) * Math.sqrt(n(m[2]) ** 2 - n(m[1]) ** 2)) / n(m[2])],
+    "trapeze-rect": [/mesurent (\d+) cm et (\d+) cm, et son côté oblique (\d+) cm/, (m) => ((n(m[1]) + n(m[2])) * Math.sqrt(n(m[3]) ** 2 - (n(m[1]) - n(m[2])) ** 2)) / 2],
+    armoire: [/hauteur (\d+) cm, largeur (\d+) cm, profondeur (\d+) cm/, (m) => H(n(m[1]), n(m[3]))],
+    chalet: [/rectangle de (\d+) m de large .* faîte est à ([\d,]+) m au-dessus des murs.*dépasse encore de ([\d,]+) m/, (m) => H(n(m[1]) / 2, n(m[2])) + n(m[3])],
+    hexagone: [/de côté (\d+) cm se découpe/, (m) => ((3 * Math.sqrt(3)) / 2) * n(m[1]) ** 2] };
+  const R1L = (c) => R1[c] || (/^losange-/.test(c) ? [/mesurent (\d+) cm et (\d+) cm/, (m) => H(n(m[1]) / 2, n(m[2]) / 2)] : null);
+  let nb = 0;
+  for (const [id, d] of [["pyth", 1], ["pyth", 2], ["pyth", 3], ["pythfig", 1], ["pythfig", 2], ["pythfig", 3]]) for (let s = 1; s <= 150; s++) {
+    const q = Engine.build(id, d, s); if (!q.co) continue; const r = R1L(q.ctx); if (!r) { bad.push(q.code + " sans recalcul"); continue; }
+    const m = r[0].exec(txt(q)); nb++; if (!m || !near(q.spec.value, r[1](m))) bad.push(q.code);
+    if ((q.traps || []).some((t) => Math.abs(t.v - q.spec.value) <= (q.spec.round || 1e-9) / 2)) bad.push(q.code + " piège = réponse"); }
+  for (let s = 1; s <= 200; s++) {
+    const p = Engine.build("pyth", 4, s);
+    if (p.ctx === "antenne") { nb++; const m = /attachés à ([\d,]+) m de hauteur et fixés au sol à ([\d,]+) m du pied.*coûte ([\d,]+) CHF/.exec(txt(p)), c = m && H(n(m[1]), n(m[2]));
+      if (!m || !near(p.parts[0].spec.value, c) || !near(p.parts[1].spec.value, 3 * (c + 0.5)) || !near(p.parts[2].spec.value, 3 * (c + 0.5) * n(m[3]))) bad.push(p.code); }
+    const f = Engine.build("pythfig", 4, s);
+    if (f.ctx === "armoire" && f.co) { nb++; const m = /plafond de la chambre est à (\d+) cm.*mesure (\d+) cm de haut, 100 cm de large et (\d+) cm de profondeur/.exec(txt(f)), h2 = /mesure (\d+) cm de haut/.exec(txt({ q: f.parts[2].label })), d = m && H(n(m[2]), n(m[3]));
+      if (!m || !h2 || !near(f.parts[0].spec.value, d) || !near(f.parts[1].spec.value, n(m[1]) - d) || !near(f.parts[2].spec.value, Math.sqrt(n(m[1]) ** 2 - n(h2[1]) ** 2))) bad.push(f.code); }
+  }
+  ok(!bad.length && nb > 150, "recalcul des formes et défis de 10e (" + nb + " questions) : " + (bad.length ? bad.slice(0, 8).join(" ") : "tout juste"));
+  /* indice, rappel et leçon active de 10e : ni a√b ni réciproque */
+  state = S10; const h10 = HINTS.pyth, l10 = LESSONS.pyth.regle + LESSONS.pyth.exemple.join(" "), A10 = JSON.stringify(ACTIVE.pyth.retiens);
+  state = S11; const l11 = LESSONS.pyth.regle + LESSONS.pyth.exemple.join(" "), A11 = JSON.stringify(ACTIVE.pyth.retiens);
+  ok(!/a\\sqrt\{b\}|2\\sqrt\{5\}|réciproque/.test(l10 + h10) && /racine/.test(h10) && /a\\sqrt\{b\}/.test(l11), "rappel et indice de Pythagore : sans a√b en 10e, inchangés en 11e");
+  ok(!/c\^2 > a\^2/.test(A10) && /c\^2 > a\^2/.test(A11), "leçon active pyth : Retiens de 10e sans l'inégalité de l'angle obtus, inchangé en 11e");
+  /* sujet de préparation : banque de 10e, sans contenu de 11e */
+  const ids = ["pyth", "pythfig"], pr = (g) => st(g).profile;
+  ok(richChapter(ids, pr(10)) === "pyth10" && richChapter(["pyth"], pr(10)) === "pyth10" && richChapter(["pyth", "pythfig", "pythrec"], pr(11)) === "pyth11", "sujet de préparation : RICH.pyth10 en 10e, RICH.pyth11 en 11e (inchangé)");
+  state = S10; const hors = []; for (const lev of ["facile", "standard", "exigeant"]) for (let k = 0; k < 6; k++) for (const x of mockPlan(ids, lev)) if (x.rich && x.rich !== "pyth10") hors.push(x.rich);
+  const T = []; for (const kind of ["ex", "raison"]) RICH.pyth10[kind].forEach((f, k) => { for (let s = 1; s <= 40; s++) { R.seed(s * 31 + k); const x = f(); T.push(x.q.replace(/<svg[\s\S]*?<\/svg>/g, "") + x.sol + x.parts.map((p) => p.label).join(" ")); } });
+  const t11 = T.filter((t) => /réciproque|est-il rectangle|sont-ils rectangles|cône|(^|[^\d}^{_.,])\d+\s*\\sqrt\{/.test(t));
+  ok(!hors.length && !t11.length && RICH.pyth10.ex.length >= 5 && RICH.pyth10.raison.length >= 4, "sujets de 10e : RICH.pyth10 seulement, sans réciproque, cône ni racine simplifiée " + (hors[0] || "") + " " + (t11[0] || "").slice(0, 120));
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+state = keep;
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+});
 Lot.lance();
 </script>
