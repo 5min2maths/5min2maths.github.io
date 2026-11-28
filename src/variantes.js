@@ -271,7 +271,7 @@ V34("relrep",
 );
 // --- Pavé ---
 V("volpave", 1,
-  () => { const a = R.int(3, 9); return QV("Calcule le volume d'un cube d'arête " + a + " cm (en cm³).", a ** 3, M(a + "^3 = " + a ** 3) + " cm³.", { guide: [GS("Aire d'une face : " + M(a + "^2") + " = ?", a * a, M(a * a) + " cm²."), GS("Volume : " + M(a * a + " \\cdot " + a) + " = ?", a ** 3, M(a ** 3) + " cm³.")], traps: [TRAP(3 * a, "Le volume : arête · arête · arête."), TRAP(a * a, "C'est l'aire d'une face ; le volume : arête au cube.")] }); },
+  () => { const a = R.int(3, 9); return QV("Calcule le volume d'un cube d'arête " + a + " cm (en cm³).", a ** 3, M(a + "^3 = " + a ** 3) + " cm³.", { fig: FIG.cube(a + " cm"), guide: [GS("Aire d'une face : " + M(a + "^2") + " = ?", a * a, M(a * a) + " cm²."), GS("Volume : " + M(a * a + " \\cdot " + a) + " = ?", a ** 3, M(a ** 3) + " cm³.")], traps: [TRAP(3 * a, "Le volume : arête · arête · arête."), TRAP(a * a, "C'est l'aire d'une face ; le volume : arête au cube.")] }); },
   () => { const a = R.int(3, 8), b = R.int(2, 6), h = R.int(2, 9); return QV("Un pavé droit a un volume de " + a * b * h + " cm³ et une base de " + a + " cm sur " + b + " cm. Quelle est sa hauteur (en cm) ?", h, M(a * b * h + " : (" + a + " \\cdot " + b + ") = " + h) + " cm.", { guide: [GS("Aire de la base ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + " cm²."), GS("Hauteur = volume : aire de la base ?", h, M(a * b * h + " : " + a * b + " = " + h) + " cm.")], traps: [TRAP(a * b * h - a * b, "On divise le volume par l'aire de la base."), TRAP(a * b * h / a, "Divise par l'aire de la base : " + a + " · " + b + " = " + a * b + " cm².")] }); },
 );
 V34("volpave",

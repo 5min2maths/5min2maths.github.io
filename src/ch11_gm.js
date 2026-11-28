@@ -195,14 +195,14 @@
     3: [
       () => { const [a, b, c] = pk([[30, 40, 50], [60, 80, 100], [45, 60, 75], [90, 120, 150]]);
         return Qv("Pour vérifier qu'un angle est droit, un menuisier marque " + M(a) + " cm sur un côté et " + M(b) + " cm sur l'autre, à partir du coin. Quelle distance doit-il mesurer entre les deux marques pour que l'angle soit droit (en cm) ?", c, M("\\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm : si la mesure vaut " + M(c) + " cm, l'angle est droit (réciproque).",
-          { ctx: "menuisier", guide: [GS(M(a + "^2 + " + b + "^2") + " = ?", c * c, M(c * c) + "."), GS("Distance ?", c, M(c) + " cm.")], traps: [TR(a + b, "On additionne les carrés.")] }); },
+          { ctx: "menuisier", fig: GF.rightTri(a, b, { la: a + " cm", lb: b + " cm", lc: "?", names: false }), guide: [GS(M(a + "^2 + " + b + "^2") + " = ?", c * c, M(c * c) + "."), GS("Distance ?", c, M(c) + " cm.")], traps: [TR(a + b, "On additionne les carrés.")] }); },
       () => { const [n1, n2, n3] = pk([[5, 20, 25], [2, 7, 9], [3, 13, 16], [8, 17, 25], [6, 10, 16], [5, 11, 16]]);
         return Qv("Un triangle a pour côtés " + M("\\sqrt{" + n1 + "}") + " cm, " + M("\\sqrt{" + n2 + "}") + " cm et " + M(Math.sqrt(n3) % 1 ? "\\sqrt{" + n3 + "}" : Math.sqrt(n3)) + " cm. Calcule la somme des carrés des deux plus petits côtés.", n1 + n2, M("(\\sqrt{" + n1 + "})^2 + (\\sqrt{" + n2 + "})^2 = " + n1 + " + " + n2 + " = " + (n1 + n2)) + ", égal au carré du plus grand côté : rectangle.",
           { ctx: "racines", guide: [GS(M("(\\sqrt{" + n1 + "})^2") + " = ?", n1, "Le carré d'une racine redonne le nombre : " + M(n1) + "."), GS("Somme des deux carrés ?", n1 + n2, M(n1 + n2) + ".")],
             traps: [TR(Math.sqrt(n1) + Math.sqrt(n2), "On additionne les carrés : " + M("(\\sqrt{" + n1 + "})^2 = " + n1) + "."), TR(2 * n1 + 2 * n2, "Le carré de " + M("\\sqrt{" + n1 + "}") + " est " + M(n1) + ", pas " + M(2 * n1) + ".")] }); },
       () => { const L = pk([120, 150, 200, 90]), l = pk([50, 80, 60, 40]), d = Math.sqrt(L * L + l * l), dm = rd(d, 1) + pk([2, 3, -2, -3]);
         return Qv("Un cadre rectangulaire doit mesurer " + M(L) + " cm sur " + M(l) + " cm. Le menuisier mesure une diagonale de " + M(dm) + " cm. Quelle devrait être la diagonale d'un cadre bien d'équerre (en cm, au dixième) ?", d, M("\\sqrt{" + L + "^2 + " + l + "^2} \\approx " + N(rd(d, 0.1))) + " cm : avec " + M(dm) + " cm, les angles ne sont pas droits.",
-          { round: 0.1, ctx: "cadre", guide: [GS(M(L + "^2 + " + l + "^2") + " = ?", L * L + l * l, M(L * L + l * l) + "."), GS("Diagonale au dixième ?", d, M(N(rd(d, 0.1))) + " cm.", 0.1)], traps: [TR(dm, "C'est la mesure du menuisier ; on demande la diagonale théorique."), TR(L + l, "On additionne les carrés.")] }); },
+          { round: 0.1, ctx: "cadre", fig: GF.rect(L, l, { lw: L + " cm", lh: l + " cm", diag: "?" }), guide: [GS(M(L + "^2 + " + l + "^2") + " = ?", L * L + l * l, M(L * L + l * l) + "."), GS("Diagonale au dixième ?", d, M(N(rd(d, 0.1))) + " cm.", 0.1)], traps: [TR(dm, "C'est la mesure du menuisier ; on demande la diagonale théorique."), TR(L + l, "On additionne les carrés.")] }); },
     ],
   };
 
@@ -282,7 +282,7 @@
             traps: [TR(a ** 3, "C'est le volume du cube ; la pyramide en vaut le tiers."), TR(a ** 3 / 6, "La hauteur est l'arête entière : le sommet est sur la face opposée.")] }); },
       () => { const r = 3 * R.int(1, 3), k = 2 * r ** 3 / 3;
         return Qv("Un bol a la forme d'une demi-boule de rayon intérieur " + M(r) + " cm. Calcule son volume" + PIX + ".", k * Math.PI, "Demi-boule : " + M("\\frac{1}{2} \\cdot \\frac{4}{3}\\pi \\cdot " + r + "^3 = " + piT(k)) + " cm³.",
-          { canon: k + "π", ctx: "demiboule", guide: [GS("Volume de la boule entière (nombre devant " + M("\\pi") + ") ?", 4 * r ** 3 / 3, M(piT(4 * r ** 3 / 3)) + "."), GS("La moitié (avec " + M("\\pi") + ") ?", k * Math.PI, M(piT(k)) + " cm³.")],
+          { canon: k + "π", ctx: "demiboule", fig: FIG.halfBall("r = " + r + " cm"), guide: [GS("Volume de la boule entière (nombre devant " + M("\\pi") + ") ?", 4 * r ** 3 / 3, M(piT(4 * r ** 3 / 3)) + "."), GS("La moitié (avec " + M("\\pi") + ") ?", k * Math.PI, M(piT(k)) + " cm³.")],
             traps: [TR(2 * k * Math.PI, "C'est la boule entière ; le bol en est la moitié.")] }); },
     ],
     3: [
@@ -307,15 +307,15 @@
     1: [
       () => { const c = R.int(4, 12), a = R.int(5, 15); if (a === c) return null;
         return Qv("Une pyramide régulière à base carrée a un côté de base de " + M(c) + " cm et un apothème de " + M(a) + " cm. Calcule son aire latérale (en cm²).", 2 * c * a, "Quatre triangles : " + M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + 2 * c * a) + " cm².",
-          { ctx: "lat", guide: [GS("Aire d'une face triangulaire : " + M("\\frac{" + c + " \\cdot " + a + "}{2}") + " = ?", c * a / 2, M(c * a / 2) + " cm²."), GS("Quatre faces ?", 2 * c * a, M(2 * c * a) + " cm².")],
+          { ctx: "lat", fig: FIG.pyramid(c + " cm", "", { apo: a + " cm" }), guide: [GS("Aire d'une face triangulaire : " + M("\\frac{" + c + " \\cdot " + a + "}{2}") + " = ?", c * a / 2, M(c * a / 2) + " cm²."), GS("Quatre faces ?", 2 * c * a, M(2 * c * a) + " cm².")],
             traps: [TR(c * a / 2, "C'est une seule face ; il y en a quatre."), TR(4 * c * a, "L'aire d'un triangle se divise par 2.")] }); },
       () => { const c = R.int(4, 12), a = R.int(5, 15); if (a === c) return null;
         return Qv("Une pyramide régulière à base carrée a un côté de base de " + M(c) + " cm et un apothème de " + M(a) + " cm. Calcule son aire totale (en cm²).", c * c + 2 * c * a, "Base : " + M(c * c) + " cm² ; faces : " + M(2 * c * a) + " cm² ; total " + M(c * c + 2 * c * a) + " cm².",
-          { ctx: "tot", guide: [GS("Aire de la base ?", c * c, M(c * c) + " cm²."), GS("Aire latérale (4 triangles) ?", 2 * c * a, M(2 * c * a) + " cm²."), GS("Aire totale ?", c * c + 2 * c * a, M(c * c + 2 * c * a) + " cm².")],
+          { ctx: "tot", fig: FIG.pyramid(c + " cm", "", { apo: a + " cm" }), guide: [GS("Aire de la base ?", c * c, M(c * c) + " cm²."), GS("Aire latérale (4 triangles) ?", 2 * c * a, M(2 * c * a) + " cm²."), GS("Aire totale ?", c * c + 2 * c * a, M(c * c + 2 * c * a) + " cm².")],
             traps: [TR(2 * c * a, "C'est l'aire latérale : ajoute la base."), TR(c * c + c * a / 2, "Il y a quatre faces triangulaires.")] }); },
       () => { const c = R.int(4, 16), a = R.int(5, 15), x = pk([["une tente en forme de pyramide", "tente"], ["le toit d'une tour, en forme de pyramide", "toit"]]); if (a === c) return null;
         return Qv("On veut recouvrir de toile les quatre faces " + (x[0].startsWith("le ") ? "du " + x[0].slice(3) : "d'" + x[0]) + " (base carrée de " + M(c) + " dm, apothème " + M(a) + " dm). Quelle surface de toile faut-il (en dm²) ?", 2 * c * a, M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + 2 * c * a) + " dm² (sans le sol).",
-          { ctx: x[1], guide: [GS("Une face ?", c * a / 2, M(c * a / 2) + " dm²."), GS("Quatre faces ?", 2 * c * a, M(2 * c * a) + " dm².")], traps: [TR(c * c + 2 * c * a, "Le sol n'est pas recouvert de toile.")] }); },
+          { ctx: x[1], fig: FIG.pyramid(c + " dm", "", { apo: a + " dm" }), guide: [GS("Une face ?", c * a / 2, M(c * a / 2) + " dm²."), GS("Quatre faces ?", 2 * c * a, M(2 * c * a) + " dm².")], traps: [TR(c * c + 2 * c * a, "Le sol n'est pas recouvert de toile.")] }); },
     ],
     2: [
       () => { const [c2, h, a] = pk([[3, 4, 5], [5, 12, 13], [8, 6, 10], [6, 8, 10], [9, 12, 15], [12, 5, 13], [4, 3, 5], [8, 15, 17]]), c = 2 * c2;
@@ -324,26 +324,26 @@
             traps: [TR(Math.sqrt(h * h + c * c), "Sous l'apothème, il y a le demi-côté."), TR(h + c2, "On additionne les carrés.")] }); },
       () => { const [c2, h, a] = pk([[3, 4, 5], [5, 12, 13], [8, 6, 10], [6, 8, 10], [9, 12, 15], [4, 3, 5]]), c = 2 * c2;
         return Qv("Une pyramide régulière à base carrée a un côté de base de " + M(c) + " cm et une hauteur de " + M(h) + " cm. Calcule son aire latérale (en cm²).", 2 * c * a, "Apothème : " + M("\\sqrt{" + h + "^2 + " + c2 + "^2} = " + a) + " cm ; aire latérale : " + M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + 2 * c * a) + " cm².",
-          { ctx: "lath", guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " cm."), GS("Aire latérale ?", 2 * c * a, M(2 * c * a) + " cm².")],
+          { ctx: "lath", fig: FIG.pyramid(c + " cm", "h = " + h, { apo: "a" }), guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " cm."), GS("Aire latérale ?", 2 * c * a, M(2 * c * a) + " cm².")],
             traps: [TR(2 * c * h, "Les faces ont pour hauteur l'apothème, pas la hauteur de la pyramide.")] }); },
       () => { const [c2, a, s] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 15, 17], [9, 12, 15], [4, 3, 5]]), c = 2 * c2;
         return Qv("Une pyramide régulière à base carrée a des arêtes latérales de " + M(s) + " cm et un côté de base de " + M(c) + " cm. Calcule son aire totale (en cm²).", c * c + 2 * c * a, "Apothème (dans une face) : " + M("\\sqrt{" + s + "^2 - " + c2 + "^2} = " + a) + " cm ; total : " + M(c * c + " + " + 2 * c * a + " = " + (c * c + 2 * c * a)) + " cm².",
-          { ctx: "arete", guide: [GS("Dans une face, l'apothème coupe la base en deux : " + M(s + "^2 - " + c2 + "^2") + " = ?", a * a, M(a * a) + "."), GS("Apothème ?", a, M(a) + " cm."), GS("Aire totale ?", c * c + 2 * c * a, M(c * c + 2 * c * a) + " cm².")],
+          { ctx: "arete", fig: FIG.pyramid(c + " cm", "", { edge: s + " cm", apo: "a" }), guide: [GS("Dans une face, l'apothème coupe la base en deux : " + M(s + "^2 - " + c2 + "^2") + " = ?", a * a, M(a * a) + "."), GS("Apothème ?", a, M(a) + " cm."), GS("Aire totale ?", c * c + 2 * c * a, M(c * c + 2 * c * a) + " cm².")],
             traps: [TR(c * c + 2 * c * s, "L'arête n'est pas l'apothème : calcule l'apothème avec Pythagore."), TR(2 * c * a, "N'oublie pas la base.")] }); },
     ],
     3: [
       () => { const c = 35.4, h = 21.6, a = Math.sqrt(h * h + (c / 2) ** 2), A = 2 * c * a;
         return Qv("La pyramide du Louvre a une base carrée de côté " + cm(c, "m") + " et une hauteur de " + cm(h, "m") + ". Ses quatre faces sont en verre. Calcule la surface de verre (en m², arrondie à l'unité).", A, "Apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(c / 2) + "^2} \\approx " + N(rd(a, 0.01))) + " m ; surface : " + M("2 \\cdot " + N(c) + " \\cdot " + N(rd(a, 0.01)) + " \\approx " + N(rd(A, 1))) + " m².",
-          { round: 1, ctx: "louvre", guide: [GS("Apothème (au centième) ?", a, M(N(rd(a, 0.01))) + " m.", 0.01), GS("Surface des quatre faces (à l'unité) ?", A, M(N(rd(A, 1))) + " m².", 1)],
+          { round: 1, ctx: "louvre", fig: FIG.pyramid(N(c) + " m", "h = " + N(h)), guide: [GS("Apothème (au centième) ?", a, M(N(rd(a, 0.01))) + " m.", 0.01), GS("Surface des quatre faces (à l'unité) ?", A, M(N(rd(A, 1))) + " m².", 1)],
             traps: [TR(c * c + A, "Le sol n'est pas en verre."), TR(2 * c * h, "La hauteur des faces est l'apothème.")] }); },
       // Aire du cône retirée (22.11) : hors programme 11e. Toit de tour : hauteur donnée, apothème à calculer, puis coût.
       () => { const [c2, h, a] = pk([[3, 4, 5], [5, 12, 13], [6, 8, 10], [8, 6, 10], [9, 12, 15], [8, 15, 17]]), c = 2 * c2, p = pk([35, 40, 45, 60]), A = 2 * c * a;
         return Qv("Le toit d'une tour est une pyramide régulière à base carrée de " + M(c) + " m de côté et de " + M(h) + " m de haut. On couvre ses quatre pans d'ardoises à " + M(p) + " CHF le m². Combien coûtent les ardoises (en CHF) ?", A * p, "Apothème : " + M("\\sqrt{" + h + "^2 + " + c2 + "^2} = " + a) + " m ; pans : " + M("4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + A) + " m² ; prix : " + M(A + " \\cdot " + p + " = " + N(A * p)) + " CHF.",
-          { ctx: "ardoises", guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " m."), GS("Aire des quatre pans (m²) ?", A, M(A) + " m²."), GS("Prix (CHF) ?", A * p, M(N(A * p)) + " CHF.")],
+          { ctx: "ardoises", fig: FIG.pyramid(c + " m", "h = " + h), guide: [GS("Apothème (Pythagore avec le demi-côté) ?", a, M(a) + " m."), GS("Aire des quatre pans (m²) ?", A, M(A) + " m²."), GS("Prix (CHF) ?", A * p, M(N(A * p)) + " CHF.")],
             traps: [TR(2 * c * h * p, "Les pans ont pour hauteur l'apothème, pas la hauteur du toit."), TR((c * c + A) * p, "Le plancher n'est pas couvert d'ardoises.")] }); },
       () => { const c = 2 * R.int(2, 8), a = R.int(c / 2 + 1, c + 8), A = c * c + 2 * c * a, cost = pk([12, 15, 18, 25]);
         return Qv("Un artisan fabrique une boîte en forme de pyramide régulière (base carrée de " + M(c) + " cm, apothème " + M(a) + " cm), entièrement fermée. Le carton coûte " + M(cost) + " CHF le m². Quel est le prix du carton pour une boîte (en CHF, au centime) ?", A / 10000 * cost, "Aire : " + M(c * c + " + " + 2 * c * a + " = " + A) + " cm² " + M("= " + N(A / 10000)) + " m² ; prix : " + M(N(A / 10000) + " \\cdot " + cost + " \\approx " + N(rd(A / 10000 * cost, 0.01))) + " CHF.",
-          { round: 0.01, ctx: "boite", guide: [GS("Aire totale en cm² ?", A, M(A) + " cm²."), GS("En m² (1 m² = 10'000 cm²) ?", A / 10000, M(N(A / 10000)) + " m²."), GS("Prix (au centime) ?", A / 10000 * cost, M(N(rd(A / 10000 * cost, 0.01))) + " CHF.", 0.01)],
+          { round: 0.01, ctx: "boite", fig: FIG.pyramid(c + " cm", "", { apo: a + " cm" }), guide: [GS("Aire totale en cm² ?", A, M(A) + " cm²."), GS("En m² (1 m² = 10'000 cm²) ?", A / 10000, M(N(A / 10000)) + " m²."), GS("Prix (au centime) ?", A / 10000 * cost, M(N(rd(A / 10000 * cost, 0.01))) + " CHF.", 0.01)],
             traps: [TR(A / 100 * cost, "1 m² = 10'000 cm² (et non 100)."), TR(A * cost, "Convertis d'abord les cm² en m².")] }); },
     ],
   };
@@ -371,17 +371,17 @@
             traps: [TR((r * r * h + 4 * r ** 3 / 3) * Math.PI, "C'est une demi-boule : la moitié de " + M("\\frac{4}{3}\\pi r^3") + ".")] }); },
       () => { const r = 3, L = pk([8, 10, 12, 14]), K = 4 * r ** 3 / 3 + r * r * (L - 2 * r);
         return Qv("Une gélule a la forme d'un cylindre terminé par deux demi-boules. Son diamètre est " + M(2 * r) + " mm et sa longueur totale " + M(L) + " mm. Calcule son volume" + PIX + ".", K * Math.PI, "Les deux demi-boules forment une boule : " + M(piT(4 * r ** 3 / 3)) + ". Partie cylindrique : longueur " + M(L - 2 * r) + " mm, " + M(piT(r * r * (L - 2 * r))) + ". Total " + M(piT(K)) + " mm³.",
-          { canon: K + "π", ctx: "gelule", guide: [GS("Longueur de la partie cylindrique (on retire deux rayons) ?", L - 2 * r, M(L + " - 2 \\cdot " + r + " = " + (L - 2 * r)) + " mm."), GS("Les deux demi-boules : nombre devant " + M("\\pi") + " ?", 4 * r ** 3 / 3, M(piT(4 * r ** 3 / 3)) + "."), GS("Cylindre : nombre devant " + M("\\pi") + " ?", r * r * (L - 2 * r), M(piT(r * r * (L - 2 * r))) + "."), GS("Total (avec " + M("\\pi") + ") ?", K * Math.PI, M(piT(K)) + " mm³.")],
+          { canon: K + "π", ctx: "gelule", fig: FIG.capsule("d = " + 2 * r + " mm", L + " mm", 2 * r, L), guide: [GS("Longueur de la partie cylindrique (on retire deux rayons) ?", L - 2 * r, M(L + " - 2 \\cdot " + r + " = " + (L - 2 * r)) + " mm."), GS("Les deux demi-boules : nombre devant " + M("\\pi") + " ?", 4 * r ** 3 / 3, M(piT(4 * r ** 3 / 3)) + "."), GS("Cylindre : nombre devant " + M("\\pi") + " ?", r * r * (L - 2 * r), M(piT(r * r * (L - 2 * r))) + "."), GS("Total (avec " + M("\\pi") + ") ?", K * Math.PI, M(piT(K)) + " mm³.")],
             traps: [TR((4 * r ** 3 / 3 + r * r * L) * Math.PI, "La partie cylindrique est plus courte : on retire les deux demi-boules (2 rayons)."), TR((r * r * L) * Math.PI, "Ajoute les deux demi-boules.")] }); },
       () => { const a = pk([6, 8, 10, 12]), r = pk([1, 2, 3].filter((x) => 2 * x < a)), V = a ** 3 - Math.PI * r * r * a;
         return Qv("On perce un trou cylindrique de rayon " + M(r) + " cm de part en part dans un cube d'arête " + M(a) + " cm (perpendiculairement à une face). Calcule le volume restant (en cm³, arrondi à l'unité).", V, M(a + "^3 - \\pi \\cdot " + r + "^2 \\cdot " + a + " \\approx " + a ** 3 + " - " + N(rd(Math.PI * r * r * a, 0.01)) + " \\approx " + N(rd(V, 1))) + " cm³.",
-          { round: 1, ctx: "cubetrou", guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume du trou (au centième) ?", Math.PI * r * r * a, M("\\pi \\cdot " + r * r + " \\cdot " + a + " \\approx " + N(rd(Math.PI * r * r * a, 0.01))) + " cm³.", 0.01), GS("Volume restant (à l'unité) ?", V, M(N(rd(V, 1))) + " cm³.", 1)],
+          { round: 1, ctx: "cubetrou", fig: FIG.cubeHole(a + " cm", "r = " + r, r / a), guide: [GS("Volume du cube ?", a ** 3, M(a ** 3) + " cm³."), GS("Volume du trou (au centième) ?", Math.PI * r * r * a, M("\\pi \\cdot " + r * r + " \\cdot " + a + " \\approx " + N(rd(Math.PI * r * r * a, 0.01))) + " cm³.", 0.01), GS("Volume restant (à l'unité) ?", V, M(N(rd(V, 1))) + " cm³.", 1)],
             traps: [TR(a ** 3 - Math.PI * 4 * r * r * a, "Le rayon est " + M(r) + " : l'aire du disque est " + M("\\pi \\cdot " + r * r) + "."), TR(a ** 3, "Il faut retirer le volume du trou.")] }); },
     ],
     3: [
       () => { const r = 3 * R.int(1, 2), h = 3 * R.int(2, 4), K = r * r * h / 3 + 2 * r ** 3 / 3;
         return Qv("Une glace : un cône de rayon " + M(r) + " cm et de hauteur " + M(h) + " cm, rempli et surmonté d'une demi-boule de glace de même rayon. Calcule le volume total de glace" + PIX + ".", K * Math.PI, "Cône : " + M(piT(r * r * h / 3)) + " ; demi-boule : " + M(piT(2 * r ** 3 / 3)) + " ; total " + M(piT(K)) + " cm³.",
-          { canon: K + "π", ctx: "glace", guide: [GS("Cône : nombre devant " + M("\\pi") + " ?", r * r * h / 3, M(piT(r * r * h / 3)) + "."), GS("Demi-boule : nombre devant " + M("\\pi") + " ?", 2 * r ** 3 / 3, M(piT(2 * r ** 3 / 3)) + "."), GS("Total (avec " + M("\\pi") + ") ?", K * Math.PI, M(piT(K)) + " cm³.")],
+          { canon: K + "π", ctx: "glace", fig: FIG.iceCone("r = " + r + " cm", "h = " + h + " cm", r, h), guide: [GS("Cône : nombre devant " + M("\\pi") + " ?", r * r * h / 3, M(piT(r * r * h / 3)) + "."), GS("Demi-boule : nombre devant " + M("\\pi") + " ?", 2 * r ** 3 / 3, M(piT(2 * r ** 3 / 3)) + "."), GS("Total (avec " + M("\\pi") + ") ?", K * Math.PI, M(piT(K)) + " cm³.")],
             traps: [TR((r * r * h + 2 * r ** 3 / 3) * Math.PI, "Le cône vaut le tiers du cylindre."), TR((r * r * h / 3 + 4 * r ** 3 / 3) * Math.PI, "C'est une demi-boule.")] }); },
       () => { const a = 3 * R.int(1, 4), V = 2 * a ** 3 / 3;
         return Qv("On découpe dans un cube d'arête " + M(a) + " cm la plus grande pyramide possible (base = une face, sommet = centre de la face opposée). Quel volume de matière enlève-t-on (en cm³) ?", V, "Cube " + M(a ** 3) + ", pyramide " + M(a ** 3 / 3) + " : on enlève " + M(a ** 3 + " - " + a ** 3 / 3 + " = " + V) + " cm³, les deux tiers.",
@@ -399,36 +399,36 @@
     1: [
       () => { const a = R.int(3, 12), b = R.int(2, 8), h = R.int(2, 12); if (h === a || h === b || a === b) return null;
         return Qv("Un pavé droit a un volume de " + M(a * b * h) + " cm³ et une base de " + M(a) + " cm sur " + M(b) + " cm. Quelle est sa hauteur (en cm) ?", h, M(a * b + " \\cdot h = " + a * b * h) + ", donc " + M("h = " + a * b * h + " : " + a * b + " = " + h) + " cm.",
-          { ctx: "pave", guide: [GS("Aire de la base ?", a * b, M(a * b) + " cm²."), GS(M("h") + " = volume divisé par l'aire de la base : ?", h, M(h) + " cm.")], traps: [TR(a * b * h / a, "Divise par l'aire de la base entière, " + M(a + " \\cdot " + b) + ".")] }); },
+          { ctx: "pave", fig: FIG.box(a + " cm", b + " cm", "h = ?"), guide: [GS("Aire de la base ?", a * b, M(a * b) + " cm²."), GS(M("h") + " = volume divisé par l'aire de la base : ?", h, M(h) + " cm.")], traps: [TR(a * b * h / a, "Divise par l'aire de la base entière, " + M(a + " \\cdot " + b) + ".")] }); },
       () => { const r = R.int(2, 7), h = R.int(2, 12); if (h === r) return null;
         return Qv("Un cylindre de rayon " + M(r) + " cm a un volume de " + M(piT(r * r * h)) + " cm³. Quelle est sa hauteur (en cm) ?", h, M("\\pi \\cdot " + r + "^2 \\cdot h = " + piT(r * r * h)) + ", donc " + M("h = " + r * r * h + " : " + r * r + " = " + h) + " cm.",
-          { ctx: "cyl", guide: [GS("Aire de la base : nombre devant " + M("\\pi") + " ?", r * r, M(piT(r * r)) + "."), GS(M("h") + " = ?", h, M(r * r * h + " : " + r * r + " = " + h) + " cm.")], traps: [TR(r * h, "L'aire de la base est " + M("\\pi r^2") + " : divise par " + M(r * r) + ".")] }); },
+          { ctx: "cyl", fig: FIG.cylinder("r = " + r + " cm", "h = ?"), guide: [GS("Aire de la base : nombre devant " + M("\\pi") + " ?", r * r, M(piT(r * r)) + "."), GS(M("h") + " = ?", h, M(r * r * h + " : " + r * r + " = " + h) + " cm.")], traps: [TR(r * h, "L'aire de la base est " + M("\\pi r^2") + " : divise par " + M(r * r) + ".")] }); },
       () => { const b = R.int(3, 10), hh = 2 * R.int(1, 5), L = R.int(4, 15), Ab = b * hh / 2; if (L === b) return null;
         return Qv("Un prisme droit a pour base un triangle de base " + M(b) + " cm et de hauteur " + M(hh) + " cm. Son volume est " + M(Ab * L) + " cm³. Quelle est sa longueur (en cm) ?", L, "Aire de la base : " + M(Ab) + " cm² ; " + M("L = " + Ab * L + " : " + Ab + " = " + L) + " cm.",
-          { ctx: "prisme", guide: [GS("Aire du triangle de base ?", Ab, M(Ab) + " cm²."), GS("Longueur ?", L, M(L) + " cm.")], traps: [TR(Ab * L / (b * hh), "L'aire du triangle se divise par 2 : " + M(Ab) + " cm².")] }); },
+          { ctx: "prisme", fig: FIG.prism(b + " cm", hh + " cm", "L = ?"), guide: [GS("Aire du triangle de base ?", Ab, M(Ab) + " cm²."), GS("Longueur ?", L, M(L) + " cm.")], traps: [TR(Ab * L / (b * hh), "L'aire du triangle se divise par 2 : " + M(Ab) + " cm².")] }); },
     ],
     2: [
       () => { const r = R.int(2, 6), h = 3 * R.int(1, 4); if (r === h) return null;
         return Qv("Un cône de hauteur " + M(h) + " cm a un volume de " + M(piT(r * r * h / 3)) + " cm³. Quel est le rayon de sa base (en cm) ?", r, M("\\frac{1}{3}\\pi r^2 \\cdot " + h + " = " + piT(r * r * h / 3)) + ", donc " + M("r^2 = " + r * r) + " et " + M("r = " + r) + " cm.",
-          { ctx: "cone", guide: [GS(M("\\frac{1}{3} \\cdot r^2 \\cdot " + h + " = " + r * r * h / 3) + " : combien vaut " + M("r^2") + " ?", r * r, M(r * r * h / 3 + " \\cdot 3 : " + h + " = " + r * r) + "."), GS(M("r") + " = ?", r, M(r) + " cm.")], traps: [TR(r * r, "C'est " + M("r^2") + " : prends la racine."), TR(Math.sqrt(r * r / 3), "N'oublie pas de multiplier par 3 (le cône vaut le tiers du cylindre).")] }); },
+          { ctx: "cone", fig: FIG.cone("r = ?", "h = " + h + " cm"), guide: [GS(M("\\frac{1}{3} \\cdot r^2 \\cdot " + h + " = " + r * r * h / 3) + " : combien vaut " + M("r^2") + " ?", r * r, M(r * r * h / 3 + " \\cdot 3 : " + h + " = " + r * r) + "."), GS(M("r") + " = ?", r, M(r) + " cm.")], traps: [TR(r * r, "C'est " + M("r^2") + " : prends la racine."), TR(Math.sqrt(r * r / 3), "N'oublie pas de multiplier par 3 (le cône vaut le tiers du cylindre).")] }); },
       () => { const c = R.int(3, 10), h = R.int(2, 15), V = c * c * h; if (V % 3 || h === c) return null;
         return Qv("Une pyramide à base carrée de côté " + M(c) + " cm a un volume de " + M(V / 3) + " cm³. Quelle est sa hauteur (en cm) ?", h, M("\\frac{1}{3} \\cdot " + c * c + " \\cdot h = " + V / 3) + ", donc " + M("h = " + V / 3 + " \\cdot 3 : " + c * c + " = " + h) + " cm.",
-          { ctx: "pyr", guide: [GS("Aire de la base ?", c * c, M(c * c) + " cm²."), GS("Volume × 3 ?", V, M(V) + "."), GS("Hauteur ?", h, M(V + " : " + c * c + " = " + h) + " cm.")], traps: [TR(V / 3 / (c * c), "Une pyramide : " + M("h = \\frac{3V}{A_{\\text{base}}}") + ", n'oublie pas le facteur 3.")] }); },
+          { ctx: "pyr", fig: FIG.pyramid(c + " cm", "h = ?"), guide: [GS("Aire de la base ?", c * c, M(c * c) + " cm²."), GS("Volume × 3 ?", V, M(V) + "."), GS("Hauteur ?", h, M(V + " : " + c * c + " = " + h) + " cm.")], traps: [TR(V / 3 / (c * c), "Une pyramide : " + M("h = \\frac{3V}{A_{\\text{base}}}") + ", n'oublie pas le facteur 3.")] }); },
       () => { const r = pk([3, 6, 9]), k = 4 * r ** 3 / 3;
         return Qv("Une boule a un volume de " + M(piT(k)) + " cm³. Quel est son rayon (en cm) ?", r, M("\\frac{4}{3}\\pi r^3 = " + piT(k)) + ", donc " + M("r^3 = " + k + " \\cdot \\frac{3}{4} = " + r ** 3) + " et " + M("r = " + r) + " cm.",
-          { ctx: "boule", guide: [GS("Combien vaut " + M("r^3") + " ? (" + M(k + " \\cdot 3 : 4") + ")", r ** 3, M(r ** 3) + "."), GS(M("r") + " = ? (racine cubique)", r, M(r + "^3 = " + r ** 3) + ", donc " + M("r = " + r) + " cm.")], traps: [TR(r ** 3, "C'est " + M("r^3") + " : cherche le nombre dont le cube vaut " + M(r ** 3) + "."), TR(Math.sqrt(r ** 3), "C'est un cube : racine cubique, pas carrée.")] }); },
+          { ctx: "boule", fig: FIG.sphere("r = ?"), guide: [GS("Combien vaut " + M("r^3") + " ? (" + M(k + " \\cdot 3 : 4") + ")", r ** 3, M(r ** 3) + "."), GS(M("r") + " = ? (racine cubique)", r, M(r + "^3 = " + r ** 3) + ", donc " + M("r = " + r) + " cm.")], traps: [TR(r ** 3, "C'est " + M("r^3") + " : cherche le nombre dont le cube vaut " + M(r ** 3) + "."), TR(Math.sqrt(r ** 3), "C'est un cube : racine cubique, pas carrée.")] }); },
     ],
     3: [
       () => { const a = pk([8, 10, 12, 15]), b = pk([4, 5, 6]), V = pk([96, 120, 150, 180, 240]), h = V / (a * b); if (h > 3 || h < 0.5) return null;
         return Qv("Une piscine rectangulaire de " + M(a) + " m sur " + M(b) + " m doit contenir " + M(N(V)) + " m³ d'eau. Quelle doit être la profondeur de l'eau (en m, au centième) ?", h, M("h = " + V + " : (" + a + " \\cdot " + b + ") = " + V + " : " + a * b + " \\approx " + N(rd(h, 0.01))) + " m.",
-          { round: 0.01, ctx: "piscine", guide: [GS("Aire du fond ?", a * b, M(a * b) + " m²."), GS("Profondeur (au centième) ?", h, M(N(rd(h, 0.01))) + " m.", 0.01)], traps: [TR(V / a, "Divise par l'aire du fond, " + M(a + " \\cdot " + b) + ".")] }); },
+          { round: 0.01, ctx: "piscine", fig: FIG.box(a + " m", b + " m", "h = ?"), guide: [GS("Aire du fond ?", a * b, M(a * b) + " m²."), GS("Profondeur (au centième) ?", h, M(N(rd(h, 0.01))) + " m.", 0.01)], traps: [TR(V / a, "Divise par l'aire du fond, " + M(a + " \\cdot " + b) + ".")] }); },
       () => { const r = pk([3, 4, 5, 6, 3.5]), L = pk([0.5, 1, 1.5, 0.75, 2]), V = L * 1000, h = V / (Math.PI * r * r);
         return Qv("Une boîte cylindrique de rayon " + cm(r) + " doit contenir " + M(N(L)) + " L. Quelle doit être sa hauteur (en cm, au dixième) ?", h, M(N(L) + "\\ \\text{L} = " + N(V)) + " cm³ ; " + M("h = \\frac{" + N(V) + "}{\\pi \\cdot " + N(r) + "^2} \\approx " + N(rd(h, 0.1))) + " cm.",
-          { round: 0.1, ctx: "boite", guide: [GS("Volume en cm³ (1 L = 1000 cm³) ?", V, M(N(V)) + " cm³."), GS("Aire de la base (au centième) ?", Math.PI * r * r, M("\\pi \\cdot " + N(r) + "^2 \\approx " + N(rd(Math.PI * r * r, 0.01))) + " cm².", 0.01), GS("Hauteur (au dixième) ?", h, M(N(rd(h, 0.1))) + " cm.", 0.1)],
+          { round: 0.1, ctx: "boite", fig: FIG.cylinder("r = " + N(r) + " cm", "h = ?"), guide: [GS("Volume en cm³ (1 L = 1000 cm³) ?", V, M(N(V)) + " cm³."), GS("Aire de la base (au centième) ?", Math.PI * r * r, M("\\pi \\cdot " + N(r) + "^2 \\approx " + N(rd(Math.PI * r * r, 0.01))) + " cm².", 0.01), GS("Hauteur (au dixième) ?", h, M(N(rd(h, 0.1))) + " cm.", 0.1)],
             traps: [TR(L / (Math.PI * r * r), "Convertis d'abord les litres en cm³ (1 L = 1000 cm³)."), TR(V / (Math.PI * 2 * r), "L'aire de la base est " + M("\\pi r^2") + ".")] }); },
       () => { const d = 2 * R.int(2, 6), r = d / 2, h = 3 * R.int(1, 5), k = r * r * h / 3; if (!Number.isInteger(k)) return null;
         return Qv("Un entonnoir en forme de cône a un diamètre de " + M(d) + " cm et contient " + M(piT(k)) + " cm³. Quelle est sa profondeur (hauteur, en cm) ?", h, "Rayon " + M(r) + " : " + M("\\frac{1}{3}\\pi \\cdot " + r * r + " \\cdot h = " + piT(k)) + ", donc " + M("h = " + k + " \\cdot 3 : " + r * r + " = " + h) + " cm.",
-          { ctx: "entonnoir", guide: [GS("Le rayon ?", r, M(r) + " cm."), GS(M("r^2 \\cdot h") + " vaut " + M(k + " \\cdot 3") + ". Combien ?", 3 * k, M(3 * k) + "."), GS("Hauteur ?", h, M(3 * k + " : " + r * r + " = " + h) + " cm.")],
+          { ctx: "entonnoir", fig: FIG.cone("d = " + d + " cm", "h = ?"), guide: [GS("Le rayon ?", r, M(r) + " cm."), GS(M("r^2 \\cdot h") + " vaut " + M(k + " \\cdot 3") + ". Combien ?", 3 * k, M(3 * k) + "."), GS("Hauteur ?", h, M(3 * k + " : " + r * r + " = " + h) + " cm.")],
             traps: [TR(3 * k / (d * d), "On a donné le diamètre : le rayon en est la moitié."), TR(k / (r * r), "N'oublie pas le facteur 3 du cône.")] }); },
     ],
   };
@@ -506,12 +506,12 @@
         let i = 0; const q = txt.replace(/#/g, () => N([c, h][i++]));
         return Object.assign(P(q, [["a) Apothème (hauteur d'une face, en " + u + ")", a], ["b) Aire latérale (" + u + "²)", r12(AL)], ["c) Volume (" + u + "³" + (ex ? "" : ", au centième") + ")", ex ? r12(V) : V, ex ? 0 : 0.01]],
           ["a) Triangle rectangle : hauteur, demi-côté de la base et apothème : " + M("\\sqrt{" + N(h) + "^2 + " + N(s) + "^2}") + ".", "b) 4 triangles de base " + N(c).replace("{,}", ",") + " et de hauteur l'apothème ; c) aire de la base · hauteur ÷ 3."],
-          "a) " + M("\\sqrt{" + N(r12(h * h)) + " + " + N(r12(s * s)) + "} = " + N(a)) + " ; b) " + M("4 \\cdot \\frac{" + N(c) + " \\cdot " + N(a) + "}{2} = " + N(r12(AL))) + " ; c) " + M("\\frac{" + N(r12(c * c)) + " \\cdot " + N(h) + "}{3} " + (ex ? "= " : "\\approx ") + N(rd(V, 0.01))) + "."), { ctx: cx }); },
+          "a) " + M("\\sqrt{" + N(r12(h * h)) + " + " + N(r12(s * s)) + "} = " + N(a)) + " ; b) " + M("4 \\cdot \\frac{" + N(c) + " \\cdot " + N(a) + "}{2} = " + N(r12(AL))) + " ; c) " + M("\\frac{" + N(r12(c * c)) + " \\cdot " + N(h) + "}{3} " + (ex ? "= " : "\\approx ") + N(rd(V, 0.01))) + "."), { ctx: cx, fig: FIG.pyramid(N(c) + " " + u, "h = " + N(h)) }); },
       () => { const [cx, nm] = pk([["patron", "Patron d'une pyramide régulière en carton"], ["emballage", "Patron d'un emballage de chocolats en forme de pyramide régulière"], ["lampe", "Patron d'un abat-jour en papier en forme de pyramide régulière (fermée)"]]);
         const [s, h, a] = pk([[8, 6, 10], [6, 8, 10], [5, 12, 13], [12, 5, 13], [9, 12, 15], [12, 9, 15], [3, 4, 5], [4, 3, 5]]), c = 2 * s, Ap = c * c + 2 * c * a, V = (c * c * h) / 3;
         return Object.assign(P(nm + " : un carré de " + M(c) + " cm de côté et quatre triangles isocèles d'apothème (hauteur) " + M(a) + " cm.", [["a) Aire du patron (cm²)", Ap], ["b) Hauteur de la pyramide montée (cm)", h], ["c) Volume (cm³)", V]],
           ["a) Carré + 4 triangles.", "b) " + M("\\sqrt{" + a + "^2 - " + s + "^2}") + " (demi-côté de la base) ; c) aire de la base · hauteur ÷ 3."],
-          "a) " + M(c * c + " + 4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + Ap) + " cm² ; b) " + M("\\sqrt{" + a * a + " - " + s * s + "} = " + h) + " cm ; c) " + M("\\frac{" + c * c + " \\cdot " + h + "}{3} = " + N(V)) + " cm³."), { ctx: cx }); },
+          "a) " + M(c * c + " + 4 \\cdot \\frac{" + c + " \\cdot " + a + "}{2} = " + Ap) + " cm² ; b) " + M("\\sqrt{" + a * a + " - " + s * s + "} = " + h) + " cm ; c) " + M("\\frac{" + c * c + " \\cdot " + h + "}{3} = " + N(V)) + " cm³."), { ctx: cx, fig: FIG.pyramid(c + " cm", "", { apo: a + " cm" }) }); },
     ],
     volcomp: [
       () => { const [cx, nm, rr, HH, hh] = pk([["silo", "Un silo à grain est un cylindre de rayon # m et de hauteur # m, avec un fond en cône de même rayon et de hauteur # m.", [2, 2.5, 3], [6, 8, 10], [1, 1.5, 2]],
@@ -520,14 +520,14 @@
         let i = 0; const q = nm.replace(/#/g, () => N([r, H, h][i++]));
         return Object.assign(P(q, [["a) Volume du cylindre (m³, au centième)", Vc, 0.01], ["b) Volume du cône (m³, au centième)", Vk, 0.01], ["c) Contenance totale en litres (à l'unité)", L, 1]],
           ["Cylindre : π · r² · h ; cône : ⅓ · π · r² · h.", "1 m³ = 1000 L."],
-          "a) " + M("\\pi \\cdot " + N(r) + "^2 \\cdot " + N(H) + " \\approx " + N(rd(Vc, 0.01))) + " m³ ; b) " + M("\\frac{1}{3} \\pi \\cdot " + N(r) + "^2 \\cdot " + N(h) + " \\approx " + N(rd(Vk, 0.01))) + " m³ ; c) " + M("\\approx " + N(rd(Vc + Vk, 0.001))) + " m³, soit " + M("\\approx " + N(Math.round(L))) + " L."), { ctx: cx }); },
+          "a) " + M("\\pi \\cdot " + N(r) + "^2 \\cdot " + N(H) + " \\approx " + N(rd(Vc, 0.01))) + " m³ ; b) " + M("\\frac{1}{3} \\pi \\cdot " + N(r) + "^2 \\cdot " + N(h) + " \\approx " + N(rd(Vk, 0.01))) + " m³ ; c) " + M("\\approx " + N(rd(Vc + Vk, 0.001))) + " m³, soit " + M("\\approx " + N(Math.round(L))) + " L."), { ctx: cx, fig: GF.silo(2 * r, H, h, { r: "r = " + N(r) + " m", h1: N(H) + " m", h2: N(h) + " m" }) }); },
       () => { const [cx, txt, rho, mat] = pk([["bougie", "Une bougie : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 0.9, "de cire"], ["presse-papier", "Un presse-papier en verre : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 2.5, "de verre"],
           ["savon", "Un savon décoratif : un cube de # cm d'arête surmonté d'une pyramide de même base et de # cm de hauteur.", 1.1, "de savon"]]);
         const a = pk([4, 5, 6, 8]), h = pk([3, 6, 9].filter((z) => z <= 1.5 * a)), Vc = a ** 3, Vp = (a * a * h) / 3, m = r12((Vc + Vp) * rho);
         let i = 0; const q = txt.replace(/#/g, () => [a, h][i++]);
         return Object.assign(P(q, [["a) Volume du cube (cm³)", Vc], ["b) Volume de la pyramide (cm³)", Vp], ["c) Masse " + mat + " si 1 cm³ pèse " + N(rho).replace("{,}", ",") + " g (g)", m]],
           ["Pyramide : " + a * a + " · " + h + " ÷ 3.", "Masse = volume total · " + N(rho).replace("{,}", ",") + "."],
-          "a) " + M(a + "^3 = " + Vc) + " cm³ ; b) " + M("\\frac{" + a * a + " \\cdot " + h + "}{3} = " + Vp) + " cm³ ; c) " + M("(" + Vc + " + " + Vp + ") \\cdot " + N(rho) + " = " + N(m)) + " g."), { ctx: cx }); },
+          "a) " + M(a + "^3 = " + Vc) + " cm³ ; b) " + M("\\frac{" + a * a + " \\cdot " + h + "}{3} = " + Vp) + " cm³ ; c) " + M("(" + Vc + " + " + Vp + ") \\cdot " + N(rho) + " = " + N(m)) + " g."), { ctx: cx, fig: GF.profile("pyr", a, a, h, { a: a + " cm", h1: a + " cm", h2: h + " cm" }) }); },
     ],
     volmanq: [
       () => P("Un verre conique de 6 cm de rayon doit contenir 20 cL.", [["a) 20 cL en cm³", 200], ["b) Hauteur du verre (cm, au dixième)", 600 / (36 * Math.PI), 0.1]],

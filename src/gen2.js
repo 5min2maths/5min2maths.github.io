@@ -161,7 +161,7 @@ const solsetSpec = (ivs) => ({ kind: "solset", ivs });
   // Boule.
   FIG.sphere = function (lr) {
     let g = '<circle cx="150" cy="90" r="70" class="f-shape"/><ellipse cx="150" cy="90" rx="70" ry="18" class="f-line" fill="none" stroke-dasharray="4 4"/>';
-    g += L(150, 90, 220, 90, "f-accent") + t(185, 84, lr, "f-accent f-txt");
+    g += L(150, 90, 220, 90, "f-accent") + t(185, 66, lr, "f-accent f-txt"); // 28.11 : au-dessus de l'équateur en pointillé (l'étiquette le chevauchait)
     return svg(300, 180, g, "boule");
   };
   // Prisme droit à base triangulaire : lb = base du triangle, lh = sa hauteur, lH = longueur du prisme.

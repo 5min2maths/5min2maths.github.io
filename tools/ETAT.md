@@ -20,9 +20,13 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   28.11, branches `agent/pepite-ecrans` et `agent/pepite-presentations`) ; captures à montrer avant publication.
 - **Ménage** (28.11) : rapports archivés ✓, ce fichier ✓ ; reste à regrouper les tests par thème (180 pages → 80–100, `/entretien tests`) après la
   fusion des branches Pépite² (pour éviter les conflits).
-- **Audit des figures** (demande du 28.11, `/contenu figures`) : relever toutes les questions de géométrie, de mesures ou de problème qui n'ont pas
-  de figure (par fréquence, 9e–11e et 1re Collège d'abord), puis ajouter des figures (SVG maison, lisibles à 360 px, cotes
-  justes, jamais la réponse). À lancer dès qu'un agent Pépite² a fini (2 agents au plus).
+- **Audit des figures** (demande du 28.11, `/contenu figures`, rapport `archive/contenu_figures_28-11.md`) : 105 formes
+  reçoivent une figure dans 17 notions (11e : airepyr, volmanq, volcomp, volcone, thales, thalesrec, cercthales, angles,
+  pythrec, probeq2 ; 1re : euclide, exactes, geocomb, droitesrem, trigo, trigexact ; 9e : volpave), branche
+  `agent/contenu`, à fusionner après contrôle des captures (`tests/_shots/contenu/figures/`). Reste (par fréquence) :
+  repère de pythrec 2, rectangles cotés (sysprob, sys2, ineq2, ratden), simil, cylindre donné par son diamètre
+  (airelat, volmanq 4), disque / secteur (10e), voldecomp ; puis 2e–4e Collège et MP. À décider : figures qui feraient
+  la mise en équation (eq2 4, idrem 4) ou trancheraient la question (pythrec 1–2, paraboles).
 
 ## À faire
 
