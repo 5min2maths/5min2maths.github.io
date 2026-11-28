@@ -14,6 +14,11 @@ présentations / PDF, commentaires d'interface), **/entretien** (tests, ménage,
 2 agents au plus en même temps. Routines cron : robot 3 h 30, tests de nuit 5 h, miroir Dropbox 6 h 10, revue élèves
 Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entretien).
 
+## Publication
+
+**Règle générale (enseignant, 28.11) : une seule publication par jour**, en fin de journée, avec tout ce qui est
+fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Exception : bug bloquant, avec son accord.
+
 ## En cours
 
 - **Univers Pépite²** : accueil fait (27.11, `pepite_accueil.md`) ; écrans et présentations / PDF en cours (agents du
@@ -53,6 +58,8 @@ puis `/app animations` et `/contenu curieux et histoire` (le grand problème de 
   (55 : événements, anecdotes, portraits), là où il en manque : inventaire par classe et chapitre (notions `uses` / `need`),
   11e et 1re Collège d'abord, puis France ; vraisemblance, « À toi » au niveau de la classe, faits historiques exacts et
   vérifiables, séparation France / romand, familles variées.
+  Inventaire fait (28.11, `archive/inventaire_curieux_histoire_28-11.md`) : rien de lié au programme de l'année en
+  1re Collège, MP 2e, 2e–4e Collège, lycée FR ; 20 + 15 sujets proposés (11e, 1C, MP 2e, 2C) à valider.
 - **`/app animations`** (validé 28.11, n° 1 à 5) : bonne réponse → petite pépite qui s'envole vers le compteur (« +2 ») ;
   bilan → nombre de pépites qui défile ; pépite polie → éclat doré sur la carte ; filon qui augmente → flamme qui grossit ;
   barre de séance qui se remplit en glissant. Règles : < 0,5 s, un retour (pas un décor), jamais d'attente, rien si
