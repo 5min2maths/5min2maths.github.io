@@ -3319,7 +3319,7 @@ else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenH
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
   if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
   const d = document.createElement("div"); d.className = "splash"; d.setAttribute("aria-hidden", "true");
-  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE}</div>`;
+  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE}</div>`;
   document.body.appendChild(d);
   const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
   d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 700 : 1200);

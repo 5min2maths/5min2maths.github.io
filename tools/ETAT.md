@@ -50,6 +50,9 @@ puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux d�
    `rotation`, `optim` n. 1, `eqverif`).
 5. `tools/run_tests.sh` : « verrou des tests occupé … série annulée » sort avec le code 0 → un commit enchaîné passe sans
    test (28.11). Le verrou occupé doit être un échec (code ≠ 0). (`/entretien`)
+6. `tools/publier.sh` : il teste l'arbre de travail puis fait `git add -A src …` À LA FIN → des modifications faites pendant
+   les tests partent sans avoir été testées (28.11, écran d'ouverture publié avant son recadrage). Figer l'état (commit ou
+   copie) AVANT les tests. (`/entretien`)
 6. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
 
 ## Décisions de l'enseignant
