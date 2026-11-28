@@ -32,6 +32,12 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
   pour factor, tour par deux visées) ; `co: [11]` / `[12]` seulement, la version à 3 parties reste pour le défi du jour des faibles.
   À relire par l'enseignant (énoncés), puis fusion. Reste pour 35 sans reprise : 1C +9, 11e +2.
 
+## File d'attente (28.11)
+
+**EN TÊTE (décision 28.11) : « nickel » 11e Équations 1 (1er degré, mise en équation) et Équations 2 (2e degré,
+factorisation, Viète)**, à finir avant mi-janvier (11LS y arrive après Calcul littéral 2, test du 22.01) ;
+puis « nickel » 10e (ch. 6 après décisions, 10, 11, 4, reprises 3-1-2, courts) et « nickel » 9e ;
+
 ## En cours
 
 - **Univers Pépite²** : accueil fait (27.11, `pepite_accueil.md`) ; écrans et présentations / PDF en cours (agents du
