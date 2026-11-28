@@ -243,14 +243,14 @@ const DEFIS = (() => {
           [["a) Distance entre la tour et le premier point de visée (m, au dixième)", x, 0.1], ["b) Hauteur de la tour (m, au dixième)", H, 0.1]],
           ["Appelle x la distance du premier point au pied de la tour et H la hauteur : tan " + be + "° = H ÷ x et tan " + al + "° = H ÷ (x + " + d + ").",
            "H = x · tan " + be + "° = (x + " + d + ") · tan " + al + "°. Résous cette équation en x (regroupe les x d'un côté), puis calcule H."],
-          M("x \\tan " + be + "° = (x + " + d + ")\\tan " + al + "° \\iff x = \\frac{" + d + " \\tan " + al + "°}{\\tan " + be + "° - \\tan " + al + "°} \\approx " + D(r1(x))) + " m. b) " + M("H = x \\tan " + be + "° \\approx " + D(r1(H))) + " m.");
+          M("x \\tan " + be + "° = (x + " + d + ")\\tan " + al + "° \\iff x = \\frac{" + d + " \\tan " + al + "°}{\\tan " + be + "° - \\tan " + al + "°} \\approx " + D(r1(x))) + " m. b) " + M("H = x \\tan " + be + "° \\approx " + D(r1(H))) + " m.", GF.elev(al, be, { al: al + "°", be: be + "°", d: d + " m", h: "?" }));
       },
       () => { /* rampe : pente en %, longueur, angle */
         const h = pk([36, 42, 48, 54, 60, 75]), pc = pk([6, 8, 10, 12]), Lh = h / pc, Lr = Math.sqrt(Lh * Lh + (h / 100) ** 2), ang = deg(Math.atan(pc / 100));
         return P("Une rampe pour fauteuil roulant doit monter de " + M(h) + " cm. Sa pente vaut " + M(pc + "\\,\\%") + " (elle monte de " + M(pc) + " cm pour 100 cm à l'horizontale).",
           [["a) Longueur horizontale nécessaire (m, au centième)", r2c(Lh), 0.01], ["b) Longueur de la rampe elle-même (m, au centième)", r2c(Lr), 0.01], ["c) Angle de la rampe avec le sol (°, au dixième)", r1(ang), 0.1]],
           ["Pente = dénivelé ÷ distance horizontale. Attention aux unités : passe tout en mètres.", "La rampe est l'hypoténuse (Pythagore). Angle : tan α = " + pc + " ÷ 100."],
-          "a) " + M("0{,}" + String(h).padStart(2, "0") + " \\div 0{,}" + String(pc).padStart(2, "0") + " = " + D(Lh)) + " m. b) " + M("\\sqrt{" + D(Lh) + "^2 + " + D(h / 100) + "^2} \\approx " + D(r2c(Lr))) + " m. c) " + M("\\tan \\alpha = " + D(pc / 100)) + ", " + M("\\alpha \\approx " + D(r1(ang)) + "°") + ".");
+          "a) " + M("0{,}" + String(h).padStart(2, "0") + " \\div 0{,}" + String(pc).padStart(2, "0") + " = " + D(Lh)) + " m. b) " + M("\\sqrt{" + D(Lh) + "^2 + " + D(h / 100) + "^2} \\approx " + D(r2c(Lr))) + " m. c) " + M("\\tan \\alpha = " + D(pc / 100)) + ", " + M("\\alpha \\approx " + D(r1(ang)) + "°") + ".", GF.slope(ang, { v: h + " cm", h: "?" }));
       },
     ],
     /* 26.11 soir (agent defis3) : + hexagone et chevron de toit (30°, 45°, 60°), 3 contextes. */
@@ -1057,7 +1057,7 @@ const DEFIS = (() => {
           [["a) Volume du cône (cm³, au dixième)", Vc, 0.1], ["b) Volume total de glace (cm³, au dixième)", Vt, 0.1], ["c) Hauteur d'un cône de même rayon qui contiendrait toute cette glace (cm)", h + 2 * r]],
           ["Cône : π r² h ÷ 3. Boule : 4πr³ ÷ 3, donc demi-boule : 2πr³ ÷ 3.",
            "c) π · " + r * r + " · H ÷ 3 = volume total : divise par π · " + r * r + " ÷ 3 (garde π dans les calculs, sans arrondir)."],
-          "a) " + M("\\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + D(r1(Vc))) + " cm³. b) Demi-boule " + M("\\frac{2\\pi \\cdot " + r + "^3}{3}") + " ; total " + M("\\frac{\\pi \\cdot " + r * r + "(" + h + " + " + 2 * r + ")}{3} \\approx " + D(r1(Vt))) + " cm³. c) " + M("H = " + h + " + 2 \\cdot " + r + " = " + (h + 2 * r)) + " cm : la demi-boule vaut un cône de hauteur " + M(2 * r) + ".");
+          "a) " + M("\\frac{\\pi \\cdot " + r + "^2 \\cdot " + h + "}{3} \\approx " + D(r1(Vc))) + " cm³. b) Demi-boule " + M("\\frac{2\\pi \\cdot " + r + "^3}{3}") + " ; total " + M("\\frac{\\pi \\cdot " + r * r + "(" + h + " + " + 2 * r + ")}{3} \\approx " + D(r1(Vt))) + " cm³. c) " + M("H = " + h + " + 2 \\cdot " + r + " = " + (h + 2 * r)) + " cm : la demi-boule vaut un cône de hauteur " + M(2 * r) + ".", FIG.iceCone("r = " + r + " cm", "h = " + h + " cm", r, h));
       },
       () => { /* boule fondue en petits cônes */
         let R0, r, h, ratio; do { R0 = ri(4, 10); r = ri(1, 3); h = ri(3, 8); ratio = (4 * R0 ** 3) / (r * r * h); } while (Number.isInteger(ratio) || ratio > 2000);
@@ -1191,7 +1191,7 @@ const DEFIS = (() => {
           [["a) Longueur " + M("PT") + " (cm)", PT], ["b) Aire du quadrilatère " + M("OTPT'") + " (cm²)", r * PT], ["c) Longueur de la corde " + M("TT'") + " (cm, au dixième)", TT, 0.1]],
           ["Une tangente est perpendiculaire au rayon au point de contact : le triangle OTP est rectangle en T.",
            "b) Le quadrilatère est formé de deux triangles rectangles identiques. c) [TT'] est perpendiculaire à (OP) ; sa moitié est la hauteur du triangle OTP issue de T : aire = ½ · OP · hauteur."],
-          "a) " + M("PT = \\sqrt{" + OP + "^2 - " + r + "^2} = " + PT) + " cm. b) " + M("2 \\cdot \\frac{" + r + " \\cdot " + PT + "}{2} = " + r * PT) + " cm². c) Hauteur " + M("\\frac{" + r + " \\cdot " + PT + "}{" + OP + "} = " + D(r2c((r * PT) / OP))) + ", " + M("TT' = 2 \\cdot " + D(r2c((r * PT) / OP)) + " \\approx " + D(r1(TT))) + " cm.");
+          "a) " + M("PT = \\sqrt{" + OP + "^2 - " + r + "^2} = " + PT) + " cm. b) " + M("2 \\cdot \\frac{" + r + " \\cdot " + PT + "}{2} = " + r * PT) + " cm². c) Hauteur " + M("\\frac{" + r + " \\cdot " + PT + "}{" + OP + "} = " + D(r2c((r * PT) / OP))) + ", " + M("TT' = 2 \\cdot " + D(r2c((r * PT) / OP)) + " \\approx " + D(r1(TT))) + " cm.", GF.tangent(r, OP, { lr: r + " cm", ld: OP + " cm", both: true }));
       },
       () => { /* triangle inscrit dans un demi-cercle : côté, aire, hauteur */
         const [a, b, c] = pk([[6, 8, 10], [10, 24, 26], [12, 16, 20], [16, 30, 34], [9, 12, 15], [5, 12, 13], [8, 15, 17]]), k = c < 15 ? ri(1, 2) : 1;
@@ -1200,7 +1200,7 @@ const DEFIS = (() => {
           [["a) Longueur " + M("BC") + " (cm)", BC], ["b) Aire du triangle " + M("ABC") + " (cm²)", (AC * BC) / 2], ["c) Distance de " + M("C") + " au diamètre " + M("[AB]") + " (cm, au centième)", hh, 0.01]],
           ["Un triangle inscrit dans un demi-cercle (un côté = diamètre) est rectangle : en quel sommet ? Le diamètre mesure " + T(AB) + " cm.",
            "b) Aire = ½ · produit des cathètes. c) Cette distance est la hauteur relative à l'hypoténuse [AB] : aire = ½ · AB · hauteur."],
-          "Triangle rectangle en " + M("C") + ", " + M("AB = " + AB) + ". a) " + M("BC = \\sqrt{" + AB + "^2 - " + AC + "^2} = " + BC) + " cm. b) " + M("\\frac{" + AC + " \\cdot " + BC + "}{2} = " + (AC * BC) / 2) + " cm². c) " + M("\\frac{" + AC * BC + "}{" + AB + "} \\approx " + D(r2c(hh))) + " cm.");
+          "Triangle rectangle en " + M("C") + ", " + M("AB = " + AB) + ". a) " + M("BC = \\sqrt{" + AB + "^2 - " + AC + "^2} = " + BC) + " cm. b) " + M("\\frac{" + AC + " \\cdot " + BC + "}{2} = " + (AC * BC) / 2) + " cm². c) " + M("\\frac{" + AC * BC + "}{" + AB + "} \\approx " + D(r2c(hh))) + " cm.", GF.diam(2 * Math.atan2(BC, AC) * 180 / Math.PI, { lAC: AC + " cm", center: true }));
       },
     ],
     angles: [
@@ -1611,7 +1611,7 @@ const DEFIS = (() => {
           [["a) Hauteur de la façade (m)", ht], ["b) Volume de la tente (m³, au centième)", r2c(V), 0.01], ["c) Surface de toile (deux façades et deux pans, m², au centième)", r2c(S), 0.01]],
           ["Hauteur : Pythagore dans le demi-triangle (hypoténuse " + T(sd) + " m, un côté " + T(hb) + " m).",
            "Volume du prisme = aire de la façade · longueur. Toile : 2 triangles + 2 rectangles de " + T(sd) + " m sur " + T(L) + " m."],
-          "a) " + M("\\sqrt{" + D(sd) + "^2 - " + D(hb) + "^2} = " + D(ht)) + " m. b) Façade " + M("\\frac{" + D(2 * hb) + " \\cdot " + D(ht) + "}{2} = " + D(r2c(Af))) + " m², " + M("V = " + D(r2c(Af)) + " \\cdot " + D(L) + " \\approx " + D(r2c(V))) + " m³. c) " + M("2 \\cdot " + D(r2c(Af)) + " + 2 \\cdot " + D(sd) + " \\cdot " + D(L) + " \\approx " + D(r2c(S))) + " m².");
+          "a) " + M("\\sqrt{" + D(sd) + "^2 - " + D(hb) + "^2} = " + D(ht)) + " m. b) Façade " + M("\\frac{" + D(2 * hb) + " \\cdot " + D(ht) + "}{2} = " + D(r2c(Af))) + " m², " + M("V = " + D(r2c(Af)) + " \\cdot " + D(L) + " \\approx " + D(r2c(V))) + " m³. c) " + M("2 \\cdot " + D(r2c(Af)) + " + 2 \\cdot " + D(sd) + " \\cdot " + D(L) + " \\approx " + D(r2c(S))) + " m².", GF.isoH(2 * hb, sd, { lb: T(2 * hb) + " m", ls: T(sd) + " m", lh: "h", names: false }));
       },
     ],
     /* ---------- 1re Collège : droites remarquables du triangle rectangle ---------- */
@@ -2750,7 +2750,7 @@ const DEFIS = (() => {
       return CXP("rampe", P("Une rampe de skate pleine a la forme d'un prisme droit couché : sa face latérale est un triangle rectangle de hauteur " + M(D(h) + " \\text{ m}") + " et de longueur au sol " + M(D(Lh) + " \\text{ m}") + ". La rampe est large de " + M(D(l) + " \\text{ m}") + ".",
         [["a) Longueur de la pente (m)", Lr], ["b) Volume de la rampe (m³, au centième)", r2c((h * Lh * l) / 2), 0.01], ["c) Aire de la surface de roulement (m², au centième)", r2c(Lr * l), 0.01]],
         ["La pente est l'hypoténuse du triangle : Pythagore.", "Volume d'un prisme : aire du triangle · largeur. La surface de roulement est un rectangle : pente · largeur."],
-        "a) " + M("\\sqrt{" + D(h) + "^2 + " + D(Lh) + "^2} = " + D(Lr)) + " m. b) " + M("\\frac{" + D(h) + " \\cdot " + D(Lh) + "}{2} \\cdot " + D(l) + " \\approx " + D(r2c((h * Lh * l) / 2))) + " m³. c) " + M(D(Lr) + " \\cdot " + D(l) + " = " + D(r2c(Lr * l))) + " m²."));
+        "a) " + M("\\sqrt{" + D(h) + "^2 + " + D(Lh) + "^2} = " + D(Lr)) + " m. b) " + M("\\frac{" + D(h) + " \\cdot " + D(Lh) + "}{2} \\cdot " + D(l) + " \\approx " + D(r2c((h * Lh * l) / 2))) + " m³. c) " + M(D(Lr) + " \\cdot " + D(l) + " = " + D(r2c(Lr * l))) + " m².", GF.rightTri(h, Lh, { la: T(h) + " m", lb: T(Lh) + " m", lc: "?", names: false })));
     },
     () => { /* abri de jardin : pavé et toit à deux pans */
       let u, v, w, k, l; do { [u, v, w] = pk([[3, 4, 5], [6, 8, 10], [5, 12, 13]]); k = pk([0.1, 0.2, 0.25]); l = r2c(2 * v * k); } while (l > 3.5 || l < 1.2);
@@ -2759,7 +2759,7 @@ const DEFIS = (() => {
       return CXP("abri", P("Un abri de jardin est un pavé de " + M(D(L) + " \\text{ m}") + " de long, " + M(D(l) + " \\text{ m}") + " de large et " + M(D(H) + " \\text{ m}") + " de haut, surmonté d'un toit à deux pans égaux dont le faîte est à " + M(D(hT) + " \\text{ m}") + " au-dessus des murs.",
         [["a) Largeur d'un pan du toit (m)", pan], ["b) Volume de l'abri (m³, au centième)", r2c(V), 0.01], ["c) Surface du toit (m², au centième)", r2c(2 * pan * L), 0.01]],
         ["La façade du toit est un triangle isocèle : sa hauteur le coupe en deux triangles rectangles de base " + T(l / 2) + " m.", "Volume : pavé + prisme (triangle de base " + T(l) + " m et de hauteur " + T(hT) + " m, sur " + T(L) + " m). Toit : deux rectangles."],
-        "a) " + M("\\sqrt{" + D(l / 2) + "^2 + " + D(hT) + "^2} = " + D(pan)) + " m. b) " + M(D(l) + " \\cdot " + D(L) + " \\cdot " + D(H) + " + \\frac{" + D(l) + " \\cdot " + D(hT) + "}{2} \\cdot " + D(L) + " \\approx " + D(r2c(V))) + " m³. c) " + M("2 \\cdot " + D(pan) + " \\cdot " + D(L) + " = " + D(r2c(2 * pan * L))) + " m²."));
+        "a) " + M("\\sqrt{" + D(l / 2) + "^2 + " + D(hT) + "^2} = " + D(pan)) + " m. b) " + M(D(l) + " \\cdot " + D(L) + " \\cdot " + D(H) + " + \\frac{" + D(l) + " \\cdot " + D(hT) + "}{2} \\cdot " + D(L) + " \\approx " + D(r2c(V))) + " m³. c) " + M("2 \\cdot " + D(pan) + " \\cdot " + D(L) + " = " + D(r2c(2 * pan * L))) + " m².", GF.house(l, H, hT, { a: T(l) + " m", b: T(H) + " m", h: T(hT) + " m" })));
     });
   ADD("trigrel", "perimetre",
     () => { /* sinus donné, hypoténuse connue */
@@ -2835,7 +2835,7 @@ const DEFIS = (() => {
       return CXP("charpente", P("Dans une charpente, la poutre " + M("[AB]") + " de " + M(nb(c)) + " cm est l'hypoténuse d'un triangle " + M("ABC") + " rectangle en " + M("C") + ". Le poteau " + M("[CH]") + " est perpendiculaire à " + M("[AB]") + ", avec " + M("AH = " + P1) + " cm et " + M("HB = " + Q1) + " cm.",
         [["a) Hauteur " + M("CH") + " (cm)", H], ["b) Longueur " + M("AC") + " (cm, au dixième)", r1(Math.sqrt(P1 * c)), 0.1], ["c) Longueur " + M("BC") + " (cm, au dixième)", r1(Math.sqrt(Q1 * c)), 0.1]],
         ["Théorème de la hauteur : CH² = AH · HB.", "Théorème d'Euclide : AC² = AH · AB et BC² = HB · AB."],
-        "a) " + M("\\sqrt{" + P1 + " \\cdot " + Q1 + "} = " + H) + " cm. b) " + M("\\sqrt{" + P1 + " \\cdot " + nb(c) + "} \\approx " + D(r1(Math.sqrt(P1 * c)))) + " cm. c) " + M("\\sqrt{" + Q1 + " \\cdot " + nb(c) + "} \\approx " + D(r1(Math.sqrt(Q1 * c)))) + " cm."));
+        "a) " + M("\\sqrt{" + P1 + " \\cdot " + Q1 + "} = " + H) + " cm. b) " + M("\\sqrt{" + P1 + " \\cdot " + nb(c) + "} \\approx " + D(r1(Math.sqrt(P1 * c)))) + " cm. c) " + M("\\sqrt{" + Q1 + " \\cdot " + nb(c) + "} \\approx " + D(r1(Math.sqrt(Q1 * c)))) + " cm.", GF.altitude(Q1, P1, { lp: Q1 + " cm", lq: P1 + " cm", lh: "?" })));
     });
   ADD("trigo", ["elevation", "rampe"],
     () => { /* cerf-volant au bout de son fil */

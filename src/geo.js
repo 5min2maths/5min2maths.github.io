@@ -18,8 +18,11 @@ function GEO() {
         const r = o.r || 20, u = T.dir(V, A, r), w = T.dir(V, B, r), x = T.X(V), y = T.Y(V);
         const cross = u[0] * w[1] - u[1] * w[0], m = T.dir(V, A, 1), n = T.dir(V, B, 1), bis = [m[0] + n[0], m[1] + n[1]], bl = Math.hypot(...bis) || 1;
         const ang = Math.acos(Math.max(-1, Math.min(1, m[0] * n[0] + m[1] * n[1]))), off = r + 14 + (ang < 0.45 ? 22 : 0);
-        const lx = x + (bis[0] / bl) * off, ly = y + (bis[1] / bl) * off + 4;
-        return '<path d="M' + (x + u[0]) + "," + (y + u[1]) + " A" + r + "," + r + " 0 0 " + (cross > 0 ? 1 : 0) + " " + (x + w[0]) + "," + (y + w[1]) + '" class="' + (/\?/.test(label) ? "f-accent" : "f-line") + '" fill="none"/>' + (label ? T.txt(lx, ly, label) : "");
+        /* 28.11 (audit des figures : « (4x + 16)° » coupé par la sécante) : étiquette longue (expression) alignée à partir
+           de la bissectrice, du côté où elle s'éloigne des demi-droites, au lieu d'être centrée dessus. */
+        const bx = bis[0] / bl, an = String(label || "").length > 4 ? (bx > 0.3 ? "start" : bx < -0.3 ? "end" : "middle") : "middle", o2 = an === "middle" ? off : r + 6;
+        const lx = x + bx * o2, ly = y + (bis[1] / bl) * o2 + 4;
+        return '<path d="M' + (x + u[0]) + "," + (y + u[1]) + " A" + r + "," + r + " 0 0 " + (cross > 0 ? 1 : 0) + " " + (x + w[0]) + "," + (y + w[1]) + '" class="' + (/\?/.test(label) ? "f-accent" : "f-line") + '" fill="none"/>' + (label ? T.txt(lx, ly, label, an) : "");
       });
       return g;
     },
@@ -85,10 +88,14 @@ const GF = {
     return g.svg("hauteur sur l'hypoténuse");
   },
   // Triangle isocèle de base b et de côtés s, hauteur en pointillé.
-  isoH(b, s, { lb = "", ls = "", lh = "" } = {}) {
-    const h = Math.sqrt(Math.max(s * s - (b * b) / 4, 0.01));
-    const g = GEO().pt("A", 0, 0).pt("B", b, 0).pt("C", b / 2, h).pt("H", b / 2, 0, false).poly(["A", "B", "C"]);
-    g.seg("C", "H", { cls: "f-accent", dash: true }).right("H", "B", "C").side("A", "B", lb).side("B", "C", ls).side("C", "H", lh, { inside: true });
+  // 28.11 : names = [base gauche, base droite, sommet] (noms de l'énoncé), false = sans noms.
+  isoH(b, s, { lb = "", ls = "", lh = "", names = ["A", "B", "C"] } = {}) {
+    const h = Math.sqrt(Math.max(s * s - (b * b) / 4, 0.01)), [nA, nB, nC] = names || ["A", "B", "C"], sh = names !== false;
+    const g = GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b / 2, h, false).pt("H", b / 2, 0, false).poly(["A", "B", "C"]);
+    if (sh) g.text("A", nA, -11, 4).text("B", nB, 11, 4).text("C", nC, 0, -8);
+    g.seg("C", "H", { cls: "f-accent", dash: true }).right("H", "B", "C").side("A", "B", lb).side("B", "C", ls);
+    // 28.11 (audit des figures : « h = ? » coupait le côté gauche) : à droite de la hauteur, dans le bas du triangle.
+    if (lh) g.raw((T) => T.txt(T.X([b / 2, h * 0.36]) + 6, T.Y([b / 2, h * 0.36]) + 4, lh, "start"));
     return g.svg("triangle isocèle et sa hauteur");
   },
   // Parallélogramme de base b, hauteur h, décalage k ; ls = côté oblique.
@@ -109,7 +116,8 @@ const GF = {
   losange(D, d, { lD = "", ld = "" } = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", D / 2, -d / 2, false).pt("C", D, 0, false).pt("E", D / 2, d / 2, false).poly(["A", "B", "C", "E"]);
     g.seg("A", "C", { dash: true }).seg("B", "E", { dash: true }).right([D / 2, 0], "C", "E");
-    g.text([D / 4, 0], lD, 0, -6).text([D / 2, d / 4], ld, 22, 4);
+    // 28.11 (audit des figures : étiquettes sur les diagonales) : lD au-dessus de la grande diagonale, ld à droite de la petite.
+    g.text([D * 0.3, 0], lD, 0, -5).raw((T) => T.txt(T.X([D / 2, d * 0.2]) + 6, T.Y([D / 2, d * 0.2]) + 4, ld, "start"));
     return g.svg("losange");
   },
   rect(w, h, { lw = "", lh = "", diag = "" } = {}) {
@@ -135,7 +143,9 @@ const GF = {
   },
   house(a, b, h, labs = {}) {
     const g = GEO().pt("A", 0, 0, false).pt("B", a, 0, false).pt("C", a, b, false).pt("S", a / 2, b + h, false).pt("D", 0, b, false).poly(["A", "B", "C", "S", "D"]);
-    g.seg("D", "C", { dash: true }).seg("S", [a / 2, b], { cls: "f-accent", dash: true }).side("A", "B", labs.a || "").side("B", "C", labs.b || "").side("S", [a / 2, b], labs.h || "", { inside: true });
+    g.seg("D", "C", { dash: true }).seg("S", [a / 2, b], { cls: "f-accent", dash: true }).side("A", "B", labs.a || "").side("B", "C", labs.b || "");
+    // 28.11 (audit des figures : la cote du toit coupait le pan gauche) : à droite de la hauteur, dans le bas du toit.
+    if (labs.h) g.raw((T) => T.txt(T.X([a / 2, b + h * 0.3]) + 6, T.Y([a / 2, b + h * 0.3]) + 4, labs.h, "start"));
     return g.svg("façade");
   },
   frame(a, b, w, labs = {}) {
@@ -167,24 +177,34 @@ const GF = {
     return g.dot("O").svg("angles autour d'un point");
   },
   // Cercle de diamètre [AB] et point C du cercle (angle en degrés depuis A), angles et côtés optionnels.
-  diam(cAng, { lA = "", lB = "", lAC = "", lBC = "", lAB = "", center = false } = {}) {
+  // 28.11 (audit des figures) : lACO / lBCO = angles en C de part et d'autre du rayon [OC] (sans équerre en C).
+  diam(cAng, { lA = "", lB = "", lAC = "", lBC = "", lAB = "", center = false, lACO = "", lBCO = "" } = {}) {
     const t = (cAng * Math.PI) / 180, g = GEO().pt("A", -1, 0).pt("B", 1, 0).pt("C", Math.cos(t), Math.sin(t)).circle([0, 0], 1, "f-soft").poly(["A", "B", "C"]);
-    g.right("C", "A", "B").side("A", "C", lAC).side("B", "C", lBC).side("A", "B", lAB, { inside: true });
+    if (!lACO && !lBCO) g.right("C", "A", "B");
+    g.side("A", "C", lAC).side("B", "C", lBC).side("A", "B", lAB, { inside: true });
     if (lA) g.angle("A", "B", "C", lA, { r: 24 });
     if (lB) g.angle("B", "C", "A", lB, { r: 24 });
-    if (center) g.pt("O", 0, 0).dot("O");
+    if (center || lACO || lBCO) g.pt("O", 0, 0).dot("O");
+    if (lACO || lBCO) g.seg("C", "O", { dash: true }).angle("C", "A", "O", lACO, { r: 14 }).angle("C", "O", "B", lBCO, { r: 20 });
     return g.svg("cercle de Thalès");
   },
   // Tangente issue d'un point P extérieur : rayon r, distance OP = d.
-  tangent(r, d, { lr = "", ld = "", lt = "" } = {}) {
+  // 28.11 (audit des figures) : lP / lO = angles en P et en O ; both = les deux tangentes (T et T'), sans le segment [OP].
+  tangent(r, d, { lr = "", ld = "", lt = "", lP = "", lO = "", both = false } = {}) {
     const ang = Math.acos(r / d), T = [r * Math.cos(ang), r * Math.sin(ang)];
-    const g = GEO().pt("O", 0, 0).pt("P", d, 0).pt("T", T[0], T[1]).circle([0, 0], r, "f-soft").poly(["O", "P", "T"]).right("T", "O", "P").dot("O");
-    g.side("O", "T", lr).side("O", "P", ld).side("P", "T", lt);
+    const g = GEO().pt("O", 0, 0).pt("P", d, 0).pt("T", T[0], T[1]).circle([0, 0], r, "f-soft").poly(both ? ["O", "T", "P"] : ["O", "P", "T"]).right("T", "O", "P").dot("O");
+    if (both) g.pt("T'", T[0], -T[1]).poly(["O", "T'", "P"]).right("T'", "O", "P").seg("O", "P", { dash: true });
+    g.side("O", "T", lr).side("O", "P", both ? "" : ld).side("P", "T", lt);
+    if (both && ld) g.text([d * 0.62, 0], ld, 0, -6);
+    if (lP) g.angle("P", "O", "T", lP, { r: 16 });
+    if (lO) g.angle("O", "P", "T", lO, { r: 16 });
     return g.svg("tangente au cercle");
   },
   // Configuration de Thalès (triangles emboîtés) : D sur [AB], E sur [AC], (DE) ∥ (BC). k = AD/AB (pour le dessin).
   thales(k, labs = {}) {
-    const A = [0, 0], B = [6, -4], C = [7.5, 1.5], D = [B[0] * k, B[1] * k], E = [C[0] * k, C[1] * k];
+    // 28.11 : labs.kE = AE/AC quand il diffère de k (réciproque : (DE) pas forcément parallèle à (BC), dessinée telle quelle).
+    // Rapport borné à 0,3–0,75 pour le dessin (avec AD = 3 et DB = 30, D, E et les longueurs se chevauchaient en A).
+    const k0 = k; k = Math.max(0.3, Math.min(0.75, k)); const kE = labs.kE ? (labs.kE * k) / k0 : k, A = [0, 0], B = [6, -4], C = [7.5, 1.5], D = [B[0] * k, B[1] * k], E = [C[0] * kE, C[1] * kE];
     // 24.11 (robot : « D » chevauchait la longueur de [AD]) : D et E nommés vers l'intérieur du triangle, les longueurs restent à l'extérieur.
     const G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], inw = (P) => { const dx = G[0] - P[0], dy = G[1] - P[1], l = Math.hypot(dx, dy) || 1; return [(dx / l) * 14, -(dy / l) * 14 + 4]; };
     const g = GEO().pt("A", ...A).pt("B", ...B).pt("C", ...C).pt("D", ...D, false).pt("E", ...E, false).poly(["A", "B", "C"]).seg("D", "E", { cls: "f-accent", w: 2 }).text("D", "D", ...inw(D)).text("E", "E", ...inw(E));
@@ -216,7 +236,8 @@ const GF = {
     if (kind === "cone" || kind === "dome") g.seg([w / 2, 0], "B", { cls: "f-accent" }).text([w * 0.75, 0], labs.r || "", 0, 16);
     else g.side("A", "B", labs.a || "");
     g.side("B", "C", labs.h1 || "");
-    if (kind !== "dome") g.side("S", [w / 2, h1], labs.h2 || "", { inside: true });
+    // 28.11 (audit des figures : la cote coupait le flanc du toit) : à droite de la hauteur en pointillé, dans le bas du toit.
+    if (kind !== "dome" && labs.h2) g.raw((T) => T.txt(T.X([w / 2, h1 + h2 * 0.3]) + 6, T.Y([w / 2, h1 + h2 * 0.3]) + 4, labs.h2, "start"));
     return g.svg("solide composé");
   },
   // Cadran d'horloge : aiguille de midi et aiguille sur le nombre k.
@@ -239,5 +260,54 @@ const GF = {
     g.seg("O", d(alpha), { w: 2 }).dot(d(alpha)).angle("O", [1, 0], d(alpha), la, { r: 18 });
     if (beta !== undefined) g.seg("O", d(beta), { cls: "f-accent", w: 2 }).dot(d(beta)).text(d(beta), lb, d(beta)[0] < 0 ? -16 : 16, d(beta)[1] < 0 ? 16 : -8);
     return g.svg("cercle trigonométrique");
+  },
+  /* 28.11 (audit des figures, /contenu figures) : figures pour des questions qui n'en avaient pas (jamais la réponse). */
+  // Angle droit partagé en deux angles (complément) : a = angle du bas.
+  complement(a, la, lb) {
+    const r = (a * Math.PI) / 180, u = [4 * Math.cos(r), 4 * Math.sin(r)];
+    return GEO().pt("O", 0, 0, false).add([-0.6, -0.6], [4.4, 4.4]).seg("O", [4.4, 0]).seg("O", [0, 4.4]).seg("O", u).right("O", [4, 0], [0, 4]).angle("O", [4, 0], u, la, { r: 34 }).angle("O", u, [0, 4], lb, { r: 46 }).svg("angle droit partagé");
+  },
+  // Angle au centre AOB d'un cercle de centre O et triangle AOB (isocèle) ; lo = angle en O, la = angle en A.
+  centralTri(deg, lo, la) {
+    const t = (deg * Math.PI) / 180, A = [Math.cos(-Math.PI / 2 - t / 2), Math.sin(-Math.PI / 2 - t / 2)], B = [Math.cos(-Math.PI / 2 + t / 2), Math.sin(-Math.PI / 2 + t / 2)];
+    const g = GEO().circle([0, 0], 1, "f-soft").pt("O", 0, 0).pt("A", ...A).pt("B", ...B).poly(["A", "O", "B"]).dot("O");
+    g.angle("O", "A", "B", lo, { r: 18 }).angle("A", "O", "B", la, { r: 22 });
+    return g.svg("angle au centre et triangle AOB");
+  },
+  // Triangle ABC et hauteur [AH] issue de A ; angle B donné (degrés, aigu), lb = son étiquette, lh = angle BAH.
+  footH(B, lb, lh) {
+    const t = (B * Math.PI) / 180, A = [4.5 * Math.cos(t), 4.5 * Math.sin(t)], H = [A[0], 0];
+    const g = GEO().pt("B", 0, 0).pt("C", 6.5, 0).pt("A", ...A).pt("H", ...H, false).poly(["A", "B", "C"]).seg("A", "H", { cls: "f-accent", dash: true }).right("H", "C", "A").text("H", "H", 0, 16);
+    g.angle("B", "C", "A", lb, { r: 24 }).angle("A", "B", "H", lh, { r: 30 });
+    return g.svg("triangle et hauteur issue de A");
+  },
+  // Trapèze isocèle : grande base B (en bas), petite base b, hauteur h (pour le dessin) ; étiquettes lB, lb, ll (côté oblique), lh.
+  trapIso(B, b, h, { lB = "", lb = "", ll = "", lh = "" } = {}) {
+    const k = (B - b) / 2, g = GEO().pt("A", 0, 0, false).pt("B", B, 0, false).pt("C", B - k, h, false).pt("D", k, h, false).pt("K", k, 0, false).poly(["A", "B", "C", "D"]);
+    g.seg("D", "K", { cls: "f-accent", dash: true }).right("K", "B", "D").side("A", "B", lB).side("D", "C", lb).side("B", "C", ll).side("D", "K", lh, { inside: true });
+    return g.svg("trapèze isocèle");
+  },
+  // Deux visées du sommet d'une tour (angles d'élévation) : be depuis le point le plus proche, al après avoir reculé de d.
+  elev(al, be, labs = {}) {
+    const ta = Math.tan((al * Math.PI) / 180), tb = Math.tan((be * Math.PI) / 180), x = ta / (tb - ta), H = x * tb; // d = 1 pour le dessin
+    const g = GEO().pt("S", 0, H, false).pt("F", 0, 0, false).pt("P", x, 0, false).pt("Q", x + 1, 0, false).seg("F", "Q", { w: 2 }).seg("F", "S", { w: 3 }).seg("P", "S").seg("Q", "S");
+    g.angle("P", "F", "S", labs.be || "", { r: 26 }).angle("Q", "F", "S", labs.al || "", { r: 40 }).side("P", "Q", labs.d || "").side("F", "S", labs.h || "");
+    return g.svg("deux visées du sommet d'une tour");
+  },
+  // Jardin rectangulaire L × l traversé par deux allées perpendiculaires de largeur x (dessinées à une largeur indicative).
+  allees(L, l, labs = {}) {
+    const e = Math.min(L, l) * 0.16, cx = L * 0.42, cy = l * 0.55;
+    const g = GEO().pt("A", 0, 0, false).pt("B", L, 0, false).pt("C", L, l, false).pt("D", 0, l, false).poly(["A", "B", "C", "D"]);
+    g.poly([[cx - e / 2, 0], [cx + e / 2, 0], [cx + e / 2, l], [cx - e / 2, l]], "f-shape2").poly([[0, cy - e / 2], [L, cy - e / 2], [L, cy + e / 2], [0, cy + e / 2]], "f-shape2");
+    g.side("A", "B", labs.L || "").side("D", "A", labs.l || "").raw((T) => T.txt(T.X([cx + e / 2, l]) + 5, T.Y([cx, l]) + 15, labs.x || "", "start"));
+    return g.svg("jardin traversé par deux allées");
+  },
+  // Silo (vue de face) : cylindre de largeur w et de hauteur h1, fond en cône de hauteur h2 (pointe en bas).
+  silo(w, h1, h2, labs = {}) {
+    const g = GEO().pt("A", 0, 0, false).pt("B", w, 0, false).pt("C", w, h1, false).pt("D", 0, h1, false).pt("S", w / 2, -h2, false).poly(["S", "B", "C", "D", "A"]);
+    g.seg("A", "B", { dash: true }).seg("S", [w / 2, 0], { cls: "f-accent", dash: true }).seg([w / 2, h1], "C", { cls: "f-accent", w: 2 }).text([w * 0.75, h1], labs.r || "", 0, -8);
+    g.side("B", "C", labs.h1 || "");
+    if (labs.h2) g.raw((T) => T.txt(T.X([w / 2, -h2 * 0.3]) + 6, T.Y([w / 2, -h2 * 0.3]) + 4, labs.h2, "start"));
+    return g.svg("silo : cylindre et fond conique");
   },
 };

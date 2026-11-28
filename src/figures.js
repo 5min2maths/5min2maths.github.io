@@ -139,8 +139,9 @@ const FIG = (() => {
     if (/^\s*d\b/.test(String(lr || ""))) return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(88, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(150, 68, lr, "f-accent f-txt"), "disque et son diamètre");
     return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + (String(lr).length * 7.5 > 56 ? t(219, 80, lr, "f-accent f-txt", "start") : t(181, 68, lr, "f-accent f-txt")), "disque"); // 24.11 : étiquette longue hors du disque (elle coupait le cercle)
   }
-  function square(ls) {
-    return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
+  // 28.11 : ld = étiquette de la diagonale quand elle est donnée (au-dessus de la diagonale, sans la chevaucher).
+  function square(ls, ld) {
+    return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls, /\?/.test(ls) ? "f-accent f-txt" : "f-txt") + (ld ? t(139, 73, ld, "f-accent f-txt", "end", 14) : t(158, 74, "?", "f-accent f-txt", "start", 16)), "carré");
   }
   // Pavé droit en perspective cavalière ; la = largeur (devant), lb = profondeur, lc = hauteur.
   // 24.11 (galerie) : à l'échelle des trois dimensions quand elles sont toutes données (un cube a l'air d'un cube,
@@ -194,10 +195,15 @@ const FIG = (() => {
     g += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="var(--margin)"/>';
     return svg(300, 185, g, "polygone à " + n + " côtés découpé en triangles depuis un sommet");
   }
-  function pyramid(lc, lh) {
-    const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
+  /* 28.11 (audit des figures) : o.apo = apothème (hauteur de la face avant, du sommet au milieu de l'arête de base),
+     o.edge = arête latérale (avant droite) ; lh vide ou absent : pas de hauteur dessinée. */
+  function pyramid(lc, lh, o = {}) {
+    let b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2");
+    if (lh) b += L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
+    if (o.apo) b += L(150, 20, 130, 140, "f-line", 'style="stroke:var(--blue);stroke-width:2"') + '<path d="M121,140 L121,131.5 L129,131" class="f-line" fill="none"/>' + t(103, 124, o.apo, "f-blue f-txt", "middle", 13);
+    if (o.edge) b += t(187, 104, o.edge, "f-txt", "start", 13);
     // 24.11 (galerie : « h = … » coupait l'arête de droite) : à gauche de la hauteur, dans le bas de la face avant.
-    return svg(300, 162, b + t(130, 158, lc) + t(147, 112, lh, "f-accent f-txt", "end"), "pyramide");
+    return svg(300, 162, b + t(130, 158, lc) + (lh ? (o.apo ? t(157, 134, lh, "f-accent f-txt", "start", 12) : t(147, 112, lh, "f-accent f-txt", "end")) : ""), o.apo ? "pyramide et apothème" : "pyramide");
   }
   // Cône (24.11, galerie) : proportions réelles rayon / hauteur quand elles sont connues (« r = 8 », « h = 3 » ; « g = … »
   // donne la hauteur par Pythagore ; « d = … » : diamètre dessiné en entier). Inconnue (« ? », « h ») : forme d'origine.
@@ -206,12 +212,16 @@ const FIG = (() => {
     let hv = /^\s*g\b/.test(String(lh || "")) ? (num(lh) && r0 && num(lh) > r0 ? Math.sqrt(num(lh) ** 2 - r0 ** 2) : null) : num(lh);
     let R = 80, H = 110, forced = false;
     if (r0 && hv) { const u = Math.min(100 / r0, 120 / hv); R = r0 * u; H = hv * u; if (R < 30) { forced = R < 21; R = 30; } if (H < 40) { forced = forced || H < 28; H = 40; } }
+    /* 28.11 (audit des figures) : étiquette de hauteur trop large pour l'intérieur du cône → cote à gauche ; le cône est
+       réduit (mêmes proportions) pour que l'étiquette tienne à gauche de la cote. */
+    const lw = String(lh || "").length * 7.5, wide = lw > R * 0.45 - 10;
+    if (wide && H >= 75 && 128 - R - lw < 4) { const f = Math.max(0.45, (124 - lw) / R); R *= f; H = Math.max(75, H * f); }
     const by = 20 + H, ry = Math.max(8, R * 0.22);
     let b = '<ellipse cx="150" cy="' + f1(by) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-shape2"/>' + P([[150 - R, by], [150 + R, by], [150, 20]].map((p) => p.map(f1)), "f-shape") + L(150, f1(by), 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(f1(isD ? 150 - R : 150), f1(by), f1(150 + R), f1(by), "f-accent");
     const flat = H < 75, thin = R < 75; // cône aplati ou étroit : étiquettes hors des flancs
     b += isD || flat || thin ? t(f1(isD ? 150 : 150 + R / 2), f1(by + ry + 16), lr, "f-accent f-txt") : t(f1(150 + R / 2), f1(by - 6), lr, "f-accent f-txt");
     const cx = 150 - R - 14; // cône étroit : hauteur en cote à gauche
-    const lhT = thin && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
+    const lhT = (thin || wide) && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
     return svg(300, Math.round(by + ry + (isD || flat || thin ? 24 : 12)), b + lhT + (forced ? noScale(296, Math.round(by + ry + 8)) : ""), "cône");
   }
   // Route et chronomètre (vitesse).
@@ -468,5 +478,71 @@ const FIG = (() => {
     return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
   }
 
-  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+  /* 28.11 (audit des figures, /contenu figures) : figures pour des questions qui n'en avaient pas. Toujours les seules
+     données de l'énoncé ; jamais la réponse ni une valeur calculée. */
+  // Hexagone régulier découpé en six triangles équilatéraux depuis le centre (un triangle teinté) ; ls = côté.
+  function hexTri(ls) {
+    const cx = 150, cy = 86, r = 72, pts = Array.from({ length: 6 }, (_, i) => [+(cx + r * Math.cos((Math.PI / 3) * i)).toFixed(1), +(cy - r * Math.sin((Math.PI / 3) * i)).toFixed(1)]);
+    let g = P(pts, "f-shape") + '<polygon points="' + [[cx, cy], pts[4], pts[5]].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.25" stroke="none"/>';
+    pts.forEach((p) => (g += L(cx, cy, p[0], p[1], "f-line", 'stroke-dasharray="5 4"')));
+    return svg(300, 182, g + '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + t(cx, f1(pts[4][1] + 20), ls), "hexagone régulier découpé en six triangles équilatéraux");
+  }
+  // Disque inscrit dans un carré : la partie hors du disque est teintée ; ls = côté du carré.
+  function squareDisk(ls) {
+    const x = 85, y = 12, s = 130;
+    const g = '<rect x="' + x + '" y="' + y + '" width="' + s + '" height="' + s + '" style="fill:var(--margin);fill-opacity:0.25;stroke:var(--ink);stroke-width:1.6"/>' + '<circle cx="' + (x + s / 2) + '" cy="' + (y + s / 2) + '" r="' + s / 2 + '" class="f-shape"/>';
+    return svg(300, 166, g + t(x + s / 2, y + s + 20, ls), "disque inscrit dans un carré");
+  }
+  // Gélule (vue de profil) : cylindre terminé par deux demi-boules ; d = diamètre, L = longueur totale (vd, vL : valeurs pour l'échelle).
+  function capsule(ld, lL, vd, vL) {
+    const u = Math.min(230 / vL, 90 / vd), r = (vd * u) / 2, w = vL * u, x0 = 150 - w / 2, x1 = 150 + w / 2, cy = r + 28;
+    let g = '<path d="M' + f1(x0 + r) + "," + f1(cy - r) + " L" + f1(x1 - r) + "," + f1(cy - r) + " A" + f1(r) + "," + f1(r) + " 0 0 1 " + f1(x1 - r) + "," + f1(cy + r) + " L" + f1(x0 + r) + "," + f1(cy + r) + " A" + f1(r) + "," + f1(r) + " 0 0 1 " + f1(x0 + r) + "," + f1(cy - r) + ' Z" class="f-shape"/>';
+    g += L(f1(x0 + r), f1(cy - r), f1(x0 + r), f1(cy + r), "f-line", 'stroke-dasharray="4 4"') + L(f1(x1 - r), f1(cy - r), f1(x1 - r), f1(cy + r), "f-line", 'stroke-dasharray="4 4"');
+    g += L(150, f1(cy - r), 150, f1(cy + r), "f-accent", 'stroke-width="2"') + t(150, f1(cy - r - 7), ld, "f-accent f-txt", "middle", 13);
+    const yb = cy + r + 16;
+    g += L(f1(x0), yb, f1(x1), yb) + L(f1(x0), yb - 5, f1(x0), yb + 5) + L(f1(x1), yb - 5, f1(x1), yb + 5) + t(150, yb + 18, lL);
+    return svg(300, Math.round(yb + 26), g, "gélule : cylindre et deux demi-boules");
+  }
+  // Cornet de glace : cône pointe en bas, surmonté d'une demi-boule de même rayon (vr, vh : valeurs pour l'échelle).
+  function iceCone(lr, lh, vr, vh) {
+    const u = Math.min(70 / vr, 150 / (vh + vr)), R = vr * u, H = vh * u, ry = Math.max(6, R * 0.22), by = 14 + R, cx = 168;
+    let g = '<path d="M' + f1(cx - R) + "," + f1(by) + " A" + f1(R) + "," + f1(R) + " 0 0 1 " + f1(cx + R) + "," + f1(by) + ' Z" class="f-shape2"/>';
+    g += P([[cx - R, by], [cx + R, by], [cx, by + H]].map((p) => p.map(f1)), "f-shape") + '<ellipse cx="' + cx + '" cy="' + f1(by) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-line"/>';
+    g += L(cx, f1(by), f1(cx + R), f1(by), "f-accent", 'stroke-width="2"') + L(cx, f1(by), cx, f1(by + H), "f-accent", 'stroke-dasharray="5 4"');
+    const xl = cx - R - 14; // hauteur du cône en cote à gauche, rayon à droite du bord (sans chevauchement)
+    g += L(f1(xl), f1(by), f1(xl), f1(by + H)) + L(f1(xl - 5), f1(by), f1(xl + 5), f1(by)) + L(f1(xl - 5), f1(by + H), f1(xl + 5), f1(by + H)) + t(f1(xl - 7), f1(by + H / 2 + 5), lh, "f-accent f-txt", "end", 13);
+    g += t(f1(cx + R + 6), f1(by + 4), lr, "f-accent f-txt", "start", 12);
+    return svg(300, Math.round(by + H + 14), g, "cornet : cône et demi-boule");
+  }
+  // Cube percé d'un trou cylindrique de part en part (perpendiculaire à la face avant) ; k = rayon / arête (pour l'échelle).
+  function cubeHole(la, lr, k) {
+    const x = 70, y = 50, s = 110, dx = 39, dy = -39, D = 'stroke-dasharray="5 4"', rr = Math.max(8, Math.min(0.42, k) * s), cx = x + s / 2, cy = y + s / 2;
+    const F = [[x, y + s], [x + s, y + s], [x + s, y], [x, y]], B = F.map((p) => [p[0] + dx, p[1] + dy]);
+    let g = P(F, "f-shape") + P([F[3], F[2], B[2], B[3]], "f-shape2") + P([F[1], B[1], B[2], F[2]], "f-shape2");
+    g += L(B[0][0], B[0][1], F[0][0], F[0][1], "f-line", D) + L(B[0][0], B[0][1], B[1][0], B[1][1], "f-line", D) + L(B[0][0], B[0][1], B[3][0], B[3][1], "f-line", D);
+    g += '<circle cx="' + f1(cx + dx) + '" cy="' + f1(cy + dy) + '" r="' + f1(rr) + '" class="f-line" stroke-dasharray="4 4"/>' + '<circle cx="' + cx + '" cy="' + cy + '" r="' + f1(rr) + '" class="f-soft"/>';
+    g += L(cx, cy, f1(cx + rr), cy, "f-accent", 'stroke-width="2"') + '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+    return svg(300, 190, g + t(f1(cx + rr / 2), cy - 6, lr, "f-accent f-txt", "middle", 13) + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start"), "cube percé d'un trou cylindrique");
+  }
+  // Demi-boule (bol) : bord en ellipse, rayon marqué.
+  function halfBall(lr) {
+    const cx = 150, cy = 42, R = 90, ry = 18;
+    let g = '<path d="M' + (cx - R) + "," + cy + " A" + R + "," + R + " 0 0 0 " + (cx + R) + "," + cy + ' Z" class="f-shape"/>' + '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + R + '" ry="' + ry + '" class="f-shape2"/>';
+    g += L(cx, cy, cx + R, cy, "f-accent", 'stroke-width="2"') + '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+    return svg(300, cy + R + 12, g + t(cx + R / 2, cy - ry - 6, lr, "f-accent f-txt"), "demi-boule");
+  }
+  // Boule coupée par un plan (vue en coupe) : rayon R de la boule, distance d du centre au plan, rayon r de la section.
+  // vR, vd : valeurs pour l'échelle (la position du plan suit l'énoncé) ; étiquettes vides = non affichées.
+  function ballCut(vR, vd, labs = {}) {
+    const cx = 150, cy = 92, R = 76, e = Math.max(0.12, Math.min(0.88, vd / vR)) * R, hy = cy - e, hw = Math.sqrt(R * R - e * e);
+    let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" class="f-shape"/>' + '<ellipse cx="' + cx + '" cy="' + f1(hy) + '" rx="' + f1(hw) + '" ry="' + f1(Math.max(5, hw * 0.18)) + '" class="f-shape2"/>';
+    g += L(cx, cy, cx, f1(hy), "f-line", 'stroke-dasharray="5 4"') + L(cx, cy, f1(cx + hw), f1(hy), "f-line", 'style="stroke:var(--blue);stroke-width:2"') + L(cx, f1(hy), f1(cx + hw), f1(hy), "f-accent", 'stroke-width="2"');
+    g += '<path d="M' + (cx + 8) + "," + f1(hy) + " L" + (cx + 8) + "," + f1(hy + 8) + " L" + cx + "," + f1(hy + 8) + '" class="f-line" fill="none"/>' + '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + t(cx - 8, cy + 14, "O", "f-txt", "end", 13);
+    if (labs.d) g += t(cx - 6, f1((cy + hy) / 2 + 4), labs.d, "f-txt", "end", 13);
+    if (labs.R) g += t(f1(cx + hw / 2 + 10), f1((cy + hy) / 2 + 12), labs.R, "f-blue f-txt", "start", 13);
+    if (labs.r) g += t(f1(cx + hw / 2), f1(hy - 9), labs.r, "f-accent f-txt", "middle", 13);
+    return svg(300, 180, g, "boule coupée par un plan");
+  }
+
+  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
