@@ -30,8 +30,17 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 
 ## À faire
 
-Ordre décidé le 28.11 (2 agents au plus) : après la publication en cours → `/app présentations` + `/entretien tests` ;
-puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux dépôts GitHub.
+Ordre (28.11, 2 agents au plus ; en cours : `/entretien tests`, `/contenu` élagage des figures superficielles) :
+puis grand problème de la semaine (`/contenu`) et `/app animations` ; puis `/app mine` ; puis deux dépôts GitHub
+(+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
+- **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
+  (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :
+  2 navigateurs au plus) ; tirages réduits le jour, complets la nuit. Cible : suite rapide 1–2 min avant publication
+  (la suite complète tourne la nuit, sa durée gêne peu).
+- **`/app animations`** (validé 28.11, n° 1 à 5) : bonne réponse → petite pépite qui s'envole vers le compteur (« +2 ») ;
+  bilan → nombre de pépites qui défile ; pépite polie → éclat doré sur la carte ; filon qui augmente → flamme qui grossit ;
+  barre de séance qui se remplit en glissant. Règles : < 0,5 s, un retour (pas un décor), jamais d'attente, rien si
+  mouvement réduit. Pas de tremblement sur une erreur (vécu comme une sanction). GIF de chaque avant publication.
 
 0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
    (tout : sources, tests, tools, historique complet) ; dépôt public `5min2maths.github.io` réduit à l'app publiée
