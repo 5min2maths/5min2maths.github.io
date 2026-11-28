@@ -1,0 +1,503 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="110000">
+<title>Tests : revues_eleves</title>
+<link rel="stylesheet" href="../src/style.css">
+<link rel="stylesheet" href="../src/presente.css">
+<link rel="stylesheet" href="../src/parents.css">
+<!-- Revues des élèves joués et décisions de l'enseignant (26.11) : corrections contrôlées une à une (problèmes, indices, séance Révision, corrigés, bilan, carnet, séries, bouton Vérifier, contextes…).
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : revue26, decisions26, p5_26_11, p6_26_11.
+     Une seule section : revues_eleves.html#section=revue26 -->
+<body><main id="app"></main>
+<script>try {
+window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){};window.ensurePacks=()=>Promise.resolve();window.fetch=()=>Promise.resolve(new Response("{}"));if(navigator.sendBeacon)navigator.sendBeacon=()=>true;Element.prototype.scrollIntoView=function(){};window.confirm=()=>true;window.alert=()=>{};
+} catch (e) {}
+try {
+window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+} catch (e) {}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch1c_argact.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/perco.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/ref_co.js"></script><script src="../src/ref_mp.js"></script><script src="../src/ref_formes.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
+<script>
+/* ======== revue26 (ancienne page tests/revue26.html) ======== */
+Lot.section("revue26", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* Revue quotidienne des élèves testeurs du 26.11 (suivi/revues/2026-11-26.md) : un contrôle par point corrigé.
+   1 indice de notion au problème ; 2 indices valables pour toutes les formes (decdiv, deccomp) ; 3 « 🧠 Révision · 1 sur 4 » ;
+   4 « · » dans le corrigé du pavé (repere3d), « × » en France ; 5 bilan d'un problème en parties ; 6 carnet « presque effacées » ;
+   7 série d'automatismes courte (positionnement du jour, sous le plancher) ; 8 « Je prépare une évaluation » replié ;
+   9 Révision d'un élève fort : niveau 2 au moins. */
+(async function () {
+  const out = [], fail = [];
+  const ok = (c, m) => { (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m); };
+  const txt = (el) => ((el || {}).textContent || "").replace(/\s+/g, " ");
+  const fresh = (prof) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; state.tourDone = true; save(); session = null; return state; };
+  try {
+    /* 1. Problème : partie a) fausse, aucun indice marqué « a) » → indice de la notion */
+    fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+    session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true };
+    const P = { id: "proba", d: 4, code: "t", q: "Deux dés.", parts: [{ label: "a) A", spec: { kind: "value", value: 0.25 } }, { label: "b) B", spec: { kind: "value", value: 0.5 } }, { label: "c) C", spec: { kind: "value", value: 0.75 } }], hints: ["c) contraire de b)."], sol: "s" };
+    renderProblem(P, { eyebrow: "t", onDone: () => 0, onNext() {} });
+    document.getElementById("p0").value = "0,9"; document.getElementById("p1").value = "0,5"; document.getElementById("check").click();
+    const fb1 = txt(document.getElementById("fb"));
+    ok(fb1.includes(HINTS.proba.slice(0, 30)) && !/relis bien/.test(fb1), "problème : indice de la notion pour la partie a) (" + fb1.slice(0, 90) + ")");
+    const q4 = Engine.fromCode("proba-4-4jp");
+    renderProblem(q4, { eyebrow: "t", onDone: () => 0, onNext() {} });
+    document.getElementById("p0").value = "0,99"; document.getElementById("check").click();
+    ok(!/relis bien ce qui est demandé/.test(txt(document.getElementById("fb"))), "q-proba-4-4jp : plus d'indice générique (" + txt(document.getElementById("fb")).slice(0, 90) + ")");
+
+    /* 2. Indices valables pour toutes les formes */
+    const h1 = Engine.fromCode("decdiv-1-ond").hint;
+    ok(!/^Diviser par un décimal/.test(h1) && /entiers/.test(h1), "decdiv-1-ond (÷ un entier) : indice général (" + h1.slice(0, 60) + ")");
+    let hc = ""; for (let s = 1; s <= 200 && !hc; s++) { const q = Engine.build("deccomp", 1, s); if (/dépasse/.test(q.q)) hc = q.hint; }
+    ok(hc && !/^Compare d'abord les unités/.test(hc) && /écart/.test(hc), "deccomp « de combien dépasse » : indice qui parle de l'écart (" + hc.slice(0, 60) + ")");
+
+    /* 3. Séance Révision : libellé du format, même sur une notion jamais travaillée */
+    fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });
+    const old = Object.keys(state.notions).filter((id) => GEN[id] && state.notions[id].status === "vu" && !newNotion(id)).slice(0, 4);
+    old.forEach((id) => Object.assign(state.notions[id], { seen: 0, lessonSeen: true }));
+    const plan = old.map((id) => id + "|2|rev");
+    session = { fmt: "revision", plan, i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() }; session.lessonAt = lessonAtStart(plan);
+    nextQuestion(); const eb3 = txt(app.querySelector(".eyebrow"));
+    ok(/^🧠 Révision · 1 sur 4/.test(eb3), "Révision : « 🧠 Révision · 1 sur 4 » (" + eb3 + ")");
+
+    /* 4. Corrigé du pavé : « · » en romand, « × » après conversion France */
+    let s4 = ""; for (let s = 1; s <= 300 && !s4; s++) { const q = Engine.build("repere3d", 1, s); if (/cm³/.test(q.sol) && /dimensions/.test(q.sol)) s4 = q.sol; }
+    ok(s4 && /\\cdot/.test(s4) && !/\\times/.test(s4) && /\\times/.test(frTimes(s4)), "repere3d : « \\cdot » en romand, « \\times » en France (" + s4.slice(-60) + ")");
+
+    /* 5. Bilan d'un problème : parties justes, jamais « 0,67 / 1 » */
+    fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+    session = { plan: ["proba|4"], i: 1, score: 0.67, answered: 1, start: Date.now(), elo0: state.elo.r, ids: new Set(["proba"]), weekly: true, parts: [3, 3] };
+    screenSummary(); const t5 = txt(app);
+    ok(/Parties justes\s*3 \/ 3/.test(t5) && !/0,67/.test(t5), "bilan du problème : « Parties justes 3 / 3 », pas « 0,67 »");
+
+    /* 6. Carnet : erreurs presque effacées */
+    const c6 = carnetLeft([{ id: "a", d: 1, ok: 1 }, { id: "b", d: 1, ok: 1 }, { id: "c", d: 1, ok: 0 }]);
+    ok(c6 === "3 à polir, dont 2 presque polies (encore 1 réussite)", "carnet : « " + c6 + " »");
+    ok(carnetLeft([{ id: "a", d: 1, ok: 0 }]) === "1 à polir", "À polir sans progrès : « 1 à polir »"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
+
+    /* 7. Série d'automatismes : 2 le jour du positionnement (27.11, revue n° 5 : était 3), 4 sous le plancher, sinon 6 */
+    fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });
+    const n6 = Engine.planSession(state, "auto").length;
+    state.placedOn = day(); const n3 = Engine.planSession(state, "auto").length, t3 = Engine.fmtText(state, "auto");
+    state.placedOn = addDays(day(), -1); state.tadj = -200; state.last1 = [0, 0, 1, 0, 0, 1, 0, 0, 1, 0];
+    const n4 = Engine.underFloor(state) ? Engine.planSession(state, "auto").length : -1;
+    ok(n6 === 6 && n3 === 2 && n4 === 4 && /^2 calculs/.test(t3), "automatismes : " + n6 + " / " + n3 + " (jour du positionnement, « " + t3 + " ») / " + n4 + " (sous le plancher)");
+
+    /* 8. « Je prépare une évaluation » en 1re du Collège après un positionnement : chapitre en classe + dernier travaillé */
+    fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });
+    const cur = Engine.catalog(state.profile).filter((c) => c.current && state.notions[c.id]);
+    cur.forEach((c, k) => { Object.assign(state.notions[c.id], { seen: 1 }); if (k % 3 === 0) Engine.recordComp(state, c.id, 1, 1); });
+    state.now = { ids: [cur[cur.length - 1].id], date: day() }; screenPrep();
+    const open8 = [...app.querySelectorAll(".card.flat h3")].filter((h) => !h.closest("details")).length - 1; /* moins « Date de l'évaluation » */
+    const vis = [...app.querySelectorAll(".check")].filter((c) => !c.closest("details")).length, all = app.querySelectorAll(".check").length;
+    ok(open8 >= 1 && open8 <= 2 && vis < all && app.querySelector("details.prep-more:not([open])"), "« Je prépare une évaluation » 1re Collège : " + open8 + " chapitre(s) déplié(s), " + vis + " notions visibles sur " + all);
+
+    /* 9. Révision d'un élève fort : niveau 2 au moins */
+    fresh({ system: "CH", grade: 12, track: "college", minutes: 5 });
+    Object.values(state.notions).forEach((s) => { if (s.status === "vu" || s.status === "encours") Object.assign(s, { seen: 2, m: 0.75, due: day() }); });
+    /* cas d'Inès : Mathélo ≈ 1380, notions de 11e (niveau 1 ≈ 1190, niveau 2 ≈ 1320) : le niveau 1 était le plus proche de la cible */
+    state.elo.r = 1380; let lv1 = 0, n9 = 0;
+    for (let k = 0; k < 30; k++) Engine.planSlots(state, ["rev", "rev", "rev", "rev"]).forEach((e) => { const [id, d] = e.split("|"); if (itemRating(state.profile, id, 2) > state.elo.r) return; n9++; if (d === "1") lv1++; });
+    ok(n9 >= 20 && lv1 === 0, "Révision, élève au-dessus du niveau 2 de la notion : " + lv1 + " question(s) de niveau 1 sur " + n9);
+  } catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+  state = null; session = null; try { localStorage.clear(); } catch (e) {}
+  document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+})().catch((e) => { document.getElementById("out").textContent = "EXC " + e.message + "\n" + e.stack; });
+});
+/* ======== decisions26 (ancienne page tests/decisions26.html) ======== */
+Lot.section("decisions26", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* Décisions de l'enseignant du 26.11 (tools/archive/decisions_26-11.md) : contrôles des n° 2, 4, 5, 6, 10, 12, 15, 16. */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const fresh = (prof) => { state = Engine.newState(prof); Engine.autoInit(state); state.placed = true; save(); return state; };
+const _rq = renderQuestion; renderQuestion = function (q, opt) { window.__q = q; return _rq(q, opt); };
+try {
+  /* 16. bouton « Vérifier » */
+  fresh({ system: "CH", grade: 11, track: "college", minutes: 5 });
+  for (const id in state.notions) state.notions[id].lessonSeen = true;
+  session = { fmt: "", plan: ["prio|2"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  const chk = document.getElementById("check");
+  ok(chk && chk.textContent.trim() === "Vérifier", "16. bouton de réponse « Vérifier » (" + (chk && chk.textContent) + ")");
+  ok(![...document.querySelectorAll("button")].some((b) => /^Valider/.test(b.textContent.trim())), "16. aucun bouton « Valider » sur la question");
+
+  /* 2. une question allégée par séance au plus */
+  let calls = 0; const ease0 = Engine.easeNext;
+  const ids = Object.keys(state.notions).filter((id) => GEN[id] && ["vu", "encours"].includes(state.notions[id].status)).slice(0, 6);
+  Engine.easeNext = (st, plan, i) => { calls++; return ids[0] + "|1|app"; };
+  session = { fmt: "mixte", plan: ids.map((id) => id + "|2|app"), i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  for (let k = 0; k < 6 && session.i < session.plan.length; k++) {
+    const a = document.getElementById("ans"); if (!a) break;
+    a.value = "123456789"; document.getElementById("check").click(); a.value = "123456788"; document.getElementById("check").click();
+    const nx = document.getElementById("nx"); if (nx) nx.click(); else break;
+  }
+  Engine.easeNext = ease0;
+  ok(calls === 1 && session.easeUsed, "2. question allégée appliquée une fois sur une séance de 6 échecs (appels : " + calls + ")");
+
+  /* 4. réussite au positionnement = notion vue, sans leçon ni « Nouvelle notion » */
+  fresh({ system: "CH", grade: 9, track: "college", minutes: 5 });
+  const pid = Object.keys(state.notions).find((id) => LESSONS[id] && GEN[id] && ["vu", "encours"].includes(state.notions[id].status));
+  state.notions[pid].status = "encours"; state.notions[pid].seen = 0; state.notions[pid].lessonSeen = false;
+  Engine.placementResult(state, pid, true, 2);
+  ok(!Engine.lessonDue(state, pid) && !newNotion(pid), "4. " + pid + " réussie au positionnement : pas de leçon due, pas « Nouvelle notion »");
+  session = { fmt: "mixte", plan: [pid + "|1|app"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true, lessonAt: lessonAtStart([pid + "|1|app"]) }; nextQuestion();
+  ok(!/Nouvelle notion|Rappel de cours/.test((document.querySelector(".eyebrow") || {}).textContent || "") && document.getElementById("check"), "4. séance suivante : la question directement, sans leçon");
+  const pid2 = Object.keys(state.notions).find((id) => id !== pid && LESSONS[id] && GEN[id] && ["vu", "encours"].includes(state.notions[id].status));
+  Object.assign(state.notions[pid2], { status: "encours", seen: 0, lessonSeen: false, placed: true, m: 0.75, box: 2 });
+  Engine.migrate(state);
+  ok(state.notions[pid2].lessonSeen && state.notions[pid2].seen === 1, "4. progression antérieure : réussite au positionnement migrée en notion vue");
+  Engine.placementResult(state, pid2, false, 2);
+
+  /* 5. France 4e–3e : médiane et étendue, pas de quartiles ; 2nde : quartiles ; profils suisses inchangés */
+  for (const g of [8, 9]) {
+    fresh({ system: "FR", grade: g, track: "college", minutes: 5 });
+    const cq = Engine.catalog(state.profile).find((c) => c.id === "quartiles");
+    let qt = 0, med = 0, n = 0;
+    for (const lv of [1, 2, 3, 4]) for (let k = 0; k < 25; k++) { const q = Engine.make(state, "quartiles", lv); n++; const t = q.q + " " + (q.parts || []).map((p) => p.label).join(" ");
+      if (/quartile|Q_1|Q_3|moustache/i.test(t)) qt++; if (/médiane/i.test(t)) med++; }
+    ok(cq && cq.label === "Étendue, médiane" && !qt && med >= 40, "5. FR " + (g === 8 ? "4e" : "3e") + " : libellé « " + (cq && cq.label) + " », " + qt + " question(s) à quartiles, " + med + " sur " + n + " sur la médiane");
+  }
+  fresh({ system: "FR", grade: 10, track: "college", minutes: 5 });
+  { let qt = 0, fr = 0; for (const lv of [2, 3]) for (let k = 0; k < 20; k++) { const q = Engine.make(state, "quartiles", lv); if (/quartile|Q_1|Q_3|moustache/i.test(q.q)) qt++; if (q.fr) fr++; }
+    ok(qt >= 30 && !fr, "5. FR 2nde : quartiles gardés (" + qt + "/40), aucune forme réservée au collège"); }
+  for (const prof of [{ system: "CH", grade: 13, track: "mp", minutes: 5 }, { system: "CH", grade: 15, track: "college", minutes: 5 }]) {
+    fresh(prof); if (!state.notions.quartiles) continue;
+    let fr = 0; for (const lv of [1, 2, 3]) for (let k = 0; k < 20; k++) { if (Engine.make(state, "quartiles", lv).fr) fr++; if (Engine.make(state, "quartiles", lv, 1 + k).fr) fr++; }
+    ok(!fr, "5. profil suisse " + prof.track + " " + prof.grade + " : aucune forme française (" + fr + ")");
+  }
+  { const bad = []; for (const lv of [1, 2, 3]) for (let sd = 1; sd <= 120; sd++) { const q = VARX.quartiles[lv][0](); if (!q || !q.fr || !(q.spec.value === q.spec.value) || !q.sol) bad.push(lv + ":" + sd); else if (checkAnswer(q.spec, String(q.spec.value)).status !== "correct") bad.push(lv + " valeur " + q.spec.value); }
+    ok(!bad.length, "5. formes de médiane : toujours une question valide" + (bad.length ? " — " + bad.slice(0, 4).join(" | ") : "")); }
+
+  /* 6. multiplication de décimaux : au moins 6 contextes de problème, chacun avec son ctx, valeurs cohérentes */
+  { const ctx = new Set(), bad = []; for (let sd = 1; sd <= 400; sd++) { const q = Engine.build("decmul", 4, sd); ctx.add(q.ctx || "carrelage");
+      for (const p of q.parts) { const v = p.spec.value; if (!isFinite(v) || v <= 0) bad.push(q.code + " " + v); if (p.spec.round && Math.abs(v * 100 - Math.round(v * 100)) > 1e-6) bad.push(q.code + " pas au centime " + v);
+        const f = Number.isInteger(v) ? String(v) : String(+v.toFixed(6)).replace(".", "{,}"); if (!q.sol.replace(/\\text\{'\}/g, "").includes(f) && !q.sol.replace(/\\text\{'\}/g, "").includes(v.toFixed(2).replace(".", "{,}"))) bad.push(q.code + " " + v + " absent du corrigé"); } }
+    ok(ctx.size >= 7, "6. decmul : " + ctx.size + " contextes de problème (" + [...ctx].join(", ") + ")");
+    ok(!bad.length, "6. decmul : valeurs attendues valides et présentes dans le corrigé" + (bad.length ? " — " + bad.slice(0, 4).join(" | ") : "")); }
+  { fresh({ system: "CH", grade: 10, track: "college", minutes: 5 }); const seen = []; for (let k = 0; k < 6; k++) { const q = Engine.make(state, "decmul", 4, undefined, true); if (q.d === 4) seen.push(q.ctx || "carrelage"); }
+    ok(new Set(seen).size === seen.length, "6. decmul : pas deux fois le même contexte en 6 problèmes de suite (" + seen.join(", ") + ")"); }
+
+  /* 10. décimal pour une fraction : exact accepté, arrondi refusé avec message */
+  const V = (value, input, o) => checkAnswer(Object.assign({ kind: "value", value }, o || {}), input);
+  ok(V(3 / 4, "0,75").status === "correct", "10. 0,75 pour 3/4 : accepté");
+  ok(V(3 / 4, "0,75", { final: true }).status === "correct", "10. 0,75 pour 3/4 (résultat exigé) : accepté");
+  ok(V(1 / 3, "1/3").status === "correct" && V(-5 / 6, "-5/6").status === "correct", "10. 1/3 et −5/6 en fraction : acceptés");
+  for (const [v, t] of [[1 / 3, "0,33"], [1 / 3, "0,3333"], [2 / 3, "0,67"], [2 / 3, "0,666667"], [-5 / 6, "-0,83"], [7 / 3, "2,33"]]) {
+    const r = V(v, t); ok(r.status === "form" && /arrondie/.test(r.message) && /fraction/.test(r.message), "10. " + t + " pour " + v.toFixed(4) + " : refusé (« " + r.message + " »)"); }
+  { const r = V(1 / 3, "0,33", { final: true }); ok(r.status === "form" && /arrondie/.test(r.message), "10. 0,33 pour 1/3 (résultat exigé) : refusé"); }
+  ok(V(2 / 3, "0,666666667").status === "correct", "10. valeur de machine (écart ≤ 10⁻⁹) : acceptée comme avant");
+  ok(V(1 / 3, "0,5").status === "wrong", "10. 0,5 pour 1/3 : faux (pas un arrondi)");
+  ok(V(1 / 3, "0,33", { round: 0.01 }).status === "correct", "10. arrondi demandé (au centième) : 0,33 accepté");
+  ok(V(0.333333, "0,333333").status === "correct", "10. valeur décimale stockée par le générateur : inchangé");
+  ok(checkAnswer({ kind: "set", values: [1 / 3, 2] }, "0,33 ; 2").status === "form" && checkAnswer({ kind: "set", values: [0.5, 2] }, "0,5 ; 2").status === "correct", "10. ensemble de solutions : arrondi refusé, décimal exact accepté");
+  ok(checkAnswer({ kind: "pair", values: [2 / 3, 1] }, "0,67 ; 1").status === "form" && checkAnswer({ kind: "pair", values: [0.25, 1] }, "0,25 ; 1").status === "correct", "10. coordonnées : arrondi refusé, décimal exact accepté");
+  ok(checkAnswer({ kind: "value", value: 3 / 4, final: true }, "6/8").status === "form", "10. fraction non simplifiée : exigence de forme gardée");
+
+  /* 12. automatismes : niveau 1 seulement */
+  for (const prof of [{ system: "CH", grade: 9, track: "college", minutes: 5 }, { system: "CH", grade: 11, track: "college", minutes: 5 }, { system: "FR", grade: 8, track: "college", minutes: 5 }, { system: "CH", grade: 13, track: "mp", minutes: 5 }]) {
+    fresh(prof); const lv = [];
+    for (let k = 0; k < 4; k++) for (const e of Engine.planSlots(state, ["drill", "drill", "drill", "drill", "drill", "drill"])) lv.push(+String(e).split("|")[1]);
+    ok(lv.length && lv.every((d) => d === 1), "12. " + prof.system + " " + prof.grade + " : automatismes au niveau 1 (" + [...new Set(lv)].join(",") + ")");
+  }
+  fresh({ system: "CH", grade: 11, track: "college", minutes: 5 }); for (const id in state.notions) state.notions[id].lessonSeen = true;
+  session = { fmt: "auto", plan: ["prio|3|drill"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true }; nextQuestion();
+  ok(window.__q && window.__q.d === 1, "12. créneau automatisme gardé au niveau 3 (reprise) : posé au niveau 1 (" + (window.__q && window.__q.code) + ")");
+
+  /* 15. « Mes compétences » au CO : plus de ligne « Leçons » */
+  for (const g of [9, 10, 11]) { fresh({ system: "CH", grade: g, track: "college", minutes: 5 }); screenComps();
+    ok(!app.querySelector("details.rles, .lopen") && !/📖 Leçons/.test(app.textContent), "15. CO " + g + "e : pas de ligne « Leçons »"); }
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+});
+/* ======== p5_26_11 (ancienne page tests/p5_26_11.html) ======== */
+Lot.section("p5_26_11", { html: `<main id="app"></main><pre id="out">en cours</pre>`,
+  avant: function () {
+window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+  } }, function () {
+/* 26.11 (revue des élèves joués, 5e passage, tools/archive/revue_eleves_claude_26-11_p5.md) : un contrôle par point corrigé.
+   1 (grave) : 4e FR, « Factorise x² − 100 » (différence de deux carrés = 3e) : formes de factor / développer hors programme
+     de 5e–4e écartées (HORS_FR, src/fr_couv.js), y compris par une graine (carnet). Échouait avant la correction.
+   2 : « Me tester » d'un objectif MP : formes de la notion rattachées à CET objectif (REF_MP.f, Referentiel.plan).
+   3 : note 6 seulement avec une réponse de niveau ≥ 2 ou 5 réponses. 4 : pas de leçon avant le Problème de la semaine.
+   5 : élève en grande difficulté : pas de défi du jour, jour 1 de 2 questions. 6 : pas de mise en équation en automatismes.
+   7–14 : quartiles en France (indice, libellé), colonBreak, taxi, corrigé ordonné, « Mes compétences » à 360 px,
+   notions consolidées sans le positionnement, « L » pour les litres, fraction exigée. */
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const fresh = (pr) => { state = Engine.newState({ ...pr, minutes: 5 }); Engine.autoInit(state); state.placed = true; return state; };
+const FR = (g) => ({ system: "FR", grade: g, track: "college" });
+const strip = (t) => String(t || "").replace(/<[^>]+>/g, " ");
+try {
+  /* ---- 1. factoriser / développer en 5e–4e FR ---- */
+  const DIFF = /x\^\{?2\}?\s*-\s*\d+(?!\d|\s*x|\{)(?!,)|a\^2 - b\^2|différence de (?:deux )?carrés/;
+  const BAD8 = ["diffcarres", "diffcarres2", "carre", "maximal", "cube", "trinome", "trinome-complete", "erreur", "parenthese"];
+  let n1 = 0;
+  for (const g of [7, 8]) {
+    fresh(FR(g));
+    for (const d of [1, 2, 3, 4]) for (let k = 1; k <= 40; k++) {
+      for (const q of [Engine.make(state, "factor", d, k), Engine.make(state, "factor", d)]) {
+        n1++;
+        ok(!DIFF.test(String(q.q) + " " + (q.parts || []).map((p) => p.label).join(" ")) && !BAD8.includes(q.ctx), (g === 8 ? "4e" : "5e") + " FR, factor niveau " + d + " : " + q.code + " « " + strip(q.q).slice(0, 60) + " » (" + q.ctx + ")");
+        if (g === 7) ok(q.ctx !== "lettre", "5e FR : factorisation par x (" + q.code + ")");
+      }
+      for (const q of [Engine.make(state, "distrib", d, k)]) {
+        const bad = g === 7 ? ["negatif", "lettre", "double", "double2", "trinome", "difference", "deuxdev", "degre3"] : ["difference", "deuxdev", "degre3"];
+        ok(!bad.includes(q.ctx), (g === 8 ? "4e" : "5e") + " FR, distrib niveau " + d + " : forme " + q.ctx + " (" + q.code + ")");
+      }
+    }
+  }
+  /* la 3e garde a² − b² ; la Suisse n'est pas touchée */
+  fresh(FR(9)); { let m = 0; for (let k = 1; k <= 30; k++) if (Engine.make(state, "factor", 2, k).ctx === "diffcarres") m++; ok(m > 0, "3e FR : plus de différence de carrés"); }
+  fresh({ system: "CH", grade: 11, track: "college" }); { let m = 0; for (let k = 1; k <= 30; k++) if (/diffcarres/.test(Engine.make(state, "factor", 2, k).ctx)) m++; ok(m > 0, "11e : plus de différence de carrés"); }
+  log.push("1 : " + n1 + " questions");
+
+  /* ---- 2. « Me tester » MP : formes de l'objectif ---- */
+  const tester = (pr, code, bad, n) => {
+    fresh(pr); const r = Referentiel.find(state.profile, code), ps = Referentiel.plan(state.profile, r), seen = [];
+    ok(ps.length > 0, code + " : pas de question");
+    for (let k = 0; k < n; k++) { const [id, d] = ps[k % ps.length], F = Referentiel.forms(r, id); let q = Engine.make(state, id, d);
+      if (F) for (let j = 0; j < 60 && !F.includes(q.ctx); j++) q = Engine.make(state, id, d);
+      seen.push(q.ctx); ok(!bad.test(strip(q.q)) && (!F || F.includes(q.ctx)), code + " : « " + strip(q.q).slice(0, 70) + " » (" + q.code + ", " + q.ctx + ")"); }
+    return seen;
+  };
+  tester({ system: "CH", grade: 13, track: "mp" }, "S3.FA.01", /forfait|minutes|Pour quelles valeurs/, 24);
+  tester({ system: "CH", grade: 15, track: "mp" }, "S7.CO.01", /espace|polaire|; z|\bz\b/, 24);
+  tester({ system: "CH", grade: 15, track: "mp" }, "S7.CO.03", /polaire/, 12);
+  { const s5 = tester({ system: "CH", grade: 13, track: "mp" }, "S3.FA.05", /^$/, 12); ok(s5.every((c) => !["pente", "graphe", "image-lue"].includes(c)), "S3.FA.05 : forme de définition " + s5.join(",")); }
+
+  /* ---- 3. note 6 et badges ---- */
+  ok(compNote({ r: [1, 1, 1], n: 3 }) === 5, "3 réponses de niveau 1 : note " + compNote({ r: [1, 1, 1], n: 3 }));
+  ok(compNote({ r: [1, 1, 1], n: 3, hi: true }) === 6 && compNote({ r: [1, 1, 1, 1, 1], n: 5 }) === 6, "note 6 refusée avec preuves");
+  fresh({ system: "CH", grade: 15, track: "mp" }); state.badges = {};
+  for (let k = 0; k < 3; k++) Engine.recordComp(state, "coordmp", 1, 1);
+  ok(!state.badges.expert, "badge Expert après 3 questions de niveau 1");
+  { const r = Referentiel.find(state.profile, "S7.CO.01"); ok(Referentiel.note(state, r) === 5, "S7.CO.01 : note " + Referentiel.note(state, r)); }
+
+  /* ---- 4. pas de leçon avant le Problème de la semaine ---- */
+  {
+    fresh({ system: "CH", grade: 13, track: "mp" }); Engine.setNow(state, ["f2"]); Object.assign(state.notions.f2, { status: "encours", seen: 0, lessonSeen: false, m: 0.3 });
+    session = { plan: ["f2"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion();
+    ok(!/étape 1 sur|nouvelle notion|rappel de cours ·/i.test(app.querySelector(".eyebrow") ? app.querySelector(".eyebrow").textContent : ""), "problème de la semaine, chapitre en classe : leçon avant (" + (app.querySelector(".eyebrow") || {}).textContent + ")");
+    Engine.setNow(state, []); state.now = null; Object.assign(state.notions.f2, { status: "encours", seen: 2, lessonSeen: false, m: 0.3 });
+    session = { plan: ["f2"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; nextQuestion();
+    ok(!/étape 1 sur|nouvelle notion|rappel de cours ·/i.test((app.querySelector(".eyebrow") || {}).textContent || ""), "problème de la semaine, notion déjà vue : leçon avant");
+  }
+
+  /* ---- 5. élève en grande difficulté : pas de défi ; jour 1 court ---- */
+  {
+    fresh({ system: "CH", grade: 9, track: "college" }); state.last1 = [0, 0, 1, 0, 0, 0, 0, 1]; state.formats = [];
+    ok(Engine.struggling(state), "profil non reconnu en grande difficulté");
+    let dz = 0; for (let k = 0; k < 40; k++) if (Engine.chooseFormat(state, [], addDays(day(), k % 5)) === "defi") dz++;
+    ok(dz === 0, "élève en grande difficulté : " + dz + " défis du jour sur 40");
+    state.tomorrow = null; state.today = null; state.tomorrow = { date: day(), f: "defi" };
+    ok(Engine.todayFormat(state) !== "defi", "défi annoncé tenu pour un élève en grande difficulté");
+    fresh({ system: "CH", grade: 9, track: "college" }); state.placedOn = day(); state.placeMiss = 3;
+    for (const f of ["revision", "app", "auto", "mixte"]) ok(Engine.planSession(state, f).length <= 2, "jour 1 après 3 ratés : " + f + " de " + Engine.planSession(state, f).length);
+  }
+
+  /* ---- 6. automatismes : pas de mise en équation ---- */
+  {
+    fresh(FR(8)); let n6 = 0;
+    for (let k = 1; k <= 20; k++) { const q = Engine.make(state, "probeq", 1, k); if (Engine.isDrill(q)) n6++; }
+    ok(n6 === 0, "probeq accepté comme automatisme " + n6 + " fois");
+    ok(!Engine.isDrill({ id: "eq1", q: "Un père a le triple de l'âge de son fils. Dans 10 ans, il aura le double de l'âge de son fils. Quel est l'âge du fils ?", spec: { kind: "value", value: 10 } }), "âge : automatisme");
+  }
+
+  /* ---- 7. quartiles en France : indice et libellé ---- */
+  fresh(FR(8));
+  ok(nLabel("quartiles") === "Étendue, médiane" && nLab("quartiles") === "Étendue, médiane", "4e FR : libellé « " + nLab("quartiles") + " »");
+  for (let k = 1; k <= 20; k++) { const q = Engine.make(state, "quartiles", 1, k); ok(!/quartile|Q1|Q3|Q_1/i.test(String(q.hint) + " " + (q.hints || []).join(" ")), "4e FR, indice quartiles : " + q.hint); }
+  fresh(FR(10)); ok(/quartile/i.test(Engine.make(state, "quartiles", 1, 3).hint || HINTS.quartiles), "2nde : indice des quartiles perdu");
+
+  /* ---- 8. colonBreak : citation, majuscule ---- */
+  {
+    const a = colonBreak("« f(x) = 3x est une fonction linéaire : son graphe passe par l'origine. »"), b = colonBreak("« Le tableau x : 1, 2, 3 ; f(x) : 4, 6, 9 est celui d'une fonction affine. »");
+    ok(!/<br>/.test(a) && !/<br>/.test(b), "colonBreak coupe dans une citation : " + a + " | " + b);
+    const c = colonBreak("Sachant que :<br>\\(P(x) = x^3\\)<br>est divisible par \\(x - 4\\), donne le quotient.");
+    ok(/<br>est divisible/.test(c), "majuscule au milieu d'une phrase : " + c);
+    ok(/9\s:<br>117/.test(colonBreak("Divisibles par 9 : 117, 126.")) && /<br>/.test(colonBreak("x = 3 : on remplace.")), "colonBreak : coupures habituelles perdues");
+    fresh({ system: "CH", grade: 13, track: "college" }); for (let k = 1; k <= 10; k++) { const q = Engine.make(state, "polydiv", 2, k); ok(!/Sachant que :|<br>Est /.test(q.q), "polydiv : " + q.q); }
+  }
+
+  /* ---- 9. pas à pas du taxi ---- */
+  fresh({ system: "CH", grade: 11, track: "college" });
+  { let seen = 0; for (let k = 1; k <= 120; k++) { const q = Engine.build("prio", 1, k); if (q.ctx !== "taxi") continue; seen++;
+      const t = q.guide.map((g) => g.ask).join(" ") + " " + (q.traps || []).map((x) => x.m).join(" ");
+      ok(!/éléments|nombre d'objets/.test(t) && / km/.test(q.guide[0].ask), "taxi : « " + strip(t).slice(0, 120) + " »"); }
+    ok(seen > 0, "taxi jamais tiré"); }
+
+  /* ---- 10. corrigé ordonné ---- */
+  { let seen = 0; for (let k = 1; k <= 80; k++) { const q = Engine.build("idrem", 2, k); if (q.ctx !== "deuxlettres") continue; seen++;
+      const s = String(q.sol); ok(s.indexOf("a^{2}") >= 0 && s.indexOf("a^{2}") < s.indexOf("ab") && s.indexOf("ab") < s.indexOf("b^{2}"), "corrigé non ordonné : " + s); }
+    ok(seen > 0, "(a − b)² jamais tiré"); }
+
+  /* ---- 11. « Mes compétences » MP : badges repliés après les objectifs ; « Me tester » compact ---- */
+  {
+    fresh({ system: "CH", grade: 13, track: "mp" }); screenCompsRef();
+    const det = app.querySelector("details.bdg-sec"), first = app.querySelector(".rcomp");
+    ok(det && !det.open && first && (first.compareDocumentPosition(det) & Node.DOCUMENT_POSITION_FOLLOWING), "badges non repliés ou avant les objectifs");
+    const b = app.querySelector(".rtest[data-code='S3.FA.01']"); b.click();
+    const eb = app.querySelector(".eyebrow").textContent;
+    ok(!/fonction affine/.test(eb) && /Me tester/.test(eb) && /fonction affine/.test((app.querySelector(".eb-sub") || {}).textContent || ""), "en-tête de « Me tester » : " + eb);
+  }
+
+  /* ---- 12. notions consolidées : pas le positionnement ---- */
+  {
+    fresh(FR(8)); state.placed = false; state.snaps = [];
+    Engine.recordComp(state, "rel", 2, 1); /* premier instantané pris pendant le positionnement */
+    Object.keys(state.notions).slice(0, 8).forEach((id) => Object.assign(state.notions[id], { seen: 1, m: 0.75 }));
+    Engine.snapPlaced(state);
+    ok(Engine.week(state).cons.length === 0, "notions du positionnement comptées « consolidées » : " + Engine.week(state).cons.length);
+  }
+
+  /* ---- 13. litres : « L » ---- */
+  { let n13 = 0; for (const c of CURIEUX) for (let k = 0; k < 6; k++) { let x; try { x = c.make(); } catch (e) { continue; } const t = JSON.stringify(x); n13++;
+      ok(!/ℓ|\\\\ell|\d l\)| l par /.test(t), "curieux « " + c.key + " » : ℓ ou l pour les litres"); }
+    ok(n13 > 100, "curieux : " + n13 + " tirages"); }
+
+  /* ---- 14. fraction irréductible exigée ---- */
+  ok(checkAnswer({ kind: "value", value: 15 / 16, frac: true }, "0,9375").status === "form" && checkAnswer({ kind: "value", value: 15 / 16, frac: true }, "15/16").status === "correct", "0,9375 accepté pour une fraction irréductible");
+  fresh(FR(8)); { let m = 0; for (let k = 1; k <= 30; k++) { const q = Engine.make(state, "fracmul", 2, k); if (/fraction irréductible/.test(q.q) && !Number.isInteger(q.spec.value)) { m++; ok(q.spec.frac, "fracmul : spec.frac absent (" + q.code + ")"); } } ok(m > 0, "fracmul : aucune consigne « fraction irréductible »"); }
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.length + " · " + fails.slice(0, 14).join("\n") : "ok revue p5 (14 points) : " + log.join(" | ");
+});
+/* ======== p6_26_11 (ancienne page tests/p6_26_11.html) ======== */
+Lot.section("p6_26_11", { html: `<main id="app"></main><pre id="out">en cours</pre>`,
+  avant: function () {
+window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
+  } }, function () {
+/* 26.11 (revue des élèves joués, 6e passage, tools/archive/revue_eleves_claude_26-11_p6.md) : un contrôle par point corrigé.
+   1 : Problème de la semaine = notion de l'année (placeOf = classe), pas une reprise (échouait avant la correction :
+       la 10e recevait arith@9). 2 : jamais une notion non travaillée (hors chapitre en classe). 3–9 : corrigé recipaff,
+       maquette cohérente, camp / club, pct sans pourcentages successifs avant la 3e FR / en 9e, colonBreak, fracrat,
+       stats vélo. 11–15 : corrigés (log, freinage, rangs), « Me tester » (formes de angtri), étiquette (x + …)°,
+       élision devant Yanis, 5'000 CHF, « ou bien », consigne ∅, séries courtes et pas de défi le jour du positionnement. */
+const fresh = (pr) => { state = Engine.newState({ ...pr, minutes: 5 }); Engine.autoInit(state); state.placed = true; return state; };
+const strip = (t) => String(t || "").replace(/<[^>]+>/g, " ");
+try {
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const parts = (q) => (q.parts || []).map((p) => p.label).join(" / ");
+const num = (t) => +String(t).replace(/\\text\{'\}|'/g, "").replace("{,}", ".").replace(",", ".");
+const yrOf = (id) => (placeOf(NOTIONS.find((n) => n.id === id), state.profile) || [])[0];
+
+/* ---- 1. Problème de la semaine : notion de l'année ---- */
+const setAll = (st, f) => { for (const c of Engine.catalog(st.profile)) { const s = st.notions[c.id]; if (s) Object.assign(s, f(c.id)); } };
+let n1 = 0;
+for (const pr of [{ system: "CH", grade: 10, track: "college" }, { system: "CH", grade: 11, track: "college" }, { system: "FR", grade: 10, track: "lycee" }]) {
+  for (const r of [700, 850, 1000, 1150, 1300, 1500]) {
+    fresh(pr); setAll(state, () => ({ status: "vu", seen: 3, m: 0.8 })); state.elo.r = r; delete state.weeklyPick;
+    const id = Engine.weeklyProblem(state); n1++;
+    ok(id && yrOf(id) === pr.grade, "1 : " + pr.system + "-" + pr.grade + ", Mathélo " + r + " : Problème de la semaine " + id + "@" + (id && yrOf(id)) + " (reprise)");
+  }
+}
+/* chapitre « en classe » : une notion de l'année du chapitre d'abord */
+fresh({ system: "CH", grade: 10, track: "college" }); setAll(state, () => ({ status: "vu", seen: 3, m: 0.8 }));
+{ const ch = ["aire3", "disque", "grandmanq", "vol", "airelat", "voldecomp"].filter((id) => state.notions[id] && hasProb(id)); delete state.weeklyPick; Engine.weeklyProblem(state); Engine.setNow(state, ch); /* choix fait avant le chapitre : refait */
+  const id = Engine.weeklyProblem(state); ok(ch.includes(id) && yrOf(id) === 10, "1 : chapitre en classe " + ch.join(",") + " → " + id); }
+log.push("1 : " + n1 + " profils");
+
+/* ---- 2. jamais une notion non travaillée (hors chapitre en classe) ---- */
+let n2 = 0;
+for (const pr of [{ system: "FR", grade: 6, track: "college" }, { system: "CH", grade: 9, track: "college" }, { system: "CH", grade: 10, track: "college" }]) {
+  for (let k = 0; k < 6; k++) {
+    fresh(pr); setAll(state, (id) => { const w = (id.length + k) % 3 === 0; return w ? { status: "vu", seen: 2, m: 0.7 } : { status: "encours", seen: 0, m: 0.4, lessonSeen: false }; }); delete state.weeklyPick;
+    const id = Engine.weeklyProblem(state); n2++;
+    if (id) ok(state.notions[id].seen > 0 && state.notions[id].m > 0, "2 : " + pr.system + "-" + pr.grade + " : Problème sur une notion jamais travaillée (" + id + ")");
+  }
+  fresh(pr); setAll(state, () => ({ status: "encours", seen: 0, m: 0.4 })); delete state.weeklyPick;
+  ok(Engine.weeklyProblem(state) === null, "2 : " + pr.system + "-" + pr.grade + " : rien de travaillé, pas de Problème");
+}
+log.push("2 : " + n2 + " états");
+
+/* tirages de défis */
+const draws = (pr, id, d, n, f) => { fresh(pr); for (let k = 1; k <= n; k++) { const q = Engine.make(state, id, d); if (q) f(q, k); } };
+const MP2 = { system: "CH", grade: 13, track: "mp" }, C1 = { system: "CH", grade: 12, track: "college" }, C2 = { system: "CH", grade: 13, track: "college" };
+
+/* ---- 3. recipaff, forfait : (1 − m)x = p ---- */
+let n3 = 0;
+draws(MP2, "recipaff", 4, 120, (q) => { const m = /f\(x\) = ([\d{},.]+)x \+ (\d+)/.exec(q.sol || ""); if (!m) return; n3++; const mm = num(m[1]), p = +m[2];
+  const c = new RegExp("x \\\\iff (-?[\\d{},.]+)x = (-?\\d+) \\\\iff x = ").exec(q.sol); ok(c && Math.abs(num(c[1]) - (1 - mm)) < 1e-9 && +c[2] === p, "3 : recipaff " + q.code + " : " + strip(q.sol).slice(-90)); });
+ok(n3 > 10, "3 : recipaff forfait peu tiré (" + n3 + ")");
+
+/* ---- 4. similmp, maquette : façade = L·h, volume = L·l·h, toit = L·l ---- */
+let n4 = 0;
+draws(MP2, "similmp", 4, 150, (q) => { if (q.ctx !== "maquette") return; n4++;
+  const k = +/1\\,:\\,(\d+)/.exec(q.q)[1], vals = q.parts.map((p) => p.spec.value), B = num(/toit réel a une aire de \\\(([\d\\{}',text]+)/.exec(q.parts[2].label)[1]);
+  const [Af, V, Bm] = vals, h = V / B, L = Af / h, l = B / L;
+  ok(h >= 5 && h <= 30 && L >= 10 && L <= 60 && l >= 6 && l <= L && Math.abs(Bm - (B * 1e4) / (k * k)) < 1e-6, "4 : maquette incohérente " + q.code + " : L = " + L + ", l = " + l + ", h = " + h); });
+ok(n4 > 10, "4 : maquette peu tirée (" + n4 + ")");
+
+/* ---- 5. ensembles : camp et club indépendants ---- */
+let n5 = 0;
+for (const pr of [C1, { system: "FR", grade: 10, track: "lycee" }]) draws(pr, "ensembles", 4, 80, (q) => { if (q.ctx !== "ages") return; n5++; ok(!/tarif/.test(q.q + parts(q)), "5 : " + q.code + " « " + strip(q.q).slice(0, 120) + " »"); });
+ok(n5 > 5, "5 : forme âges peu tirée (" + n5 + ")");
+
+/* ---- 6. pct : pas de pourcentages successifs avant la 3e FR ni en 9e CO ; recalcul des nouvelles formes ---- */
+const cnt6 = {};
+for (const [pr, succOk] of [[{ system: "FR", grade: 6, track: "college" }, false], [{ system: "FR", grade: 8, track: "college" }, false], [{ system: "CH", grade: 9, track: "college" }, false], [{ system: "FR", grade: 9, track: "college" }, true], [{ system: "CH", grade: 10, track: "college" }, true]]) {
+  const key = pr.system + "-" + pr.grade; cnt6[key] = {};
+  draws(pr, "pct", 4, 120, (q) => { cnt6[key][q.ctx] = (cnt6[key][q.ctx] || 0) + 1; const t = strip(q.q + " " + parts(q));
+    if (!succOk) ok(!/^succ-/.test(q.ctx || "") && !/puis (?:il )?baisse|Variation globale|carte d'étudiant|carte jeune/.test(t), "6 : " + key + " : pourcentages successifs (" + q.code + ", " + q.ctx + ")");
+    const v = q.parts.map((p) => p.spec.value);
+    if (q.ctx === "remise") { const r = +/de \\\((\d+)\\,\\%/.exec(q.q)[1], [P0, Q0] = [...q.q.matchAll(/affiché à \\\((\d+)\\\)/g)].map((m) => +m[1]); ok(v[0] === (P0 * r) / 100 && v[1] === P0 - (P0 * r) / 100 && Math.abs(v[2] - ((P0 + Q0) * (100 - r)) / 100) < 1e-9, "6 : remise " + q.code); }
+    if (q.ctx === "part-total") { const N = +/les \\\((\d+)\\\) élèves/.exec(q.q)[1], p = +/(\d+)\\,\\%/.exec(q.q)[1], G = +/cordées de (\d+)/.exec(parts(q))[1]; ok(v[0] === (N * p) / 100 && v[1] === N - v[0] && v[2] === v[0] / G && Number.isInteger(v[2]), "6 : part " + q.code); }
+    if (q.ctx === "composition") { const m0 = +/de \\\((\d+)\\\) g/.exec(q.q)[1], p = +/(\d+)\\,\\%/.exec(q.q)[1], [, k, por] = /dans (\d+) portions de (\d+) g/.exec(parts(q)).map(Number); ok(v[0] === (m0 * p) / 100 && v[1] === m0 - v[0] && v[2] === (k * por * p) / 100, "6 : composition " + q.code); }
+  });
+  if (succOk) ok(Object.keys(cnt6[key]).some((c) => /^succ-/.test(c)), "6 : " + key + " : plus de pourcentages successifs");
+  ok(Object.keys(cnt6[key]).length >= 3, "6 : " + key + " : moins de 3 formes (" + Object.keys(cnt6[key]) + ")");
+}
+log.push("6 : " + JSON.stringify(cnt6["FR-6"]));
+
+/* ---- 7. colonBreak : pas de majuscule à une variable ---- */
+for (const [s, bad, good] of [["Le double produit vaut 2k = 8 : k = 4", /K = 4/, /<br>k = 4/], ["On a k² = 36 : k = 6", /K = 6/, /k = 6/], ["x = 3 : la solution est 3", null, /<br>La solution/], ["On pose t = 2 : f(t) = 5", /F\(t\)/, /f\(t\) = 5/]]) {
+  const o = colonBreak(s); ok((!bad || !bad.test(o)) && good.test(o), "7 : colonBreak « " + s + " » → « " + o + " »"); }
+
+/* ---- 8. fracrat evidence : c) pas déjà répondue par b) ---- */
+let n8 = 0;
+draws(MP2, "fracrat", 4, 200, (q) => { const b = /F\((-?\d+)\)/.exec(q.parts[1] ? q.parts[1].label : ""); if (q.ctx !== "evidence" || !b) return; n8++; ok(+b[1] !== q.parts[2].spec.value, "8 : fracrat " + q.code + " : c) = " + b[1] + " déjà donné en b)"); });
+ok(n8 > 5, "8 : forme evidence peu tirée (" + n8 + ")");
+
+/* ---- 9. stats vélo : cyclistes seulement ---- */
+for (const pr of [{ system: "CH", grade: 15, track: "college" }, { system: "CH", grade: 14, track: "college" }]) draws(pr, "stats", 4, 150, (q) => { if (q.ctx === "velo") ok(!/traileuse|ski de fond/.test(q.q), "9 : " + q.code + " « " + strip(q.q).slice(0, 60) + " »"); });
+
+/* ---- 11. corrigés ---- */
+draws({ system: "CH", grade: 15, track: "mp" }, "logprop", 1, 80, (q) => { if (q.ctx === "difference") ok(/\\log_\{\d+\} \(\d+ \\div \d+\)/.test(q.sol), "11 : logprop " + q.code + " : parenthèses (" + q.sol.slice(0, 90) + ")"); });
+draws({ system: "CH", grade: 15, track: "mp" }, "logprop", 2, 120, (q) => { if (q.ctx === "log2-donne") ok(!/10\^\{0\}|\+ 0 =/.test(q.sol), "11 : logprop " + q.code + " : « " + q.sol.slice(0, 120) + " »"); });
+{ let nf = 0; draws({ system: "CH", grade: 15, track: "college" }, "integrale", 4, 120, (q) => { if (!/freine/.test(q.q)) return; nf++;
+  q.parts.slice(0, 2).forEach((p) => { const ex = Math.abs(p.spec.value * 100 - Math.round(p.spec.value * 100)) < 1e-9; ok(!(ex && /au centième/.test(p.label)) && !(ex && p.spec.round), "11 : integrale " + q.code + " : « " + p.label + " » pour " + p.spec.value); });
+  ok(!/= (\d+) \\approx \1 /.test(q.sol), "11 : integrale « = n ≈ n » " + q.code); }); log.push("11 : freinage " + nf); }
+draws({ system: "FR", grade: 6, track: "college" }, "decread", 1, 120, (q) => { const m = /chiffre des (dizaines|unités) \?/.exec(q.q); if (m) ok(/À gauche de la virgule/.test(q.sol) && !/À droite/.test(q.sol), "11 : decread " + q.code + " : « " + strip(q.sol).slice(0, 60) + " »"); });
+
+/* ---- 12. « Me tester » : formes de angtri ---- */
+fresh({ system: "CH", grade: 10, track: "college" });
+{ const r = Referentiel.find(state.profile, "31-FG1"), F = Referentiel.forms(r, "angtri"); ok(F && !F.includes("polygone") && !F.includes("nb-cotes") && F.includes("trapeze"), "12 : 31-FG1, formes de angtri " + F);
+  const ps = Referentiel.plan(state.profile, r); ok(ps.some(([id]) => id === "angtri"), "12 : 31-FG1 sans angtri"); }
+
+/* ---- 13. angles : coefficient 1 omis ---- */
+draws({ system: "CH", grade: 11, track: "college" }, "angles", 3, 150, (q) => ok(!/\(1x/.test(q.q + " " + (q.fig || "") + " " + q.sol), "13 : « (1x » dans " + q.code));
+
+/* ---- 14. libellés ---- */
+ok(moneyTidy("Les notes de Yanis : 4") === "Les notes de Yanis : 4" && moneyTidy("le vélo de Yves") === "le vélo d'Yves" && moneyTidy("le compte de Elsa") === "le compte d'Elsa", "14 : élision « " + moneyTidy("Les notes de Yanis") + " » / « " + moneyTidy("le vélo de Yves") + " »");
+draws({ system: "CH", grade: 15, track: "mp" }, "log", 4, 40, (q) => { if (/On place/.test(q.q)) ok(!/\\\(\d{4,}\\\) CHF/.test(q.q) && /\\text\{'\}000/.test(q.q), "14 : log « " + strip(q.q).slice(0, 50) + " »"); });
+draws({ system: "CH", grade: 14, track: "college" }, "probaxiomes", 2, 150, (q) => { if (q.ctx === "jass" && /un 6, un 7 ou un 8|un dix ou un as/.test(q.q)) ok(/, ou bien (un 6|un dix)/.test(q.q), "14 : « " + strip(q.q).slice(-70) + " »"); });
+{ const t = exactNote({ kind: "solset", ivs: [[-Infinity, false, 0, false]] }, "Résous x + 1 < 1."); ok((t.match(/∅/g) || []).length === 1, "14 : consigne ∅ en double : « " + t + " »"); }
+
+/* ---- 15. séances courtes : élève sous la moyenne de la classe, jour du positionnement ---- */
+fresh({ system: "FR", grade: 6, track: "college" }); state.elo.r = 760; state.last1 = [1, 1, 1, 1, 1, 1];
+ok(Engine.autoN(state) === 4, "15 : Mathélo sous la classe : série de " + Engine.autoN(state));
+state.elo.r = 1100; state.last1 = [1, 0, 1, 0, 0, 1, 1];
+ok(Engine.autoN(state) === 4, "15 : moins de 70 % du premier coup : série de " + Engine.autoN(state));
+state.last1 = [1, 1, 1, 1, 1, 1, 1, 1];
+ok(Engine.autoN(state) === FORMATS.auto.slots.length, "15 : élève à l'aise : série de " + Engine.autoN(state));
+fresh({ system: "FR", grade: 6, track: "college" }); setAll(state, () => ({ status: "vu", seen: 2, m: 0.8 })); state.placedOn = day();
+{ let d = 0; for (let k = 0; k < 40; k++) if (Engine.chooseFormat(state) === "defi") d++; ok(d === 0, "15 : défi du jour le jour du positionnement (" + d + "/40)");
+  state.today = { date: day(), f: "defi" }; ok(Engine.todayFormat(state) !== "defi", "15 : défi déjà tiré le jour du positionnement"); }
+
+const out = [(fails.length ? "ÉCHEC " : "ok ") + "p6_26_11 : " + fails.length + " échec(s) · " + log.join(" · ")].concat(fails.slice(0, 40));
+document.getElementById("out").textContent = out.join("\n");
+
+} catch (e) { document.getElementById("out").textContent = "EXC " + e.message + "\n" + e.stack; }
+});
+Lot.lance();
+</script>

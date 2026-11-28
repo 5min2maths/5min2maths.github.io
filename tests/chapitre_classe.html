@@ -1,11 +1,19 @@
-<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css">
-<main id="app"></main><pre id="out">en cours</pre>
+<!doctype html><meta charset="utf-8"><meta name="budget" content="30000">
+<title>Tests : chapitre_classe</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Chapitre « En ce moment en classe » servi en priorité ; revue des élèves joués du 26.11, 4e passage.
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : chapitre_classe, p4_26_11.
+     Une seule section : chapitre_classe.html#section=chapitre_classe -->
+<body><main id="app"></main>
 <script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}
 window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true; window.ensurePacks = () => Promise.resolve();
-{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }
-</script>
+{ let seed = 5; Math.random = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }; }</script>
 <script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/defis_sec2.js"></script><script src="../src/competences.js"></script><script src="../src/referentiel.js"></script><script src="../src/trx.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch4c_trous.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/ch1c_trous.js"></script><script src="../src/ch11_rep3d.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_trous.js"></script><script src="../src/fr_couv.js"></script><script src="../src/ref_matu.js"></script><script src="../src/ref_fr.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_col34b.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
 <script>
+/* ======== chapitre_classe (ancienne page tests/chapitre_classe.html) ======== */
+Lot.section("chapitre_classe", { html: `<main id="app"></main><pre id="out">en cours</pre>` }, function () {
 /* 26.11 soir (revue des élèves joués, n° 1, grave) : le chapitre choisi « En ce moment en classe » doit être travaillé même
    quand ses notions sont de l'année (« en cours », leçon pas encore vue). Avant la correction : Révision, Défi du jour et
    Automatismes n'en posaient aucune (MP 2e « Fonctions quadratiques » 0 sur 15). Pour chaque profil et chaque chapitre de
@@ -54,4 +62,140 @@ try {
   log.push(nCh + " chapitres de l'année, " + totNow + " questions du chapitre sur " + tot + " (" + Math.round((100 * totNow) / tot) + " %)");
 } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
 document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.length + " · " + fails.slice(0, 12).join("\n") : "ok chapitre en classe servi : " + log.join(" | ");
+});
+/* ======== p4_26_11 (ancienne page tests/p4_26_11.html) ======== */
+Lot.section("p4_26_11", { html: `<main id="app"></main><pre id="out">en cours</pre>` }, function () {
+/* 26.11 (revue des élèves joués, 4e passage, tools/archive/revue_eleves_claude_26-11_p4.md) : un contrôle par point corrigé.
+   1 (grave) : chapitre « en classe » : notions de la classe d'abord (France 5e–3e : thèmes de cycle de la 6e à la 3e ;
+     avant : les 5 premières, donc celles de 6e–5e). Échouait avant la correction pour 5e, 4e et 3e FR.
+   2 (grave) : mode libre : notions de l'année seulement, sauf remobilisation justifiée (Engine.remob). Échouait avant
+     (2e Collège : 4 rappels du CO sur 5 ; France : idem).
+   3–11 : série courte pour l'élève en grande difficulté, jour 1 à 3 questions, positionnement arrêté après 3 ratés et sans
+   carnet, pas de « À toi » en chaîne ni en automatismes, problème de la semaine = vrai problème de l'année, automatisme
+   « sans calculatrice », niveau 2 d'entrée pour un élève fort, tradexpr en ×/÷ (FR), scènes robinet et vélo ; remarque :
+   0,3̄ en fraction (équation) réservé à la 4e+ en France. */
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const idOf = (e) => String(e).split("|")[0];
+const yr = (id) => { const pl = placeOf(NOTIONS.find((n) => n.id === id), state.profile); return pl ? pl[0] : null; };
+const fresh = (pr) => { state = Engine.newState({ ...pr, minutes: 5 }); Engine.autoInit(state); state.placed = true; return state; };
+try {
+  /* ---- 1. chapitre en classe : notions de la classe d'abord ---- */
+  const P1 = [["5e FR", { system: "FR", grade: 7, track: "college" }], ["4e FR", { system: "FR", grade: 8, track: "college" }], ["3e FR", { system: "FR", grade: 9, track: "college" }],
+    ["3e Coll.", { system: "CH", grade: 14, track: "college", niv: "N" }], ["4e Coll.", { system: "CH", grade: 15, track: "college", niv: "R" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["11e", { system: "CH", grade: 11, track: "college" }]];
+  let n1 = 0;
+  for (const [nom, pr] of P1) {
+    fresh(pr);
+    for (const ch of nowChapters()) {
+      const own = ch.ids.filter((id) => yr(id) === pr.grade), ids = nowPickIds(ch), got = ids.filter((id) => yr(id) === pr.grade).length;
+      if (!own.length) continue; n1++;
+      ok(got === Math.min(5, own.length), nom + " · " + ch.label + " : " + got + " notions de la classe sur " + Math.min(5, own.length) + " possibles (" + ids.join(", ") + ")");
+    }
+  }
+  /* sujet / évaluation : dans la liste « Je prépare une évaluation », la classe d'abord dans chaque chapitre */
+  fresh({ system: "FR", grade: 9, track: "college" }); screenPrep();
+  { const v = [...app.querySelectorAll(".checks")].map((c) => [...c.querySelectorAll("input")].map((i) => yr(i.value) === 9));
+    ok(v.every((L) => L.indexOf(false) < 0 || L.lastIndexOf(true) < L.indexOf(false)), "3e FR, évaluation : une notion d'une autre classe avant celles de 3e"); }
+  log.push("1 : " + n1 + " chapitres");
+
+  /* ---- 2. mode libre : notions de l'année (plus des remobilisations justifiées) ---- */
+  const P2 = [["2e Coll.", { system: "CH", grade: 13, track: "college" }], ["5e FR", { system: "FR", grade: 7, track: "college" }], ["4e FR", { system: "FR", grade: 8, track: "college" }], ["3e FR", { system: "FR", grade: 9, track: "college" }], ["MP 2e", { system: "CH", grade: 13, track: "mp" }]];
+  for (const [nom, pr] of P2) {
+    for (const prof of ["moyen", "fort", "fragile"]) {
+      fresh(pr);
+      const year = new Set(Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id)), all = Object.keys(state.notions).filter((id) => GEN[id]);
+      /* après un positionnement réussi sur des notions d'avant, et quelques notions de l'année travaillées */
+      all.filter((id) => !year.has(id)).slice(0, 25).forEach((id) => Object.assign(state.notions[id], { seen: 1, m: 0.75, box: 2 }));
+      const m = prof === "fort" ? 0.9 : prof === "fragile" ? 0.35 : 0.6;
+      all.filter((id) => year.has(id)).slice(0, 8).forEach((id, k) => Object.assign(state.notions[id], { seen: 3, m: prof === "moyen" && k % 2 ? 0.85 : m, status: "encours" }));
+      let out = 0, tot = 0;
+      for (let r = 0; r < 30; r++) { const need = Engine.remob ? Engine.remob(state, year) : new Set(); Engine.freePlan(state, "annee", 8).forEach((e) => { tot++; if (!year.has(idOf(e)) && !need.has(idOf(e)) && !(prof === "fragile" && Object.values(PREREQ).some((l) => l.includes(idOf(e))))) out++; }); }
+      ok(out === 0 && tot > 0, nom + " " + prof + " (mode libre) : " + out + " notions d'une autre année sans raison sur " + tot);
+    }
+  }
+  /* une notion d'avant ratée revient (remobilisation justifiée) */
+  fresh({ system: "CH", grade: 13, track: "college" });
+  { const year = new Set(Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id)), old = Object.keys(state.notions).find((id) => GEN[id] && !year.has(id));
+    Object.assign(state.notions[old], { seen: 3, m: 0.2, fails: 2 });
+    ok(Engine.remob(state, year).has(old), "2e Coll. : notion d'avant ratée non remobilisée (" + old + ")"); }
+
+  /* ---- 3. série courte (élève en grande difficulté), jour 1 à 3 questions ---- */
+  fresh({ system: "CH", grade: 9, track: "college" });
+  state.last1 = [0, 0, 1, 0, 0, 0]; ok(Engine.autoN(state) === 4, "9e très faible : série de " + Engine.autoN(state) + " automatismes (4 attendus)");
+  state.last1 = [1, 1, 1, 0, 1, 1]; ok(Engine.autoN(state) === 6, "9e à l'aise : série de " + Engine.autoN(state));
+  state.placedOn = day(); for (const f of Object.keys(FORMATS)) ok(Engine.planSession(state, f).length <= 3, "jour du positionnement : " + f + " de " + Engine.planSession(state, f).length + " questions");
+
+  /* ---- 5 (et 3) : positionnement : ratés hors du carnet ; arrêt après 3 ratés ---- */
+  fresh({ system: "CH", grade: 9, track: "college" }); state.placed = false; delete state.placement; state.carnet = [];
+  startPlacement();
+  for (let k = 0; k < 3 && !state.placed; k++) { document.getElementById("idk").click(); const nx = document.getElementById("nx"); if (nx) nx.click(); }
+  ok(state.placed, "positionnement : pas terminé après 3 « Je ne sais pas »");
+  fresh({ system: "CH", grade: 9, track: "college" }); state.placed = false; delete state.placement; state.carnet = [];
+  startPlacement();
+  for (let k = 0; k < 6 && !state.placed; k++) { const inp = document.getElementById("ans"), ck = () => { const c = document.getElementById("check"); if (c && !document.getElementById("nx")) c.click(); };
+    if (inp) { inp.value = "123456789"; ck(); inp.value = "123456788"; ck(); }
+    if (!document.getElementById("nx")) { const i = document.getElementById("idk"); if (i) i.click(); }
+    const nx = document.getElementById("nx"); if (nx) nx.click(); else break; }
+  ok(state.placed && !(state.carnet || []).length, "positionnement : " + (state.carnet || []).length + " erreurs rangées au carnet");
+
+  /* ---- 4. pas de « À toi » sur une reprise, ni en automatismes ---- */
+  fresh({ system: "CH", grade: 9, track: "college" }); Object.values(state.notions).forEach((n) => (n.lessonSeen = true));
+  session = { fmt: "revision", plan: ["ulong|2|rev", "uaire|2|rev"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
+  nextQuestion(); document.getElementById("idk").click();
+  ok(!!document.getElementById("redo"), "révision : « Refaire » absent sur une première question ratée");
+  document.getElementById("redo").click();
+  ok(/nouvelles valeurs/i.test(app.querySelector(".eyebrow").textContent), "reprise : pas d'étiquette « nouvelles valeurs »");
+  document.getElementById("idk").click();
+  ok(!document.getElementById("redo") && document.getElementById("nx").classList.contains("btn-primary"), "reprise ratée : encore un « À toi » / « Refaire », ou « Continuer » pas principal");
+  session = { fmt: "auto", plan: ["ulong|1|drill", "uaire|1|drill"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
+  nextQuestion(); document.getElementById("idk").click();
+  ok(!document.getElementById("redo"), "automatismes : « À toi » / « Refaire » proposé (une question par créneau)");
+
+  /* élève en grande difficulté (positionnement arrêté sur 3 ratés) : séances de 3 questions, pas de reprise */
+  fresh({ system: "CH", grade: 9, track: "college" }); Object.values(state.notions).forEach((n) => (n.lessonSeen = true)); state.placeMiss = 3; state.last1 = [0, 1];
+  ok(Engine.struggling(state) && Engine.planSession(state, "revision").length <= 3 && Engine.autoN(state) === 4, "élève très faible (3 ratés au positionnement) : séance non raccourcie");
+  session = { fmt: "revision", plan: ["ulong|2|rev", "uaire|2|rev"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set() };
+  nextQuestion(); document.getElementById("idk").click();
+  ok(!document.getElementById("redo"), "élève très faible : reprise proposée");
+
+  /* ---- 6, 7. problème de la semaine : vrai problème en plusieurs parties, de l'année ---- */
+  for (const [nom, pr] of [["3e FR", { system: "FR", grade: 9, track: "college" }], ["Tle FR", { system: "FR", grade: 12, track: "college" }], ["MP 3e", { system: "CH", grade: 14, track: "mp" }], ["9e", { system: "CH", grade: 9, track: "college" }], ["5e FR", { system: "FR", grade: 7, track: "college" }]]) {
+    fresh(pr); state.elo.r = 1500;
+    Engine.catalog(state.profile).filter((c) => c.current).forEach((c) => Object.assign(state.notions[c.id], { status: "encours", seen: 2, m: 0.7 }));
+    const id = Engine.weeklyProblem(state), year = new Set(Engine.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
+    if (!id) { ok(false, nom + " : pas de problème de la semaine"); continue; }
+    let q = Engine.make(state, id, 4, undefined, false); for (let k = 0; k < 20 && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
+    ok(q.d === 4 && q.parts && q.parts.length >= 2, nom + " : problème de la semaine d'une seule question (" + q.code + ")");
+    ok(year.has(id), nom + " : problème de la semaine d'une autre année (" + id + ")");
+  }
+
+  /* ---- 8. « sans calculatrice » = automatisme ; chapitre MP 3e présent dans la série ---- */
+  fresh({ system: "CH", grade: 14, track: "mp" });
+  ok(Engine.isDrill({ q: "Calcule sans calculatrice \\(\\log_{2} 32\\).", spec: { kind: "value", value: 5 } }), "« sans calculatrice » refusé comme automatisme");
+  ok(!Engine.isDrill({ q: "Calcule à la calculatrice \\(\\log 7\\).", spec: { kind: "value", value: 5 } }), "« à la calculatrice » accepté comme automatisme");
+  { Engine.setNow(state, ["puisrat", "logdef", "logprop"]); let k = 0; for (let r = 0; r < 5; r++) k += Engine.planSession(state, "auto").filter((e) => state.now.ids.includes(idOf(e))).length;
+    ok(k >= 10, "MP 3e, Puissances et logarithmes : " + k + " automatismes du chapitre sur 5 séries (≥ 10 attendus)"); }
+
+  /* ---- 9. élève fort, notion jamais vue : niveau 2 d'entrée ---- */
+  fresh({ system: "FR", grade: 12, track: "college" }); state.elo.r = 1850;
+  Engine.setNow(state, ["tvi", "limitinf"]);
+  ok(Engine.minLevel(state, "limitinf") === 2, "Tle forte : niveau minimal " + Engine.minLevel(state, "limitinf") + " sur une notion jamais vue");
+  state.notions.limitinf.placed = true; state.notions.limitinf.m = 0.3;
+  ok(Engine.minLevel(state, "limitinf") === 1, "notion ratée au positionnement : niveau 2 imposé");
+
+  /* ---- 10. tradexpr en France : × et ÷ ---- */
+  ok(/produit \(×\), quotient \(÷\)/.test(frLocal("Somme (+), différence (−), produit (·), quotient (:).")), "tradexpr FR : produit (·), quotient (:)");
+
+  /* ---- 11. scènes robinet et « viennent à vélo » ---- */
+  ok(sceneKey({ q: "Un robinet remplit 25 L en 5 minutes." }) === "robinet" && sceneKey({ q: "Sur 80 élèves, 12 viennent à vélo." }) === "velo-eleves", "scènes robinet / vélo non reconnues");
+
+  /* ---- remarque : 0,3̄ en fraction par une équation : pas avant la 4e en France ---- */
+  for (const [g, want] of [[7, false], [8, true]]) {
+    fresh({ system: "FR", grade: g, track: "college" }); let per = 0;
+    for (let k = 1; k <= 60; k++) { const q = Engine.make(state, "fracconv", 2, k); if (/10x - x|100x - 10x/.test(q.sol || "")) per++; }
+    ok(want ? true : per === 0, "fracconv " + g + " FR : " + per + " écritures périodiques par équation");
+  }
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = fails.length ? "ÉCHEC " + fails.length + " · " + fails.slice(0, 14).join("\n") : "ok revue p4 (11 points) : " + log.join(" | ");
+});
+Lot.lance();
 </script>

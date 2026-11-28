@@ -1,8 +1,51 @@
-<!doctype html><meta charset="utf-8"><link rel="stylesheet" href="../src/style.css"><main id="app"></main>
-<script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); } catch (e) {}</script>
-<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<!doctype html><meta charset="utf-8"><meta name="budget" content="75000">
+<title>Tests : guide</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Aide d'un élève en difficulté : pas à pas après deux erreurs, réponse repliée, clavier de l'étape ; aperçus (code d'une question, leçon dynamique).
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : guide_fold, guide_fold2, guide, code2, dyn.
+     Une seule section : guide.html#section=guide_fold -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
 <script>
+/* ======== guide_fold (ancienne page tests/guide_fold.html) ======== */
+Lot.section("guide_fold", { html: `<main id="app"></main><pre id="log"></pre>`, body: "width:420px" }, function () {
+// Simulation : un élève en difficulté se trompe deux fois sur Pythagore (additionne les côtés), puis suit le pas à pas.
+const q = Engine.build("vitesse", 2, 7);
+renderQuestion(q, { eyebrow: "Démonstration", onDone: () => -8, onNext: () => {} });
+const ans = document.getElementById("ans"), chk = document.getElementById("check");
+document.getElementById("idk").click();
+const first = "";
+document.getElementById("guide").click();
+const steps = 1;
+for (let k = 0; k < steps; k++) { const i = document.querySelectorAll(".gin")[k]; i.value = String(q.guide[k].spec.value).replace(".", ","); i.closest(".gstep").querySelector(".gok").click(); }
+document.title = first;
+const A = document.querySelector(".card .answer"), T = document.querySelector(".fold-toggle"), Ls = document.querySelector("details.lesson");
+document.getElementById("log").textContent = "réponse repliée : " + (A.style.display === "none") + " · bouton : " + (T ? T.textContent : "ABSENT") + " · rappel replié : " + (!Ls || Ls.style.display === "none") + " · étapes : " + document.querySelectorAll(".gstep").length;
+T.click(); const l2 = " · après clic : " + (A.style.display !== "none") + " / " + T.textContent; T.click();
+document.getElementById("log").textContent += l2 + " · re-replié : " + (A.style.display === "none");
+});
+/* ======== guide_fold2 (ancienne page tests/guide_fold2.html) ======== */
+Lot.section("guide_fold2", { html: `<main id="app"></main><pre id="log"></pre>`, body: "width:420px" }, function () {
+// Simulation : un élève en difficulté se trompe deux fois sur Pythagore (additionne les côtés), puis suit le pas à pas.
+const q = (()=>{for(let s=1;s<200;s++){const q=Engine.build("reduire",1,s); if(/a/.test(q.spec.expr)&&/b/.test(q.spec.expr)) return q;}})();
+renderQuestion(q, { eyebrow: "Démonstration", onDone: () => -8, onNext: () => {} });
+const ans = document.getElementById("ans"), chk = document.getElementById("check");
+document.getElementById("idk").click();
+const first = "";
+document.getElementById("guide").click();
+const steps = 1; document.querySelector(".gin");
+for (let k = 0; k < steps; k++) { const i = document.querySelectorAll(".gin")[k]; i.value = q.guide[k].spec.expr || String(q.guide[k].spec.value).replace(".", ","); i.closest(".gstep").querySelector(".gok").click(); }
+document.title = first;
+const KP = [...document.querySelectorAll(".gstep .keypad button")].map(b=>b.dataset.k).join(" "); const A = document.querySelector(".card .answer"), T = document.querySelector(".fold-toggle"), Ls = document.querySelector("details.lesson");
+ document.getElementById("log").textContent = "clavier de l'étape 2 : " + KP + " · réponse repliée : " + (A.style.display === "none") + " · bouton : " + (T ? T.textContent : "ABSENT") + " · rappel replié : " + (!Ls || Ls.style.display === "none") + " · étapes : " + document.querySelectorAll(".gstep").length;
+T.click(); const l2 = " · après clic : " + (A.style.display !== "none") + " / " + T.textContent; T.click();
+document.getElementById("log").textContent += l2 + " · re-replié : " + (A.style.display === "none");
+});
+/* ======== guide (ancienne page tests/guide.html) ======== */
+Lot.section("guide", { html: `<main id="app"></main>`, apercu: true }, function () {
 // Simulation : un élève en difficulté se trompe deux fois sur Pythagore (additionne les côtés), puis suit le pas à pas.
 const q = Engine.build("pyth", 1, 3), n = q.q.match(/\d+/g).map(Number);
 renderQuestion(q, { eyebrow: "Démonstration", onDone: () => -8, onNext: () => {} });
@@ -15,4 +58,18 @@ const steps = location.hash === "#all" ? q.guide.length : 2;
 for (let k = 0; k < steps; k++) { const i = document.querySelectorAll(".gin")[k]; i.value = k === 1 ? "999" : String(q.guide[k].spec.value); i.closest(".gstep").querySelector(".gok").click(); }
 document.title = first;
 window.scrollTo(0, document.body.scrollHeight);
+});
+/* ======== code2 (ancienne page tests/code2.html) ======== */
+Lot.section("code2", { html: `<main id="app"></main>`, apercu: true }, function () {
+// #q-CODE : question ; #l-ID : rappel de cours
+const k = location.hash.slice(1);
+if (k.startsWith("l-")) h(`<div class="card pop lesson-card"><h2>${LESSONS[k.slice(2)].titre}</h2>${lessonBody(k.slice(2))}</div><pre>${JSON.stringify(LESSONS[k.slice(2)], null, 1).replace(/</g, "&lt;")}</pre>`);
+else if (k.startsWith("g-")) { const [, id, d] = k.split("-"); const q = Engine.make(Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 }), id, +d); renderQuestion(q, { eyebrow: "aperçu", onDone: () => 0, onNext: () => {} }); }
+else { location.hash = "#q-" + k; showCode(); }
+});
+/* ======== dyn (ancienne page tests/dyn.html) ======== */
+Lot.section("dyn", { html: `<main id="app"></main>`, apercu: true }, function () {
+h(`<div class="card pop lesson-card"><h2>${LESSONS.optim.titre}</h2>${lessonBody("optim")}</div>`); const v = location.hash.slice(1); if (v) { const i = app.querySelector(".dyn input"); i.value = v; i.oninput(); }
+});
+Lot.lance();
 </script>

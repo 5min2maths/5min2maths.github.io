@@ -3,7 +3,7 @@
 Source : référentiel de l'enseignant `CFPT/Referentiel/referentiel_MP.csv` (150 objectifs, tirés du PEE MP 8 de
 l'ordonnance 2026, `PEE_mp - 2026.docx`, et marqués PEC / * / facultatif). Contrôlé ligne par ligne contre le PEE 2026 :
 conforme. PEC fédéraux (2012 et 2025) dans `~/DATA/Enseignement/Sources/Officiel/matu_pro_suisse/SEFRI/` (rien de
-téléchargé). Générateur `tools/ref_mp.py` → `src/ref_mp.js` ; test `tests/ref_mp.html` ; onglet « Référentiel MP » du suivi.
+téléchargé). Générateur `tools/ref_mp.py` → `src/ref_mp.js` ; test `tests/referentiels.html#section=ref_mp` ; onglet « Référentiel MP » du suivi.
 
 Affichage : profil MP (1re–4e) → en-tête « MP 2e », objectifs groupés « Semestre n — chapitre », note 1–6,
 « travaillée en classe » sans question, années précédentes repliées, code en `title` seulement. « Savoir » retiré des

@@ -25,6 +25,17 @@ def page_ok(nom):
     return base not in EXCLUS and not base.startswith("_") and (TESTS / (base + ".html")).exists()
 
 
+def sections():
+    """28.11 (pages par thème, tests/lot.js) : {nom de section: page} — une section porte le nom de l'ancienne page."""
+    idx = {}
+    for t in sorted(TESTS.glob("*.html")):
+        if t.stem.startswith("_"):
+            continue
+        for nom in re.findall(r'Lot\.section\("([\w-]+)"', t.read_text(errors="ignore")):
+            idx.setdefault(nom, t.stem)
+    return idx
+
+
 def main():
     base = sys.argv[sys.argv.index("--base") + 1] if "--base" in sys.argv else "origin/master"
     pages, ordre, corresp = [], None, {}
@@ -37,13 +48,22 @@ def main():
         if "->" in l:
             k, v = l.split("->", 1); corresp[k.strip()] = v.split(); continue
         pages.append(l)
-    vus = {p.split("#")[0] for p in pages}
+    vus = set(pages)   # 28.11 : noms complets (recalcul#part=1&n=3 et recalcul#part=3&n=3 sont deux lancements)
+
+    SEC = sections(); parts = {}   # page de thème → sections demandées (seulement celles-là : page#section=a,b)
 
     def ajoute(nom, pourquoi):
         b = nom.split("#")[0]
-        if b in vus or not page_ok(nom):
+        if nom in vus or b in vus or not page_ok(nom):   # déjà là, ou page déjà lancée en entier
             return
-        vus.add(b); pages.append(nom); print("  + %s (%s)" % (nom, pourquoi), file=sys.stderr)
+        vus.add(nom); pages.append(nom); print("  + %s (%s)" % (nom, pourquoi), file=sys.stderr)
+
+    def ajoute_section(sec, pourquoi):
+        page = SEC[sec]
+        if page in vus or not page_ok(page):
+            return
+        if sec not in parts.setdefault(page, []):
+            parts[page].append(sec); print("  + %s#section=%s (%s)" % (page, sec, pourquoi), file=sys.stderr)
 
     # changements non publiés : commits, fichiers modifiés et fichiers nouveaux non suivis
     ch = set(git("diff", base, "--name-only", "--diff-filter=d")) | set(git("ls-files", "--others", "--exclude-standard", "src", "tests", "build.py"))
@@ -59,8 +79,14 @@ def main():
             for t in sorted(TESTS.glob("*.html")):
                 if re.fullmatch(re.escape(p.stem) + r"(_.*|\d+)?", t.stem):
                     ajoute(t.stem, "teste " + f)
+            for sec in sorted(SEC):   # même règle du nom, appliquée aux sections des pages de thème
+                if re.fullmatch(re.escape(p.stem) + r"(_.*|\d+)?", sec):
+                    ajoute_section(sec, "teste " + f)
         for nom in corresp.get(f, []):
-            ajoute(nom, "lié à " + f)
+            if nom in SEC and not page_ok(nom):
+                ajoute_section(nom, "lié à " + f)
+            else:
+                ajoute(nom, "lié à " + f)
     # échecs de la dernière nuit : « N ÉCHEC(S) : page1, page2 … »
     try:
         t = NUIT.read_text()
@@ -69,6 +95,9 @@ def main():
                 ajoute(nom, "en échec la nuit dernière")
     except OSError:
         pass
+    for page, secs in parts.items():
+        if page not in vus:   # page demandée en entier par ailleurs : elle l'emporte
+            pages.append("%s#section=%s" % (page, ",".join(secs)))
     print("\n".join(pages))
     if ordre:
         print("ORDRE %d" % ordre)

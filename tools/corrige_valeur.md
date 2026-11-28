@@ -9,9 +9,9 @@ juste. Rien ne le contrôlait de façon systématique, sauf `tests/primaire.html
 | page | contenu | questions (30 graines) | durée seule |
 |---|---|---|---|
 | `tests/corrige_valeur.html` | GEN niveaux 1 à 3, les 334 notions, textes suisses (CO 9e–11e, Collège 1re–4e MA1/MA2, MP 1re–4e) | 30'060 | ≈ 20 s |
-| `tests/corrige_valeur_defis.html` | niveau 4 (problèmes à parties), 300 notions, max(30, 3 × nombre de défis) graines | 9'000 | ≈ 9 s |
-| `tests/corrige_valeur_fr.html` | profils France 6e–3e (`Engine.finalize` : ×, milliers 1 200, notes sur 20), niveaux 1 à 4 | 32'205 | ≈ 38 s |
-| `tests/corrige_valeur_frl.html` | profils France 2nde–Tle, niveaux 1 à 4 | 53'950 | ≈ 76 s |
+| `tests/corrige_valeur.html#jeu=defis` | niveau 4 (problèmes à parties), 300 notions, max(30, 3 × nombre de défis) graines | 9'000 | ≈ 9 s |
+| `tests/corrige_valeur.html#jeu=fr` | profils France 6e–3e (`Engine.finalize` : ×, milliers 1 200, notes sur 20), niveaux 1 à 4 | 32'205 | ≈ 38 s |
+| `tests/corrige_valeur.html#jeu=frl` | profils France 2nde–Tle, niveaux 1 à 4 | 53'950 | ≈ 76 s |
 
 Le contrôle est dans `tests/corrige_valeur.js` (`CV.check`) ; paramètres : `#n=30` (graines), `#ids=eq1,pyth`,
 `#detail` (tous les exemples). Profils suisses : `Engine.build` suffit, `finalize` ne touche ni le corrigé ni la valeur

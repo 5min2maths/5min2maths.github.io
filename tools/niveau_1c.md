@@ -230,7 +230,7 @@ les séries riches « raison »).
      (aujourd'hui : tout le Collège, grade ≥ 12) ;
    - contenu de l'année absent : créer les notions (standard du projet : 3 niveaux, ≥ 3 formes, pas à pas, pièges, ctx, leçon,
      indice, compétences, problème de niveau 4, ORDRE/ORDRE_THEME, `tools/referentiels.py`, PREREQ, pages de test).
-6. **Tests** : `tests/ch1c.html#ids` (ou la page de la classe), `test`, `trivial`, `pieges` ; puis relancer la sonde.
+6. **Tests** : `tests/pas_a_pas.html#section=ch1c#ids` (ou la page de la classe), `test`, `trivial`, `pieges` ; puis relancer la sonde.
 7. **Registre** `tools/niveau.json` : une entrée par notion auditée
    `{ "classe", "plan", "etalon", "audit", "verdict" }` (verdict : « au niveau », « remonté », « hors programme », « à valider »),
    et un tableau d'audit dans `tools/niveau_<classe>.md`.

@@ -1,0 +1,370 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="135000">
+<title>Tests : interface</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Interface : accueil (exemple selon la classe), mode auteur, navigation, améliorations élèves du 21.11 (positionnement, série, bilan, visite guidée, paliers…), choix de la voie, positionnement par type, signaux et erreurs envoyés.
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : accueil_demo, auteur, home_nav, ux_2111, ux_2111b, voie, placement_type, signaux, erreurs.
+     Une seule section : interface.html#section=accueil_demo -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
+<script>
+/* ======== accueil_demo (ancienne page tests/accueil_demo.html) ======== */
+Lot.section("accueil_demo", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Accueil (21.11) : exemple selon la classe (notions déjà vues), « Pas encore vu ça ? », pré-remplissage de l'étape 1.
+const fails=[],ok=(c,m)=>{if(!c)fails.push(m)};Element.prototype.scrollIntoView=function(){};
+const yr=(id)=>{const n=NOTIONS.find(x=>x.id===id);return n&&n.CH?n.CH[0]:99};
+try{
+ state=null;demoGrade=null;demoSkip=[];
+ for(let k=0;k<30;k++){screenWelcome();const ch=document.querySelector("#demo .chip").textContent;}
+ ok(demoPoolFor(null).every(([id])=>DEMO_BASE.includes(id)),"1 sans classe : bases seulement");
+ const log=[];
+ for(const g of [9,10,11,12]){const pool=demoPoolFor(g).map(x=>x[0]);log.push(g+" : "+pool.length+" notions ("+pool.slice(0,12).join(", ")+"…)");
+  ok(pool.length>=3,"2 au moins 3 notions en "+g);
+  if(g<=11)ok(pool.every(id=>yr(id)<=g),"3 rien d'une année suivante en "+g);
+  demoGrade=g;for(let k=0;k<40;k++){const q=demoQuestion();ok(pool.includes(q.id),"4 question hors pool "+q.id+" en "+g);}}
+ ok(!demoPoolFor(9).map(x=>x[0]).includes("pyth"),"5 pas de Pythagore en 9e");
+ // Interface
+ demoGrade=null;screenWelcome();document.querySelector('#dgrade button[data-v="10"]').click();
+ ok(demoGrade===10&&draft.grade===10,"6 choix 10e mémorisé et pré-rempli");ok(document.querySelector('#dgrade button[data-v="10"]').getAttribute("aria-pressed")==="true","6 bouton actif");
+ const id1=document.querySelector("#demo .chip").textContent;document.getElementById("dskip").click();ok(demoSkip.length===1,"7 notion écartée");
+ document.getElementById("go").click();ok(/10e/.test((document.getElementById("gradeknown")||{}).textContent||"")&&!document.getElementById("grade"),"8 étape 1 : 10e déjà su, pas redemandé (25.11)");
+ document.getElementById("gradechg").click();ok(document.querySelector('#grade button[aria-pressed="true"]').dataset.v==="10","8 « changer » : choix de la classe, 10e coché");
+ demoGrade=12;draft.grade=12;draft.fromWelcome=12;screenLevel();ok([...document.querySelectorAll("#grade button")].every((b)=>+b.dataset.v>=12)&&document.getElementById("track"),"8 Sec. II : classe du sec. II et voie à choisir");
+ document.body.insertAdjacentHTML("beforeend","<pre id=log>"+log.join("\n")+"</pre>");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.slice(0,10).join("\n"):"OK")+"</pre>");
+});
+/* ======== auteur (ancienne page tests/auteur.html) ======== */
+Lot.section("auteur", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Mode auteur (20.11) : #auteur marque l'appareil, #auteur-off l'annule.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
+try{
+ try{localStorage.removeItem("m2m-auteur")}catch(e){}
+ ok(!isAuthor(),"1 pas auteur au départ");
+ history.replaceState(null,"","#auteur"); restoreFromHash();
+ ok(isAuthor(),"2 marqué après #auteur"); ok(/n'est plus compté/.test(app.textContent),"2 message"); ok(location.hash==="","2 adresse nettoyée");
+ ok(!canSend(),"3 rien n'est envoyé (canSend faux)");
+ state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
+ screenPrivacy(()=>0); ok(/Appareil de l'auteur/.test(app.textContent),"4 page confidentialité");
+ history.replaceState(null,"","#auteur-off"); restoreFromHash();
+ ok(!isAuthor(),"5 annulé par #auteur-off");
+}catch(e){fails.push("EXC "+e.message)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+});
+/* ======== home_nav (ancienne page tests/home_nav.html) ======== */
+Lot.section("home_nav", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+try{ state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); state.streak={count:4,last:day()}; save(); homeTab="today"; screenHome();
+const L=[]; document.querySelector('.tab[data-tab="prog"]').click(); L.push("clic Progrès -> "+document.querySelector(".home-panel").dataset.tab);
+const sw=(dx)=>{ const t=document.querySelector(".home-panel"); const mk=(x)=>new Touch({identifier:1,target:t,clientX:x,clientY:300});
+ t.dispatchEvent(new TouchEvent("touchstart",{bubbles:true,touches:[mk(200)],changedTouches:[mk(200)]}));
+ t.dispatchEvent(new TouchEvent("touchend",{bubbles:true,touches:[],changedTouches:[mk(200+dx)]})); };
+sw(120); L.push("glisser à droite -> "+document.querySelector(".home-panel").dataset.tab);
+sw(-120); L.push("glisser à gauche -> "+document.querySelector(".home-panel").dataset.tab);
+document.getElementById("settings").click(); L.push("roue -> "+document.querySelector("h2").textContent+", barre: "+!!document.querySelector(".tabs")+", has-tabs: "+app.classList.contains("has-tabs"));
+document.getElementById("back").click(); L.push("retour -> "+document.querySelector(".home-panel").dataset.tab);
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}
+});
+/* ======== ux_2111 (ancienne page tests/ux_2111.html) ======== */
+Lot.section("ux_2111", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Améliorations UX du 21.11 : reprise du positionnement, série (record, rappel), bilan par notion, bouton « plus facile », légendes du clavier.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
+const _rq=renderQuestion; renderQuestion=function(q,opt){window.__q=q;return _rq(q,opt)};
+const answer=(good)=>{const q=window.__q;const fr=(v)=>{if(Math.abs(v*1e6-Math.round(v*1e6))<1e-6)return String(+v.toFixed(6));for(let d=2;d<=200;d++){const n=Math.round(v*d);if(Math.abs(n/d-v)<1e-9)return n+"/"+d}return String(v)};document.getElementById("ans").value=good?(q.canon||fr(q.spec.value)):"123456789";document.getElementById("check").click();if(!good&&document.getElementById("check")&&!document.getElementById("check").disabled){document.getElementById("ans").value="123456788";document.getElementById("check").click();}};
+try{
+// 1. positionnement : progression, reprise après « fermeture »
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);statsSet(false);/* 24.11 : carte des statistiques déjà répondue, sinon elle prend la place des autres cartes */
+startPlacement();const n=state.placement.plan.length;ok(n>=3,"1 plan "+n);
+ok(/question 1 sur/.test(app.textContent)&&!!app.querySelector(".pbar"),"1 eyebrow et barre");
+document.getElementById("idk").click();document.getElementById("nx").click();
+ok(state.placement.i===1,"1 position gardée "+state.placement.i);
+const saved=JSON.parse(JSON.stringify(state.placement));
+startPlacement(); // comme au rechargement
+ok(/question 2 sur/.test(app.textContent),"1 reprise à la question 2");
+ok(JSON.stringify(state.placement.plan)===JSON.stringify(saved.plan),"1 même plan");
+for(let k=0;k<n+2&&state.placement;k++){document.getElementById("idk").click();document.getElementById("nx").click();}
+ok(state.placed&&!state.placement,"1 fin : placed, plus de placement");
+// 2. série : record et rappel
+state.streak={count:4,last:addDays(day(),-1),best:4};homeTab="today";screenHome();
+ok(/tu passes à 5 \(record/.test(app.textContent),"2 rappel de série");
+Engine.finishDay(state,1,1);ok(state.streak.count===5&&state.streak.best===5,"2 record "+JSON.stringify(state.streak));
+screenHome();ok(!app.querySelector(".streak-nudge"),"2 plus de rappel une fois la séance faite");
+// 3. bouton plus facile (niveau 2, échec, sans guide ni étapes)
+for(const id in state.notions)state.notions[id].lessonSeen=true;
+session={fmt:"",plan:["prio|2","rel|1"] /* 27.11 : rel au lieu de fracadd (problème à fractions que le test ne sait pas remplir) */,i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+const d0=window.__q.d;document.getElementById("idk").click();
+const rd=document.getElementById("redo");ok(!!rd,"3 bouton refaire");
+if(d0>1)ok(/plus facile/.test(rd.textContent),"3 libellé plus facile ("+rd.textContent+")");
+rd.click();ok(window.__q.d===Math.max(1,d0-1),"3 niveau baissé "+d0+"→"+window.__q.d);
+/* 27.11 (test instable : « Suivant » absent selon le tirage) : bouton principal de la barre si #nx manque */
+const nxt=()=>(document.getElementById("nx")||app.querySelector(".qbar .btn-primary")||{click(){}}).click();
+/* jusqu'au bilan (une question de remédiation peut s'ajouter selon le tirage), 6 au plus */
+for(let k=0;k<6&&!app.querySelector(".sum-notions");k++){if(document.querySelector(".qtext"))answer(true);nxt();}
+// 4. bilan par notion
+ok(!!app.querySelector(".sum-notions"),"4 bilan par notion ["+((app.querySelector(".eyebrow")||{}).textContent||"")+" | "+app.textContent.replace(/\s+/g," ").slice(0,160)+"]");
+ok(/Réussie|Réussies/.test(app.textContent)&&/En progrès|Reviendr/.test(app.textContent),"4 catégories : "+(app.querySelector(".sum-notions")||{}).textContent);
+ok(/record/.test(app.textContent)||/série passe à/.test(app.textContent),"4 série au bilan");
+// 5. clavier
+const kp=keypadHtml({kind:"value",value:0.5,final:true});ok(/fraction/.test(kp)&&/clavier/.test(kp)&&/aria-label="barre de fraction"/.test(kp),"5 légendes clavier résultat");
+ok(/puissance/.test(keypadHtml({kind:"expr",expr:"x^2"})),"5 légende puissance");
+// 6. sauvegarde : record conservé
+ok(Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(state)))).streak.best===5,"6 record dans le code de sauvegarde");
+// 7. interface (propositions du 21.11) : aperçu masqué, sauts groupés, clavier replié, un seul bouton principal, progression
+session={fmt:"auto",plan:["prio|1","fracadd|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+ok(document.getElementById("prev").innerHTML==="","7 aperçu vide au départ");
+ok(!!app.querySelector(".qmenu #easy")&&!app.querySelector(".qmeta #easy"),"7 « Trop facile » sorti de l'en-tête"); /* 26.11 (chantier ergonomie) : rangé derrière « ⋯ » (menu .qmenu), plus dans .skips */
+ok(!!app.querySelector(".eyebrow .pbar"),"7 barre de progression de séance");
+document.getElementById("idk").click();
+ok(document.getElementById("kp").style.display==="none","7 clavier replié");
+ok(app.querySelectorAll("#fb .btn-primary").length===1,"7 un seul bouton principal ("+app.querySelectorAll("#fb .btn-primary").length+")");
+ok(/Cette question était/.test(app.textContent)&&!!app.querySelector('.vote button[data-v="down"]'),"7 votes présents (26.11 : derrière l'icône 💬)");
+// 8. réglages : taille du texte et vibrations
+screenSettings();app.querySelector('#fs button[data-v="1.3"]').click();ok(getComputedStyle(document.documentElement).fontSize==="20.8px"&&state.a11y.fs===1.3,"8 taille du texte "+getComputedStyle(document.documentElement).fontSize); /* 24.11 : taille dans le state (chantier O) */
+app.querySelector('#vib button[data-v="0"]').click();ok(UI.vib===false&&JSON.parse(localStorage.getItem("m2m-ui")).vib===false,"8 vibrations désactivées");
+app.querySelector('#fs button[data-v="1"]').click();
+// 9. installer puis rappel, au bilan
+localStorage.removeItem("m2m-ui");for(const k of ["installed","installLater","remSet","remNo"])delete UI[k];
+state.history=[{date:addDays(day(),-1),n:1,score:1}];ok(returnCard()==="","9 rien le 1er jour");
+state.history.push({date:day(),n:1,score:1});ok(/écran d'accueil/.test(returnCard()),"9 installer dès le 2e jour");
+UI.installLater=day();ok(returnCard()==="","9 « plus tard » : plus rien");
+state.history.unshift({date:addDays(day(),-2),n:1,score:1});ok(!/rappel/.test(returnCard()),"9 plus de carte rappel");
+screenSettings();ok(!/Un rappel chaque jour/.test(app.textContent),"9 pas de rappel dans les réglages");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+});
+/* ======== ux_2111b (ancienne page tests/ux_2111b.html) ======== */
+Lot.section("ux_2111b", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Améliorations élèves du 21.11 (lot 2) : reprise de séance, visite guidée, paliers, bilan de la semaine, format de demain, données en gras.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
+try{
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);statsSet(false);/* 24.11 : carte des statistiques déjà répondue, sinon elle prend la place des autres cartes */state.placed=true;
+for(const id in state.notions)state.notions[id].lessonSeen=true;
+// 2. visite guidée
+homeTab="today";screenHome();ok(!!document.getElementById("tour")&&/pépite du jour/.test(document.getElementById("tour").textContent) /* 27.11 : « Ta pépite du jour » */&&app.querySelector(".sess-card.tour-hi"),"2 bulle 1 (accueil à cases, 22.11)");
+document.getElementById("tournext").click();/* 26.11 (décision de l'enseignant : Mathélo caché par défaut) : la bulle 2 présente le grade de l'année */ ok(homeTab==="today"&&/grade/.test(document.getElementById("tour").textContent)&&app.querySelector(".elo-band.tour-hi"),"2 bulle 2 sur le grade");
+document.getElementById("tourskip").click();ok(state.tourDone&&!document.getElementById("tour")&&homeTab==="today","2 passer : fini");
+screenHome();ok(!document.getElementById("tour"),"2 plus de visite ensuite");
+// 1. reprise de séance
+session={fmt:"auto",plan:["prio|1","fracadd|1","puiss|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+document.getElementById("idk").click();document.getElementById("nx").click();
+ok(state.resume&&state.resume.s.i===1&&state.resume.s.answered===1,"1 séance gardée "+JSON.stringify(state.resume&&{i:state.resume.s.i,a:state.resume.s.answered}));
+session=null;homeTab="today";screenHome();ok(/étape <b>2 sur 3<\/b>/.test(app.innerHTML),"1 carte Reprendre"); /* 25.11 : « étape » (la leçon compte dans le compteur) */
+document.getElementById("resgo").click();ok(session&&session.i===1&&session.ids instanceof Set&&/2 sur 3/.test(app.textContent),"1 reprise à la question 2");
+document.getElementById("idk").click();document.getElementById("nx").click();document.getElementById("idk").click();document.getElementById("nx").click();
+ok(/Réussies/.test(app.textContent)&&!state.resume,"1 bilan : plus de reprise"); /* 28.11 : « Score » → « Réussies » (enseignant) */
+// 5. format de demain
+ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addDays(day(),1),"5 format de demain annoncé");
+const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");
+// 3. paliers
+/* 25.11 (grades de l'année, voulu) : le grade suit les points de l'année et non plus le Mathélo ; tests/grades_annee.html */
+ypSync();state.yp.pts=1700;homeTab="today";screenHome();ok(/Enquêteur\u00a0· 11e/.test(app.textContent)&&/Chercheur dans 100 🟡/.test(app.textContent) /* 27.11 : pts → 🟡 (pépites) */,"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
+ok(gradeOf(0).name==="Pousse"&&gradeOf(1100).name==="Explorateur"&&gradeOf(3000).name==="Expert"&&gradeOf(9000).next===null,"3 paliers en points de l'année");
+// 4. bilan de la semaine (simulé un lundi)
+const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
+state.history=[{date:addDays(mon,-6),n:5,score:4},{date:addDays(mon,-4),n:3,score:2},{date:addDays(mon,-2),n:4,score:4}];state.elo.log=[[addDays(mon,-8),1200],[addDays(mon,-2),1240]];delete state.recapSeen;
+const card=weekRecapCard();if(dow<=2){ok(/3<\/b> jours de pratique/.test(card)&&/12<\/b> questions/.test(card)/* 26.11 : plus de Mathélo dans le bilan de la semaine (caché par défaut) */&&!/Mathélo/.test(card),"4 bilan : "+card.replace(/<[^>]+>/g," ").slice(0,140));}else ok(card==="","4 rien après mercredi");
+// 6. données en gras
+ok(/\\mathbf\{4\}/.test(boldData("Un magasin vend \\(4\\) cahiers pour \\(32\\) CHF : combien coûtent \\(6\\) cahiers dans ce magasin ?")),"6 gras en contexte");
+ok(!/mathbf/.test(boldData("Calcule : \\(4 + 3 \\cdot 2\\)")),"6 pas de gras dans un calcul nu");
+ok(/<b>5<\/b> billets à <b>9<\/b> CHF/.test(boldData("Au cinéma, une famille paie 5 billets à 9 CHF et un grand pop-corn à 4 CHF. Écris le calcul en une seule ligne.")),"6 gras sur les nombres du texte");
+ok(!/<b>/.test(boldData('Une classe de 11e <span class="x" data-n="3">mesure</span> la cour avec une corde : quelle longueur obtient-elle au total ?').replace(/<span[^>]*>/,"")),"6 pas de gras dans 11e ni dans les attributs");
+// 7. joker de série
+state.streak={count:6,last:addDays(day(),-2),best:6};delete state.streak.jokerWk;homeTab="today";screenHome();
+ok(/Joker de filon/.test(app.textContent),"7 rappel du joker"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
+ok(Engine.finishDay(state,1,1)==="joker"&&state.streak.count===7,"7 joker utilisé "+JSON.stringify(state.streak));
+state.streak.last=addDays(day(),-2);state.streak.count=7;const r2=Engine.finishDay(state,1,1);
+if(Engine.weekOf(day())===Engine.weekOf(addDays(day(),-2))||true) ok(r2===""&&state.streak.count===1,"7 un seul joker par semaine "+JSON.stringify(state.streak));
+ok(Backup.unpack(JSON.parse(JSON.stringify(Backup.pack(state)))).streak.jokerWk===state.streak.jokerWk,"7 joker dans la sauvegarde");
+// 8. rappel de sauvegarde
+delete UI.lastBackup;delete UI.backupLater;state.history=Array.from({length:8},(x,k)=>({date:addDays(day(),-k-1),n:3,score:2}));screenHome();
+ok(!!document.getElementById("bkgo"),"8 carte de sauvegarde après 7 jours");
+document.getElementById("bkno").click();ok(!document.getElementById("bkgo"),"8 plus tard");
+delete UI.backupLater;UI.lastBackup=day();screenHome();ok(!document.getElementById("bkgo"),"8 code récent : pas de carte");delete UI.lastBackup;
+// 9. brouillon
+session={fmt:"auto",plan:["prio|1"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+const sb=document.getElementById("scrbtn");ok(!!sb&&document.getElementById("scr").hidden,"9 bouton brouillon, zone cachée");
+sb.click();ok(!document.getElementById("scr").hidden&&/Cacher/.test(sb.textContent),"9 brouillon ouvert");
+const cv=document.querySelector("#scr canvas");cv.dispatchEvent(new PointerEvent("pointerdown",{clientX:cv.getBoundingClientRect().left+10,clientY:cv.getBoundingClientRect().top+10,pointerId:1,bubbles:true}));
+ok(/b/.test(sig&&sig.aide||""),"9 usage du brouillon noté");
+document.getElementById("scrclose").click();ok(document.getElementById("scr").hidden,"9 fermé");
+// 10. page Mes grades
+state.yp.pts=1700;homeTab="today";screenHome();document.getElementById("eloband").click();
+ok(/Mes grades/.test(app.textContent)&&app.querySelectorAll(".grades li").length===GRADES.length,"10 page grades");
+ok(app.querySelector(".grades li.cur")&&/Enquêteur/.test(app.querySelector(".grades li.cur").textContent),"10 grade actuel mis en avant");
+ok(!/départ en/.test(app.textContent)&&gradeOf(5600).name==="Virtuose"&&gradeOf(9500).name==="Légende","10 échelle complète (points de l'année)");
+document.getElementById("back").click();ok(!!document.getElementById("eloband"),"10 retour accueil");
+// 11. changer de format sans redessiner l'accueil
+homeTab="today";screenHome();const band0=document.getElementById("eloband"),f0=Engine.todayFormat(state);document.getElementById("other").click();
+ok(document.getElementById("eloband")===band0,"11 accueil non redessiné");ok(Engine.todayFormat(state)!==f0&&app.querySelector(".fmt-lab").textContent===FORMATS[Engine.todayFormat(state)].label,"11 nouveau format affiché");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+});
+/* ======== voie (ancienne page tests/voie.html) ======== */
+Lot.section("voie", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Choix de la voie au sec. II (20.11) : rien de présélectionné, « Continuer » refusé sans choix.
+const fails=[],ok=(c,m)=>{if(!c)fails.push(m)};Element.prototype.scrollIntoView=function(){};
+try{
+ state=null;draft={system:"CH",grade:13,track:null,minutes:5};screenLevel();
+ ok(!document.querySelector('#track button[aria-pressed="true"]'),"1 aucune voie présélectionnée");
+ document.getElementById("next").click();ok(/Choisis d'abord ta voie/.test(document.getElementById("trackerr").textContent),"2 refus sans voie");ok(!state,"2 pas de profil créé");
+ document.querySelector('#track button[data-v="mp"]').click();ok(draft.track==="mp","3 MP choisie");
+ document.getElementById("next").click();ok(state&&state.profile.track==="mp"&&state.profile.grade===13,"3 profil MP 2e "+JSON.stringify(state&&state.profile));
+ // 24.11 : MP 3e et 4e (grade 14, 15) : la voie est demandée aussi en 3e–4e.
+ for(const g of [14,15]){state=null;draft={system:"CH",grade:g,track:null,minutes:5};screenLevel();ok(!!document.getElementById("track"),"5 voie proposée en "+(g-11)+"e");
+  document.getElementById("next").click();ok(!state,"5 refus sans voie en "+(g-11)+"e");
+  document.querySelector('#track button[data-v="mp"]').click();document.getElementById("next").click();ok(state&&state.profile.track==="mp"&&state.profile.grade===g,"5 profil MP "+(g-11)+"e "+JSON.stringify(state&&state.profile));}
+ state=null;draft={system:"CH",grade:14,track:null,minutes:5};screenLevel();document.querySelector('#track button[data-v="college"]').click();document.getElementById("next").click();ok(!state,"6a niveau MA1 / MA2 exigé en 3e Collège");document.querySelector('#niv button[data-v="N"]').click();document.getElementById("next").click();ok(state&&state.profile.track==="college"&&state.profile.grade===14&&state.profile.niv==="N","6 profil 3e Collège MA1");
+ state=null;draft={system:"CH",grade:11,track:null,minutes:5};screenLevel();ok(!document.getElementById("track"),"4 pas de voie en 11e");document.getElementById("next").click();ok(state&&state.profile.track==="college","4 11e = college");
+}catch(e){fails.push("EXC "+e.message)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+});
+/* ======== placement_type (ancienne page tests/placement_type.html) ======== */
+Lot.section("placement_type", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+const L=[];try{window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};
+for(const g of [11,12]){ state=Engine.newState({system:"CH",grade:g,track:"college",minutes:5}); Engine.autoInit(state); save();
+ startPlacement(); for(let k=0;k<12;k++){ const card=document.querySelector(".ans, input"); if(!card){L.push(g+"e étape "+k+" : pas de champ ; "+document.body.innerText.slice(0,80).replace(/\n/g," "));break;}
+  const before=document.body.innerText.slice(0,60).replace(/\n/g," "); card.value="5"; card.dispatchEvent(new Event("input",{bubbles:true}));
+  const after=document.querySelector(".ans, input"); L.push(g+"e étape "+k+" : "+(after===card?"champ conservé":"CHAMP DISPARU")+" | "+before);
+  const ok=document.getElementById("ok")||[...document.querySelectorAll("button")].find(b=>/Valider|Vérifier/.test(b.textContent)); if(ok) ok.click(); const fb=document.querySelector(".feedback, .fb, #fb"); L.push("   retour : "+(fb?fb.textContent.slice(0,50):"AUCUN"));
+  const nx=document.getElementById("next")||[...document.querySelectorAll("button")].find(b=>/Suivant|Continuer|suivante/.test(b.textContent)); if(nx) nx.click(); else break; } }
+}catch(e){L.push("ERR "+e.stack)} document.body.innerHTML="<pre id=\"log\">"+L.join("\n")+"</pre>";
+});
+/* ======== signaux (ancienne page tests/signaux.html) ======== */
+Lot.section("signaux", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Signaux muets (20.11) : vérifie les lignes envoyées (envoi remplacé par une capture).
+const sent = [], fails = [];
+sigSend = (S) => sent.push({ ...S, t0: undefined, sec: S.sec != null ? S.sec : sigSec(S) });
+const ok = (c, m) => { if (!c) fails.push(m); };
+const last = () => sent[sent.length - 1];
+try {
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+  // 1. question en séance : 2 réponses fausses, pas à pas guidé, puis Continuer
+  session = { fmt: "", plan: ["prio|1"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), pinged: true };
+  let q = Engine.build("prio", 1, 7); q.kind = "";
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => screenHome() });
+  const inp = () => document.getElementById("ans");
+  inp().value = "abc"; document.getElementById("check").click();
+  inp().value = "999999"; document.getElementById("check").click();
+  inp().value = "999998"; document.getElementById("check").click();
+  const g = document.getElementById("guide") || document.getElementById("solstep"); if (g) g.click();
+  document.getElementById("nx").click();
+  let r = last();
+  ok(r && r.ev === "q" && r.code === q.code, "1 code " + JSON.stringify(r));
+  ok(r.issue === "faux" && r.essais === 2, "1 issue/essais " + r.issue + r.essais);
+  ok(r.illis === 1, "1 illisible " + r.illis);
+  ok(r.rep1 === "999999", "1 rep1 " + r.rep1);
+  ok(r.aide.length > 0 && /[ge]/.test(r.aide), "1 aide " + r.aide);
+  // 2. question quittée sans répondre (onglet / écran suivant)
+  q = Engine.build("prio", 2, 8);
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => 0 });
+  screenHome();
+  ok(last().issue === "quitte" && last().code === q.code, "2 quitte " + JSON.stringify(last()));
+  // 3. juste du premier coup
+  q = Engine.build("prio", 1, 9);
+  renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => screenHome() });
+  inp().value = String(q.spec.value).replace(".", ","); document.getElementById("check").click();
+  document.getElementById("nx").click();
+  ok(last().issue === "ok1" && last().essais === 1, "3 ok1 " + JSON.stringify(last()));
+  // 4. « Je ne sais pas » puis correction complète
+  q = Engine.build("prio", 1, 10);
+  renderQuestion(q, { eyebrow: "t", track: "test", onDone: () => 1, onNext: () => screenHome() });
+  document.getElementById("idk").click(); document.getElementById("nx").click();
+  ok(last().issue === "idk" && last().fmt === "test", "4 idk " + JSON.stringify(last()));
+  // 5. consultation (#q-) : rien d'envoyé
+  const n = sent.length;
+  renderQuestion(Engine.build("prio", 1, 11), { eyebrow: "t", onDone: () => 0, onNext: () => 0 }); screenHome();
+  ok(sent.length === n, "5 consultation envoyée");
+  // 5 bis. bouton 💬 : code de la question dès l'affichage (avant toute réponse), puis de la leçon, puis titre de page
+  q = Engine.build("prio", 2, 12); renderQuestion(q, { eyebrow: "t", track: "seance", onDone: () => 1, onNext: () => 0 });
+  ok(pageCode() === q.code, "5b code question avant réponse " + pageCode());
+  screenLesson(Object.keys(LESSONS)[0], () => 0); ok(pageCode() === "lecon-" + Object.keys(LESSONS)[0], "5b leçon " + pageCode());
+  screenHome(); ok(/^page-/.test(pageCode()), "5b accueil " + pageCode());
+  // 6. mot à la place d'un calcul : [texte]
+  ok(sigRep("julie martin") === "[texte]" && sigRep("2sqrt(3)") === "2sqrt(3)" && sigRep("3/4") === "3/4", "6 sigRep");
+  // 7. leçon active : devine, passer les défis, J'ai compris
+  const act = Object.keys(ACTIVE).find((id) => LESSONS[id]);
+  screenLesson(act, () => screenHome());
+  document.querySelector("#pc button").click(); document.getElementById("skip").click(); document.getElementById("go").click();
+  r = last();
+  ok(r.ev === "lecon" && r.code === "lecon-" + act && r.issue === "lue" && /^[Dd]P$/.test(r.aide) && r.kind === "active", "7 leçon " + JSON.stringify(r));
+  // 8. leçon par lien (#l-) : rien
+  const m = sent.length; screenLesson(act, () => screenHome(), false, false); document.querySelector("#pc button").click(); document.getElementById("skip").click(); document.getElementById("go").click();
+  ok(sent.length === m, "8 consultation leçon envoyée");
+  // 9. problème : voir le corrigé
+  const pid = NOTIONS.map((x) => x.id).find((id) => { try { return Engine.build(id, 4, 3).parts; } catch (e) { return false; } });
+  if (pid) { const pq = Engine.build(pid, 4, 3); renderQuestion(pq, { eyebrow: "t", track: "semaine", onDone: () => 0, onNext: () => screenHome() }); document.getElementById("idk").click(); document.getElementById("nx").click();
+    ok(last().issue === "idk" && last().code === pq.code, "9 problème " + JSON.stringify(last())); }
+  else fails.push("9 aucun problème trouvé");
+} catch (e) { fails.push("exception " + e.message + " " + e.stack); }
+document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK " + sent.length + " lignes") + "\n" + JSON.stringify(sent.slice(0, 3));
+});
+/* ======== erreurs (ancienne page tests/erreurs.html) ======== */
+Lot.section("erreurs", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Erreurs JS (23.11, chantier N) : rien ne part hors https ; ligne envoyée ; anti-déluge (1 fois par message et par jour, 5 par jour).
+const fails = [], posts = [];
+const ok = (c, m) => { if (!c) fails.push(m); };
+window.fetch = (url, opt) => { posts.push(JSON.parse(opt.body)); return Promise.resolve(); };
+const oui = () => true;
+let fin = false;
+try {
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+  // 1. pages de test (file://) : envoi interdit, même par les écouteurs
+  ok(location.protocol !== "https:" && errCanSend() === false, "1 errCanSend hors https");
+  window.dispatchEvent(new ErrorEvent("error", { message: "Boum", filename: "file:///x/app.js", lineno: 3, colno: 4, error: new Error("Boum") }));
+  ok(errReport("Boum", "app.js", 1, 1, "") === null, "1 errReport hors https");
+  // 2. une vraie erreur (planifiée) ne doit rien envoyer non plus ; vérifié à la fin
+  setTimeout(() => { undefinedFunctionXYZ(); }, 0);
+  Promise.reject(new Error("rejet de test"));
+  // 3. ligne envoyée (envoi forcé)
+  screenHome();
+  const st = "TypeError: a is undefined\n    at f (https://5min2maths.github.io/index.html?v=3:1234:56)\n    at g (https://5min2maths.github.io/index.html:99:1)\n    at h (index.html:5:5)\n    at i (index.html:6:6)";
+  const r = errReport("TypeError: a is undefined " + "x".repeat(300), "https://5min2maths.github.io/sub/index.html?v=3#q", 1234, 56, st, oui);
+  ok(r && r.ev === "err" && posts.length === 1, "3 envoi " + JSON.stringify(r));
+  ok(r.msg.length === 200, "3 message tronqué " + r.msg.length);
+  ok(r.src === "index.html" && r.ligne === 1234 && r.col === 56, "3 fichier court " + r.src);
+  ok(r.pile.split(" | ").length === 3 && !/https?:|github/.test(r.pile), "3 pile " + r.pile);
+  ok(r.version === BUILD && r.dev === deviceId() && r.date === day() && /^page-/.test(r.ecran) && r.niveau, "3 champs " + JSON.stringify(r));
+  ok(errFile("https://5min2maths.github.io/") === "page" && errFile("") === "" && errFile("https://a.b/c/x.js?v=1") === "x.js", "3 errFile");
+  // 4. même message le même jour : une seule fois
+  ok(errReport("TypeError: a is undefined " + "x".repeat(300), "index.html", 1, 1, "", oui) === null && posts.length === 1, "4 doublon envoyé");
+  // 5. bruit : extensions, Script error. sans fichier, réseau
+  ok(errReport("Script error.", "", 0, 0, "", oui) === null, "5 Script error.");
+  ok(errReport("x is null", "chrome-extension://abc/content.js", 1, 1, "", oui) === null, "5 extension (fichier)");
+  ok(errReport("x is null", "", 0, 0, "at f (moz-extension://abc/c.js:1:1)", oui) === null, "5 extension (pile)");
+  ok(errReport("Promesse rejetée : Failed to fetch", "", 0, 0, "", oui) === null, "5 réseau");
+  // 6. plafond : 5 envois par jour au plus
+  for (let k = 0; k < 8; k++) errReport("Erreur " + k, "index.html", k, 1, "", oui);
+  ok(posts.length === 5, "6 plafond " + posts.length);
+  // 7. jour suivant : compteur remis à zéro
+  const m = JSON.parse(localStorage.getItem("m2m-err")); m.d = "2000-01-01"; localStorage.setItem("m2m-err", JSON.stringify(m));
+  ok(errReport("Erreur 0", "index.html", 1, 1, "", oui) && posts.length === 6, "7 nouveau jour");
+  // 8. appareil de l'auteur : rien
+  localStorage.setItem("m2m-auteur", "1"); ok(errCanSend() === false, "8 auteur"); localStorage.removeItem("m2m-auteur");
+  // 9. le rapporteur ne lève jamais d'erreur
+  ok(errReport(undefined, undefined, undefined, undefined, undefined, oui) === null, "9 vide");
+} catch (e) { fails.push("exception " + e.message + " " + e.stack); }
+setTimeout(() => {
+  ok(posts.length === 6, "2 une erreur réelle hors https a été envoyée (" + posts.length + ")");
+  /* 10. journal local (27.11) : les 3 dernières erreurs, même sans accord, sans donnée de l'élève ; envoi seulement avec accord */
+  try {
+    const j = errLogGet();
+    ok(j.length === 3, "10 journal : 3 erreurs gardées (" + j.length + ")");
+    ok(j.some((x) => /undefinedFunctionXYZ/.test(x.msg)) && j.some((x) => /rejet de test/.test(x.msg)), "10 journal : erreur réelle et promesse rejetée " + JSON.stringify(j));
+    ok(j.every((x) => Object.keys(x).sort().join() === "d,ligne,msg,s,src,v" && x.msg.length <= 100 && x.v === BUILD && !x.s), "10 journal : champs " + JSON.stringify(j[0]));
+    for (let k = 0; k < 4; k++) errLog("Encore " + k + " " + "y".repeat(200), "https://a.b/app.js?v=1", k, "");
+    const j2 = errLogGet(); ok(j2.length === 3 && j2[2].msg.startsWith("Encore 3") && j2[2].msg.length === 100 && j2[2].src === "app.js", "10 journal : plafond 3, message court " + JSON.stringify(j2[2]));
+    errLog("Encore 3 " + "y".repeat(200), "https://a.b/app.js?v=1", 3, ""); ok(errLogGet().length === 3, "10 journal : doublon non répété");
+    const sent = [], n0 = posts.length;
+    ok(errFlush(() => false, (r) => sent.push(r)).length === 0 && !sent.length, "10 journal : rien sans accord");
+    ok(errFlush(undefined, (r) => sent.push(r)).length === 0 && !sent.length, "10 journal : rien hors https (accord par défaut)");
+    const f = errFlush(oui, (r) => sent.push(r));
+    ok(f.length === 3 && sent.length === 3 && sent.every((r) => r.ev === "err" && r.ecran === "journal" && r.niveau === "" && !r.pile && r.version === BUILD), "10 journal : envoi avec accord " + JSON.stringify(sent[0]));
+    ok(errFlush(oui, (r) => sent.push(r)).length === 0 && errLogGet().every((x) => x.s), "10 journal : pas renvoyé deux fois");
+    ok(posts.length === n0, "10 journal : aucun fetch direct");
+  } catch (e) { fails.push("exception 10 " + e.message); }
+  document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK " + posts.length + " envois simulés") + "\n" + JSON.stringify(posts[0]);
+}, 300);
+});
+Lot.lance();
+</script>

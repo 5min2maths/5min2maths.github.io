@@ -1,11 +1,25 @@
-<link rel="stylesheet" href="../src/style.css"><!doctype html><meta charset="utf-8"><meta name="budget" content="60000"><div id="app"></div>
-<!-- France (25.11, audit tools/france.md) : profil FR = pas de CHF, pas d'apostrophe des milliers, pas de PGDC / PPMC, « antécédent »,
+<!doctype html><meta charset="utf-8"><meta name="budget" content="135000">
+<title>Tests : france</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Profils français : frLocal, profils suisses inchangés, fin de collège (pas à pas, réponses littérales) et leçons actives des notions françaises.
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : france, frfin, act_frfin.
+     Une seule section : france.html#section=france -->
+<!-- [france]  France (25.11, audit tools/france.md) : profil FR = pas de CHF, pas d'apostrophe des milliers, pas de PGDC / PPMC, « antécédent »,
      « factoriser », pas d'EVACOM ni de Genève visibles, sur un échantillon de questions (6e → Tle) et d'écrans ; profils suisses
      inchangés (frLocal jamais appliqué) ; aperçu …/#france (choix « France » à l'étape 1, …/#france-off pour annuler). -->
+<!-- [frfin]  25.11 (soir) · Notions françaises ajoutées par src/fr_fin.js (copie de frlycee.html) : 100 tirages par niveau (réponse acceptée, guide, pièges, contexte, formes), défis, classes FR et invisibilité en Suisse, progcalc en 5e (HORS_FR), notes sur 20 en France (FR_NOTES). tests/frfin.html#symax -->
+<body><main id="app"></main>
 <script>window.MathJax = { typesetPromise: () => Promise.resolve() }; try { localStorage.clear(); localStorage.setItem("m2m-france", "1"); } catch (e) {}</script>
 <script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/defis_9.js"></script><script src="../src/defis_910.js"></script><script src="../src/defis_2c.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_lycee.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/fr_college.js"></script><script src="../src/fr_1re.js"></script><script src="../src/fr_3e.js"></script><script src="../src/fr_tle.js"></script><script src="../src/fr_fin.js"></script><script src="../src/fr_couv.js"></script><script src="../src/defis.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/riche_9.js"></script><script src="../src/riche_10.js"></script><script src="../src/riche_mp2.js"></script><script src="../src/riche_mp1.js"></script><script src="../src/riche_2c.js"></script><script src="../src/riche_col34.js"></script><script src="../src/riche_mp34.js"></script><script src="../src/curieux.js"></script><script src="../src/histoire.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/manip.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_9a.js"></script><script src="../src/act_9b.js"></script><script src="../src/act_10a.js"></script><script src="../src/act_10b.js"></script><script src="../src/act_11d.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_2c.js"></script><script src="../src/act_col34.js"></script><script src="../src/act_manip.js"></script><script src="../src/act_manip2.js"></script><script src="../src/fr_act.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/parents.js"></script><script src="../src/presente.js"></script><script src="../src/app.js"></script>
-<pre id="out">en cours</pre>
+<script src="lot.js"></script>
 <script>
+/* ======== france (ancienne page tests/france.html) ======== */
+Lot.section("france", { html: `<div id="app"></div>
+
+
+
+<pre id="out">en cours</pre>` }, function () {
 const fails = [], log = [], ok = (c, m) => { if (!c && fails.length < 60) fails.push(m); };
 const SW = { CHF: /CHF/, milliers: /\d['’]\d{3}(?!\d)|\\text\{'\}/, PGDC: /PGDC|PPMC/, preimage: /[Pp]réimage/, evidence: /en évidence/, EVACOM: /EVACOM/, Geneve: /Genève|genevois/, change: /\b1 (€|euro) (=|vaut)|\bEUR\b|Suisse/ };
 const hit = (t) => Object.entries(SW).filter(([, re]) => re.test(t)).map(([k, re]) => k + " « " + t.match(new RegExp(".{0,30}(?:" + re.source + ").{0,20}"))[0] + " »");
@@ -139,4 +153,159 @@ try {
   log.push("notions françaises du 25.11 : " + NEWFR.length + " contrôlées (structure, formes, réponse type, code)");
 } catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
 document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK") + "\n" + log.join("\n");
+});
+/* ======== frfin (ancienne page tests/frfin.html) ======== */
+Lot.section("frfin", { html: `<div id="app"></div>
+
+<pre id="out">en cours</pre>` }, function () {
+const IDS = ["symax", "mediatrice", "echelle6", "proba6", "empil", "compdiff", "posrelc", "intmaj", "suiteint", "progcalc"];
+const out = [], ids = location.hash ? location.hash.slice(1).split(",") : IDS; let bad = 0;
+const fail = (m) => { bad++; if (bad < 3000) out.push("ÉCHEC " + m); };
+const txt = (q) => [q.q, q.sol, ...(q.guide || []).flatMap((g) => [g.ask, g.sol]), ...(q.parts || []).map((p) => p.label), ...(q.hints || [])].join(" | ");
+for (const id of ids) {
+  const line = [];
+  for (const d of [1, 2, 3]) {
+    const forms = new Set(), ctx = new Set(); let n = 0, g = 0, triv = 0, shown = 0, samples = [];
+    for (let s = 1; s <= 100; s++) {
+      let q; try { q = Engine.build(id, d, s); } catch (e) { fail(id + "-" + d + "-" + s + " exception " + e.message); continue; }
+      n++; forms.add(qForm(q)); if (q.ctx) ctx.add(q.ctx);
+      const t = txt(q);
+      { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
+      { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
+      if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
+      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
+        const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind === "expr" && !Expr.equivalent(Expr.parse(last.expr), Expr.parse(q.spec.expr), q.spec.pos)) fail(q.code + " dernière étape ≠ réponse : " + last.expr + " / " + q.spec.expr);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, x.spec.kind === "expr" ? x.spec.expr : String(x.spec.value)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + (x.spec.expr || x.spec.value) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.e) { let te; try { te = Expr.parse(tr.e); } catch (e) { fail(q.code + " piège illisible " + tr.e); return; } if (Expr.equivalent(te, Expr.parse(q.spec.expr))) fail(q.code + " piège = bonne réponse : " + tr.e); } });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 100) + " → " + q.spec.expr + (q.spec.form ? " [" + q.spec.form + (q.spec.minFactors ? " ≥" + q.spec.minFactors : "") + "]" : ""));
+        continue;
+      }
+      if (["pair", "ineq", "solset"].includes(q.spec.kind)) { // couples, inégalités, intervalles (systèmes, 18.11)
+        const fS = (v) => { for (let d = 1; d <= 120; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; return String(v); };
+        const canon = (sp) => sp.kind === "pair" ? sp.values.map(fS).join(" ; ") : sp.kind === "ineq" ? "x " + sp.op + " " + fS(sp.value) : sp.kind === "solset" ? SolSet.show(sp.ivs, false) : sp.kind === "set" ? sp.values.map(fS).join(" ; ") : sp.kind === "expr" ? sp.expr : String(sp.value);
+        const c0 = canon(q.spec), self = checkAnswer(q.spec, c0); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + c0);
+        if (q.spec.kind === "pair" && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " valeur non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== q.spec.kind || checkAnswer(q.spec, canon(last)).status !== "correct") fail(q.code + " dernière étape ≠ réponse : " + canon(last) + " / " + c0);
+          q.guide.forEach((x) => { const r = checkAnswer(x.spec, canon(x.spec)); if (r.status !== "correct") fail(q.code + " étape refuse sa propre réponse : " + canon(x.spec) + " " + (r.message || r.status)); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (!tr.spec) return; const ci = canon(tr.spec); if (checkAnswer(q.spec, ci).status === "correct") fail(q.code + " piège = bonne réponse : " + ci); else if (diagnose(q, ci) !== tr.m) fail(q.code + " piège non diagnostiqué : " + ci); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + c0);
+        continue;
+      }
+      if (q.spec.kind === "set") { // ensemble de solutions (équations, 16.11)
+        const canon = q.spec.all ? "tous" : q.spec.values.length ? q.spec.values.map((v) => { for (let d = 1; d <= 60; d++) if (Math.abs(v * d - Math.round(v * d)) < 1e-9) return d === 1 ? String(Math.round(v)) : Math.round(v * d) + "/" + d; const r = Math.round(v * v * 1e6) / 1e6; return v; }).join(" ; ") : "aucune";
+        const self = checkAnswer(q.spec, canon); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + ") : " + canon);
+        if (!q.spec.all && q.spec.values.some((v) => !isFinite(v))) fail(q.code + " solution non finie");
+        if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
+          if (last.kind !== "set" || !!last.all !== !!q.spec.all || last.values.length !== q.spec.values.length || last.values.some((v, i) => Math.abs(v - q.spec.values[i]) > 1e-9)) fail(q.code + " dernière étape ≠ réponse");
+          q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+        if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+        (q.traps || []).forEach((tr) => { if (tr.s && checkAnswer(q.spec, tr.s.join(";")).status === "correct") fail(q.code + " piège = bonne réponse"); if (tr.s && tr.s.some((v) => !isFinite(v))) fail(q.code + " piège non fini"); });
+        if (!q.ctx) fail(q.code + " sans ctx");
+        // le diagnostic retrouve chaque piège
+        (q.traps || []).forEach((tr) => { const inp = tr.none ? "aucune" : tr.all ? "tous" : tr.s ? tr.s.join(" ; ") : null; if (inp && diagnose(q, inp) !== tr.m && checkAnswer(q.spec, inp).status !== "correct") fail(q.code + " piège non diagnostiqué : " + inp); });
+        if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + canon);
+        continue;
+      }
+      const ans = q.spec.value; if (!isFinite(ans)) fail(q.code + " réponse non finie");
+      if (trivialQ(q, 0)) triv++; if (answerShown(q)) shown++;
+      if (q.guide) { g++; const last = q.guide[q.guide.length - 1].spec.value, tol = Math.max(q.spec.round || 0, q.guide[q.guide.length - 1].spec.round || 0, 1e-9 * Math.max(1, Math.abs(ans)));
+        if (Math.abs(last - ans) > tol) fail(q.code + " dernière étape " + last + " ≠ " + ans);
+        q.guide.forEach((x) => { if (x.spec.kind === "value" && !isFinite(x.spec.value)) fail(q.code + " étape non finie"); }); }
+      else fail(q.code + " sans guide");
+      if (!q.traps || !q.traps.length) fail(q.code + " sans piège");
+      if (!q.ctx) fail(q.code + " sans ctx");
+      if (s <= 3) samples.push(q.q.replace(/<[^>]+>/g, "").replace(/\\\(|\\\)/g, "").slice(0, 110) + " → " + +(+ans).toFixed(4));
+    }
+    line.push("  N" + d + " : " + n + " q., " + forms.size + " formes, " + ctx.size + " contextes" + (d < 4 ? ", guides " + Math.round(100 * g / n) + " %, triviales " + triv + ", réponse visible " + shown : ""));
+    samples.forEach((x) => line.push("     · " + x));
+  }
+  out.push(id + "\n" + line.join("\n"));
+}
+
+// Formes, usages français
+for (const id of ids) for (const d of [1, 2, 3]) { const forms = new Set(); for (let s = 1; s <= 100; s++) { const q = Engine.build(id, d, s); forms.add(q.ctx + "|" + qForm(q).slice(0, 40)); const t = [q.q, q.sol].join(" ");
+  if (/\\cdot(?! \\vec| \\overrightarrow| \()|CHF|\d'\d/.test(t)) fail(q.code + " usage suisse (· , CHF ou 1'200) : " + t.match(/.{0,30}(\\cdot|CHF|\d'\d).{0,10}/)[0]); }
+  const ctxs = new Set([...forms].map((f) => f.split("|")[0])); if (ctxs.size < 3) fail(id + " N" + d + " : " + ctxs.size + " forme(s) seulement"); }
+// Défis (niveau 4) : parties finies, réponses acceptées
+for (const id of IDS) { if (!hasProb(id)) { fail(id + " : pas de défi"); continue; } for (let s = 1; s <= 10; s++) { const q = Engine.build(id, 4, s); (q.parts || []).forEach((p) => { if (!isFinite(p.spec.value) || checkAnswer(p.spec, String(+(+p.spec.value).toFixed(10)).replace(".", ",")).status !== "correct") fail(q.code + " partie refusée " + p.label); }); if (!q.hints || q.hints.length < 2) fail(q.code + " indices"); } }
+// Catalogue : classes françaises, invisibles en Suisse
+{ const cat = (g) => Engine.catalog({ system: "FR", grade: g, track: "college" }), cur = (g, id) => cat(g).some((c) => c.id === id && c.current), has = (g, id) => cat(g).some((c) => c.id === id);
+  const PL = { 6: ["symax", "mediatrice", "echelle6", "proba6"], 7: ["empil", "progcalc", "symax", "mediatrice", "echelle6", "proba6"], 8: ["progcalc", "empil"], 10: ["compdiff"], 11: ["posrelc"], 12: ["intmaj", "suiteint"] };
+  for (const [g, L] of Object.entries(PL)) for (const id of L) if (!cur(+g, id)) fail("classe FR " + g + " : " + id + " pas « de l'année »");
+  if (has(6, "empil") || has(6, "progcalc")) fail("6e : notion de 5e présente");
+  if (has(10, "posrelc") || has(11, "intmaj")) fail("lycée : notion d'une classe supérieure présente");
+  for (const p of [{ system: "CH", grade: 9 }, { system: "CH", grade: 11 }, { system: "CH", grade: 12, track: "college" }, { system: "CH", grade: 14, track: "college" }, { system: "CH", grade: 13, track: "mp" }]) { const c = Engine.catalog(p).map((x) => x.id); for (const id of IDS) if (c.includes(id)) fail("Suisse " + JSON.stringify(p) + " : " + id + " visible"); }
+  for (const id of IDS) { if (!LESSONS[id] || !COMPS[id] || COMPS[id].length !== 3 || !HINTS[id]) fail(id + " : leçon, compétences ou indice manquant"); if (id !== "progcalc" && !(typeof ACTIVE !== "undefined" && ACTIVE[id])) fail(id + " : leçon active absente"); }
+  // progcalc en 5e : pas de forme de 4e ; au moins 3 formes au niveau 3
+  const st = { profile: { system: "FR", grade: 7, track: "college", minutes: 5 } }, seen = new Set();
+  for (let k = 0; k < 120; k++) { const q = Engine.make(st, "progcalc", 1 + (k % 3)); if (["negatif", "prouver-carre", "produit"].includes(q.ctx)) fail("5e : forme de 4e " + q.code + " " + q.ctx); if (q.d === 3) seen.add(q.ctx); }
+  for (let s = 1; s <= 40; s++) { const q = Engine.make(st, "progcalc", 3, s); seen.add(q.ctx); if (["negatif", "prouver-carre", "produit"].includes(q.ctx)) fail("5e (graine) : forme de 4e " + q.code); }
+  if (seen.size < 3) fail("5e : progcalc niveau 3, " + seen.size + " forme(s)");
+  const st8 = { profile: { system: "FR", grade: 8, track: "college", minutes: 5 } }; let neg = 0; for (let k = 0; k < 60; k++) { const q = Engine.make(st8, "progcalc", 1); if (q.ctx === "negatif") neg++; }
+  out.push("5e progcalc niveau 3 : " + [...seen].join(", ") + " ; 4e : forme « negatif » tirée " + neg + " fois sur 60");
+  if (FR_PROGRESSION[8].includes("progcalc") || !FR_PROGRESSION[7].includes("progcalc")) fail("progression : progcalc doit être en 5e"); }
+// Notes sur 20 en France (FR_NOTES), notes suisses inchangées en Suisse
+{ let n = 0, rep = 0; const T = (q) => [q.q, ...(q.parts || []).map((p) => p.label)].join(" ");
+  for (const g of [7, 8, 9, 10, 11]) { const st = { profile: { system: "FR", grade: g, track: "college", minutes: 5 } };
+    for (const id of ["statfreq", "stats", "diagr", "probeq"]) { if (!Engine.catalog(st.profile).some((c) => c.id === id)) continue;
+      for (const d of [1, 2, 3, 4]) for (let s = 1; s <= 30; s++) { if (d === 4 && !hasProb(id)) continue; const q = Engine.make(st, id, d, s), t = T(q).replace(/<[^>]+>/g, " "); n++;
+        if (/\b[Nn]otes?\b/.test(t) && !/sur 20|[Oo]n note|la note en parts/.test(t)) fail("FR " + g + " : notes suisses " + q.code + " : " + t.slice(0, 90));
+        if (/sur 20/.test(t)) { rep++; if (q.parts) q.parts.forEach((p) => { if (checkAnswer(p.spec, String(+(+p.spec.value).toFixed(10)).replace(".", ",")).status !== "correct") fail(q.code + " notes : partie refusée"); });
+          else { if (checkAnswer(q.spec, q.canon || String(q.spec.value).replace(".", ",")).status !== "correct") fail(q.code + " notes : réponse refusée"); if (!q.guide || !q.traps || !q.traps.length) fail(q.code + " notes : guide ou pièges"); if (/undefined|NaN/.test(t + q.sol)) fail(q.code + " notes : undefined"); }
+          if (Engine.make(st, id, d, s).q !== q.q) fail(q.code + " notes : non reproductible"); } } } }
+  const ch = { profile: { system: "CH", grade: 11, track: "college", minutes: 5 } }; let same = 0;
+  for (const id of ["stats", "statfreq", "diagr"]) for (const d of [1, 2, 3]) for (let s = 1; s <= 20; s++) { const raw = Engine.build(id, d, s), q = Engine.finalize(ch, id, JSON.parse(JSON.stringify(raw))); if (q.q !== raw.q) fail("Suisse modifiée " + raw.code); else same++; }
+  out.push("notes : " + n + " questions FR contrôlées, " + rep + " sur 20 ; Suisse inchangée : " + same); }
+out.unshift(bad ? bad + " échec(s)" : "OK");
+document.getElementById("out").textContent = out.join("\n");
+});
+/* ======== act_frfin (ancienne page tests/act_frfin.html) ======== */
+Lot.section("act_frfin", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:360px" }, function () {
+// Leçons actives des notions françaises du 25.11 au soir (fr_act.js ; copie de act_col34b.html) : on joue chaque leçon. Devine, puis chaque défi :
+// une réponse fausse (9999, ou la position de départ des curseurs) ne doit pas valider ; ensuite on cherche la bonne.
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+const gfb=()=>document.querySelector('#gfb').textContent;
+// Réponses candidates : entiers, fractions simples, quelques décimaux et grands nombres.
+const C=[];for(let v=-100;v<=300;v++)C.push(String(v));
+for(let q=2;q<=8;q++)for(let p=-40;p<=40;p++){if(p%q)C.push(p+"/"+q);}
+for(let k=-2000;k<=2000;k++)if(k%100)C.push(String(k/100));for(let k=-999;k<=999;k++)if(k%10)C.push((k/1000).toFixed(3));
+const typeAns=(sel,v)=>{const el=document.querySelector(sel+" .act-in");if(!el)return false;el.value=v;const b=el.closest(".act-ans").querySelector("[data-go]");b.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+let wrongOk=true;
+const answer=(sel,b)=>{ // sel : zone qui contient le champ
+  typeAns(sel,"9999"); if(gfb()!==b){wrongOk=false;return true;}
+  for(const v of C){if(!document.querySelector(sel+" .act-in"))return gfb()!==b;typeAns(sel,v);if(gfb()!==b)return true;}return false;};
+const ranges=()=>[...document.querySelectorAll('#play input[type=range]')];
+const vals=(r)=>{const a=[];for(let v=+r.min;v<=+r.max+1e-9;v+=+r.step)a.push(+v.toFixed(6));return a;};
+const setR=(i,v)=>{const r=ranges()[i];if(!r)return;r.value=v;r.dispatchEvent(new Event("input"));r.dispatchEvent(new Event("change"));};
+const askIn=()=>document.querySelector('#play .s2c-ask .act-in');
+const seek=()=>{const b=gfb();
+  if(document.querySelector("#play .act-plus .act-in")) return answer("#play .act-plus",b); /* question ajoutée (A.plus) : les curseurs de la leçon restent affichés */
+  if(ranges().length){
+    const rs=ranges();setR(0,rs[0].value); if(gfb()!==b||askIn()){wrongOk=false;return true;}
+    const V=rs.map(vals),n=V.length;
+    const rec=(i)=>{if(i===n)return false;for(const v of V[i]){setR(i,v);if(gfb()!==b||askIn())return true;if(rec(i+1))return true;}return false;};
+    rec(0); if(gfb()!==b) return true; if(askIn()) return answer("#play .s2c-ask",b); return false;}
+  if(document.querySelector("#play .act-in")) return answer("#play",b);
+  return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; wrongOk=true; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];const X=actPrep(A);
+  for(let k=0;k<X.defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(2,50)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  const ok=!document.getElementById("s3").hidden&&!bad&&wrongOk&&!msgs.some(m=>/non trouvé/.test(m));
+  const wide=[...document.querySelectorAll("#app *")].filter(e=>e.getBoundingClientRect().right>361).map(e=>e.tagName+"."+(e.getAttribute("class")||"")).slice(0,3); if(wide.length) msgs.push("ÉCHEC dépasse 360 px : "+wide.join(", "));
+  log.push(id+" ["+X.mode+"] : "+(ok?"OK":"ÉCHEC "+(bad?"(NaN/undefined) ":"")+(wrongOk?"":"(réponse fausse acceptée) "))+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR ÉCHEC "+e.stack)} };
+const IDS=["symax","mediatrice","echelle6","proba6","empil","compdiff","posrelc","intmaj","suiteint"];
+for(const id of IDS){ if(ACTIVE[id]&&LESSONS[id]) run(id); else log.push(id+" : ÉCHEC (leçon active ou leçon absente)"); }
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+Lot.lance();
 </script>

@@ -62,7 +62,7 @@ Chez un habitué, le code est déjà en cache (compilé) : le gain porte surtout
   donne des questions de chaque niveau sans erreur.
 - `tools/test_paquets.py` : + cases Histoire et Curieux (paquet x à la demande), `#decouvrir` (x au démarrage), 10 paquets.
 - `tools/test_hors_ligne.py` : + les 10 paquets dans le cache hors ligne ; hors ligne, accueil et MathJax.
-- `tests/maj.html` (« Nouvelle version prête ») et suite complète `tools/run_tests.sh`.
+- `tests/robustesse.html#section=maj` (« Nouvelle version prête ») et suite complète `tools/run_tests.sh`.
 
 ## Ordre d'exécution (27.11, agent ordre) : la version publiée = la version testée
 

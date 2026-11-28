@@ -60,7 +60,7 @@ personne ne refaisait le calcul.
 
 ## Page de test
 
-`tests/recalcul.html` et `tests/recalcul2.html` (dans la suite ; **scindée en deux le 26.11 au soir** : 316 s sous charge 10 pour la page unique après la 3e extension, au-delà de la cible de 200 s ; recalcul.html = notions de rang pair + exercices riches et défis, recalcul2.html = notions de rang impair, `<meta name="part">` ; les deux fichiers ne diffèrent que par cette meta) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
+`tests/recalcul.html` et `tests/recalcul.html#part=2` (dans la suite ; **scindée en deux le 26.11 au soir** : 316 s sous charge 10 pour la page unique après la 3e extension, au-delà de la cible de 200 s ; recalcul.html = notions de rang pair + exercices riches et défis, recalcul2.html = notions de rang impair, `<meta name="part">` ; les deux fichiers ne diffèrent que par cette meta) : passe 1, toutes les notions, niveaux 1 à 3, graines 1 à 15 ;
 passe 2, notions reconnues (≥ 20 % à un niveau), graines 16 à 100, soit **100 énoncés par notion et niveau** ;
 puis exercices riches et défis (parties reconnues). Échec sur tout désaccord, avec le code de la question.
 Options : `#ids=pct,vitesse`, `#n=…`, `#detail` (taux de reconnaissance), `#mutant`.
@@ -160,7 +160,7 @@ volcomp, thales, repere, sysprob, sysgraph, sysineq, eqfrac, bicarre, lectgraph,
 graphefct, ineqgraph, repere3d, bayes, syslin, bases, etudelnexp, geoesp, densite, probaxiomes, derivth, trigcercle,
 optimderiv, eqlog, eqbic, dec10, pow9, aire1, quadri, decarr, airelat). Sur 150 graines par défi : toutes les parties
 numériques reconnues, aucun désaccord. Les règles de texte reçoivent maintenant l'item en second argument
-(`r.f(txt, x)`) et les items de défi portent `fig` (recalcul.html, recalcul2.html) : la parabole de lectgraph est relue
+(`r.f(txt, x)`) et les items de défi portent `fig` (recalcul.html, morceaux 1 et 2) : la parabole de lectgraph est relue
 sur la figure (`figRead`, `quadFit`). Réponses oui/non (1/0) et valeurs exactes en fraction imbriquée : `{ v, sol: false }`
 (le corrigé dit « oui » ou donne la forme exacte, illisible en texte simple).
 
@@ -177,8 +177,8 @@ rayon tirés de l'équation), petit évaluateur de nombres complexes (z, w, z̄,
 (lois de probabilité, effectifs, classes, tableaux de contingence), règle 68-95-99,7, table de Φ donnée dans l'énoncé.
 Contre-épreuve sur toutes les graines pendant la mise au point (`#mutant`) : toute réponse faussée est détectée.
 
-Pages : **`tests/recalcul3.html`** et **`tests/recalcul4.html`** (même gabarit, `<meta name="part" content="3|4">`) recalculent
-les notions de `recalc_oracles34.js` (`RECALC.IDS34`, une sur deux par page) ; `recalcul.html` et `recalcul2.html` les
+Pages : **`tests/recalcul.html#part=3`** et **`tests/recalcul.html#part=4`** (même gabarit, `<meta name="part" content="3|4">`) recalculent
+les notions de `recalc_oracles34.js` (`RECALC.IDS34`, une sur deux par page) ; `recalcul.html#part=1` et `#part=2` les
 excluent (recalcul.html : 280 s sous charge 15 avec ces notions, au-delà de 200 s).
 
 Erreurs trouvées et corrigées :
@@ -317,7 +317,7 @@ contre-épreuve sur **chaque** énoncé reconnu. Saisie : la réponse recalculé
 l'arrondi demandé, fraction quand l'énoncé dit « fraction » (dénominateur jusqu'à 5 000), écriture exacte avec π ou √
 (trigrad, trigfr, lnfr : « 5π/3 », « e^(3)+4 », « ln(7) »), ensembles « a ; b », couples « x ; y ». Options `#ids`, `#n`,
 `#detail`, `#miss` (+ `#flat` : texte lu par les oracles). Durée : 23 à 46 s (charge 4 à 6), bien sous la cible de 200 s.
-`recalcul.html` et `recalcul2.html` excluent ces notions (pages 1 à 4 : `recalc_oracles_frl.js` chargé, filtre `IDSFRL`).
+`recalcul.html#part=1` et `#part=2` excluent ces notions (pages 1 à 4 : `recalc_oracles_frl.js` chargé, filtre `IDSFRL`).
 
 Couverture (énoncés recalculés aux niveaux 1 / 2 / 3, avant → après ; avant : oracles communs + défis FR, 15 tirages ;
 après : 100 tirages, finalisés FR) : **6 notions sur 30 couvertes avant** (≥ 20 % à un niveau, souvent une seule forme),
@@ -567,4 +567,4 @@ Liste brute des notions sous 20 % (après extension) : `fratmp`, `optim`, `combi
 Section « agent defisch » de `tests/recalc_oracles.js` : un oracle `DF` par contexte pour 56 défis (gabarits d'origine
 compris), helpers `rx` / `rs` (nombre « # », relatif « § »), `pick` (réponse selon la lettre de la partie). `check()`
 recalcule aussi les parties de défi dont la réponse est un couple (coordonnées : symetries, rotation). Mesure :
-`tests/_defis3.html#ids=…&n=150` ; `tests/recalcul2.html` reste sous 40 s à charge normale.
+`tests/_defis3.html#ids=…&n=150` ; `tests/recalcul.html#part=2` reste sous 40 s à charge normale.

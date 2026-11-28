@@ -1,0 +1,258 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="135000">
+<title>Tests : seance</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Séance : programme adaptatif (profils simulés), progression visible, carnet d'erreurs, Me tester, sujet de préparation, exercices riches 11e, EVACOM, variété des formats. Section free_vue : aperçu de l'accueil (#section=free_vue&id=prog).
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : free, progression, carnet, ctest, sujet, riche11c, evacom, variete, free_vue.
+     Une seule section : seance.html#section=free -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
+<script>
+/* ======== free (ancienne page tests/free.html) ======== */
+Lot.section("free", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];try{ window.scrollTo=()=>{};
+for(const g of [11,12]){ state=Engine.newState({system:"CH",grade:g,track:"college",minutes:5}); Engine.autoInit(state);
+  // profils simulés (19.11, programme adaptatif) : à l'aise, moyen, fragile
+  const ids=Object.keys(state.notions).filter((i)=>GEN[i]);
+  for(const [nom,mk] of [["fort",()=>0.9],["moyen",(k)=>k%2?0.85:0.3],["fragile",()=>0.3]]){
+    ids.forEach((id)=>{state.notions[id].seen=0;state.notions[id].m=0;});
+    ids.slice(0,12).forEach((id,k)=>{state.notions[id].seen=3;state.notions[id].m=mk(k);});
+    if(nom==="fragile"){ for(const w of ids.slice(0,12)) for(const p of (PREREQ[w]||[])) if(state.notions[p]&&!state.notions[p].seen){state.notions[p].seen=1;state.notions[p].m=0.4;} }
+    let bad=0,fam={f:0,w:0,n:0},pre=0,same=0;
+    for(let r=0;r<200;r++){ const p=Engine.freePlan(state,null,6).map((x)=>x.split("|")[0]); if(p.length!==6||new Set(p).size!==6) bad++;
+      p.forEach((id,i)=>{const s=state.notions[id];if(!GEN[id])bad++;fam[!s.seen?"n":s.m>=0.7?"f":"w"]++; if(Object.values(PREREQ).some(l=>l.includes(id)))pre++; if(i&&(NOTIONS.find(n=>n.id===id)||{}).theme===(NOTIONS.find(n=>n.id===p[i-1])||{}).theme)same++;});}
+    log.push(g+"e "+nom+" : défauts "+bad+", forces/faibles/neuves "+fam.f+"/"+fam.w+"/"+fam.n+", bases "+pre+", thèmes consécutifs identiques "+same+"/1000"); } }
+  state.placed=true; homeTab="today"; screenHome(); log.push("accueil : défi "+(document.getElementById("freego")?"✓":"absent")+", boutons de périmètre "+document.querySelectorAll("[data-scope]").length);
+  homeTab="prog"; screenHome(); log.push("progrès : carte "+(/Ma carte de progression/.test(document.body.innerHTML)?"✓":"absente"));
+  homeTab="today"; screenHome(); document.getElementById("freego").click(); log.push("séance : "+(document.body.innerHTML.match(/Ma pépite du jour · 1 sur 6/)?"✓ démarre":"? "+document.body.innerText.slice(0,80)));
+}catch(e){log.push("ERR "+e.stack)} document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== progression (ancienne page tests/progression.html) ======== */
+Lot.section("progression", { html: `<div id="app" style="width:360px;max-width:360px;box-sizing:border-box"></div><pre id="out"></pre>` }, function () {
+// Progression visible (24.11, chantier S) : state simulé sur 10 jours ; ligne du bilan et carte « Ma semaine ».
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)}, T=day(), D=(k)=>addDays(T,k), out=[];
+const bad=(el)=>/NaN|undefined|null/.test(el.textContent);
+const over=(root)=>[...root.querySelectorAll("*")].filter((e)=>e.scrollWidth>e.clientWidth+1&&getComputedStyle(e).overflowX!=="auto"&&getComputedStyle(e).overflowX!=="scroll"&&e.clientWidth>0).map((e)=>e.className||e.tagName);
+const fresh=()=>{const s=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(s);s.placed=true;return s;};
+const hist=(s,ks)=>{s.history=ks.map((k)=>({date:D(k),n:5,score:4}));};
+const show=(tag)=>{app.innerHTML=weekLine();const t=app.textContent.replace(/\s+/g," ").trim();out.push(tag+" | "+t);ok(!bad(app),tag+" NaN/undefined : "+t);ok(!over(app).length,tag+" débordement ligne "+over(app));
+  app.innerHTML=weekCard();ok(!bad(app),tag+" carte NaN/undefined");ok(!over(app).length,tag+" débordement carte "+over(app).join());ok(app.scrollWidth<=360,tag+" largeur carte "+app.scrollWidth);return t;};
+try{
+// ---- Cas 1 : progrès réels sur la semaine ----
+state=fresh();
+state.comps={"prio:0":{r:[0,0,1],n:3},"fracadd:1":{r:[1,0,0],n:3}};
+Object.assign(state.notions.prio,{seen:3,m:0.5});Object.assign(state.notions.fracadd,{seen:4,m:0.75});
+Engine.snap(state,D(-9));                          // hors fenêtre : sera écarté
+Engine.snap(state,D(-5));                          // point de départ de la semaine
+ok(state.snaps.length===2,"1 deux instantanés "+JSON.stringify(state.snaps.map(x=>x.d)));
+ok(state.snaps[1].c["prio:0"]===5&&state.snaps[0].k.includes("fracadd")&&!state.snaps[0].k.includes("prio"),"1 contenu de l'instantané "+JSON.stringify(state.snaps[0]));
+Engine.snap(state,D(-5));ok(state.snaps.length===2,"1 un seul instantané par jour");
+state.comps["prio:0"].r=[0,0,1,1,1,1];state.comps["fracadd:1"].r=[1,0,0,1,1,1,1,1];state.comps["puiss:0"]={r:[1,1,1],n:3};
+Object.assign(state.notions.prio,{seen:6,m:0.8});Object.assign(state.notions.puiss,{seen:3,m:0.72});
+Engine.snap(state,D(-3));Engine.snap(state,D(0));
+ok(state.snaps.length===3&&state.snaps[0].d===D(-5),"1 instantanés gardés "+state.snaps.map(x=>x.d));
+state.carnetOut=[D(-8),D(-3),D(-1)];hist(state,[-9,-5,-3,0]);
+let w=Engine.week(state);
+ok(w.ups.length===2&&w.ups[0].cid==="fracadd:1"&&w.ups[0].b===2.5&&w.ups[0].a===5&&w.ups[1].b===2.5&&w.ups[1].a===4.5,"1 compétences montées "+JSON.stringify(w.ups));
+ok(w.cons.length===2&&w.cons.includes("prio")&&w.cons.includes("puiss"),"1 notions consolidées "+w.cons);
+ok(w.fixed===2&&w.days===3&&w.n===15&&w.first.length===1&&w.since===null,"1 carnet/jours "+JSON.stringify({f:w.fixed,d:w.days,n:w.n,fi:w.first.length,s:w.since}));
+let t=show("cas 1");
+ok(t.includes("Cette semaine : 2 compétences ont monté, 2 notions consolidées et 2 pépites polies.") /* 27.11 : erreurs effacées → pépites polies */&&t.includes("Plus belle progression : "+COMPS.fracadd[1]+" (2,5 → 5)."),"1 phrase : "+t);
+app.innerHTML=weekCard();const ct=app.textContent;
+ok(/Jours actifs\s*3 \/ 7/.test(ct)&&/2 compétences en hausse/.test(ct)&&/2,5→5/.test(ct.replace(/\s/g,""))&&/2 notions consolidées/.test(ct)&&/2 pépites polies/.test(ct)&&/1 première note/.test(ct),"1 carte : "+ct.replace(/\s+/g," "));
+// Carte en tête de Progrès
+homeTab="prog";screenHome();const panel=app.querySelector(".home-panel");ok(panel&&panel.firstElementChild&&panel.firstElementChild.classList.contains("week-card"),"1 carte en tête de Progrès");
+ok(!over(panel).length,"1 débordement Progrès "+over(panel).join());
+homeTab="today";screenHome();ok(!app.querySelector(".week-card")&&!app.querySelector(".week-line"),"1 rien sur l'accueil");
+// Bilan de séance réel
+session={plan:[],i:0,score:4,answered:5,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};screenSummary();
+ok(!!app.querySelector(".week-line")&&/2 compétences ont monté/.test(app.querySelector(".week-line").textContent),"1 ligne dans le bilan de séance");
+// Code de sauvegarde : le point de départ et le carnet suivent ; ancien code (sans w ni co) : pas d'erreur
+const pk=Backup.pack(state),s2=Backup.unpack(JSON.parse(JSON.stringify(pk))),w2=Engine.week(s2);
+ok(w2.ups.length===2&&w2.cons.length===2&&w2.fixed===2,"1 sauvegarde aller-retour "+JSON.stringify({u:w2.ups.length,c:w2.cons.length,f:w2.fixed}));
+delete pk.w;delete pk.co;const s3=Backup.unpack(pk),w3=Engine.week(s3);ok(Array.isArray(w3.ups)&&w3.fixed===0,"1 ancien code sans instantané");
+// Carnet : une erreur effacée est datée
+state.carnet=[{id:"prio",d:1,code:"x",date:T,ok:1}];state.carnetOut=[];ok(carnetResult("prio",1,true)==="efface"&&state.carnetOut.length===1&&state.carnetOut[0]===T,"1 carnetOut daté");
+// ---- Cas 2 : pratique sans note en hausse ----
+state=fresh();state.comps={"prio:0":{r:[1,1,0],n:3}};Engine.snap(state,D(-2));hist(state,[-2,0]);
+w=Engine.week(state);ok(!w.ups.length&&!w.cons.length&&!w.fixed&&!w.first.length,"2 rien n'a bougé "+JSON.stringify(w));
+t=show("cas 2");/* 26.11 : « questions en séance » (le positionnement ne compte pas) */ ok(t.includes("Cette semaine : 2 jours de pratique, 10 questions en séance.")&&t.includes("chaque séance compte"),"2 phrase : "+t);
+state.comps["prio:0"].r=[1,1,0,0];w=Engine.week(state);ok(!w.ups.length,"2 note en baisse : pas comptée");
+// ---- Cas 3 : ancien state (sans instantané), pratique cette semaine ----
+state=fresh();state.comps={"prio:0":{r:[0,1,0],n:3}};hist(state,[-4,-1,0]);delete state.snaps;delete state.carnetOut;
+w=Engine.week(state);ok(w.days===3&&!w.ups.length,"3 sans instantané : pas d'erreur");show("cas 3a sans instantané");
+Engine.snap(state);ok(state.snaps.length===1&&state.snaps[0].d===T,"3 premier instantané au chargement");
+t=show("cas 3b");ok(t.includes("Cette semaine : 3 jours de pratique, 15 questions en séance."),"3 phrase : "+t);
+state.comps["prio:0"].r=[0,1,0,1,1,1];t=show("cas 3c après une séance");ok(t.includes("Depuis le "+T.slice(8,10)+"."+T.slice(5,7)+" : 1 compétence a monté."),"3 depuis : "+t);
+app.innerHTML=weekCard();ok(/Notes comparées depuis le/.test(app.textContent),"3 carte : début du suivi");
+// ---- Cas 4 : state vide (aucune activité) et instantanés corrompus ----
+state=fresh();state.snaps=[null,{d:D(-1)}];w=Engine.week(state);t=show("cas 4");ok(/Une séance de quelques minutes/.test(t),"4 phrase : "+t);
+Engine.snap(state);ok(state.snaps.length===2,"4 instantané malgré entrée corrompue");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK\n"+out.join("\n"))+"</pre>");
+});
+/* ======== carnet (ancienne page tests/carnet.html) ======== */
+Lot.section("carnet", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Carnet d'erreurs et programme jusqu'au test (20.11) : parcours complet dans l'app.
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)};
+const _rq=renderQuestion; renderQuestion=function(q,opt){window.__q=q;return _rq(q,opt)};
+const answer=(good)=>{const q=window.__q;const fr=(v)=>{if(Math.abs(v*1e6-Math.round(v*1e6))<1e-6)return String(+v.toFixed(6));for(let d=2;d<=200;d++){const n=Math.round(v*d);if(Math.abs(n/d-v)<1e-9)return n+"/"+d}return String(v)};document.getElementById("ans").value=good?(q.canon||fr(q.spec.value)):"123456789";document.getElementById("check").click();if(!good){document.getElementById("ans").value="123456788";document.getElementById("check").click();}};
+try{
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
+for(const id in state.notions)state.notions[id].lessonSeen=true;
+// 1. séance : une question ratée entre au carnet
+session={fmt:"",plan:["prio|2"],i:0,score:0,answered:0,start:Date.now(),elo0:state.elo.r,ids:new Set(),pinged:true};nextQuestion();
+answer(false);
+ok((state.carnet||[]).length===1&&state.carnet[0].id==="prio"&&state.carnet[0].d===2,"1 ajout "+JSON.stringify(state.carnet));
+document.getElementById("nx").click();
+ok(/À polir/.test(app.textContent),"1 bilan mentionne « À polir »"); /* 27.11 (univers Pépite, libellés renommés : carnet → « À polir », série → filon, points → pépites) */
+// 2. accueil et Progrès
+homeTab="today";screenHome();ok(/1 à polir/.test((app.querySelector('.door[data-door="carnet"]')||{}).textContent||""),"2 case Carnet de l'accueil (22.11)");
+homeTab="carnet";screenHome();ok(!!document.getElementById("carnetgo")&&/à refaire/.test(app.textContent),"2 page Carnet");
+// 3. séance carnet : réussite, échec (remise à 0), puis deux réussites → effacée
+startCarnet();ok(/À polir · 1 sur 1/.test(app.textContent),"3 eyebrow");answer(true);ok(state.carnet[0].ok===1,"3 ok=1");document.getElementById("nx").click();
+startCarnet();answer(false);ok(state.carnet[0].ok===0,"3 échec remet à 0");document.getElementById("nx").click();
+startCarnet();answer(true);document.getElementById("nx").click();startCarnet();answer(true);
+ok((state.carnet||[]).length===0,"3 effacée après 2 réussites "+JSON.stringify(state.carnet));
+document.getElementById("nx").click();/* 25.11 soir : petite séance du Carnet → bilan léger (« vide ✓ », commit 878d2ea) */ ok(/rien : bravo|Rien à polir : bravo/.test(app.textContent),"3 bilan « À polir » vide"); /* 27.11 : carnet → À polir */
+// 4. programme du test : J-5 autoévaluation, J-2 sujet, J-1 erreurs (décision du 26.11, n° 11), J jour J
+const ids=["prio","fracadd","puiss"];
+for(const [L,kind] of [[5,"autoeval"],[2,"mock"],[1,"tour"],[0,"jourj"]]){state.prep={ids,date:addDays(day(),L)};homeTab="today";screenHome();
+ ok(new RegExp(prepTask(kind).label).test(app.textContent),"4 tâche J-"+L+" = "+kind); /* 26.11 : prepTask — veille du test sans grille de départ = Autoévaluation (plus de « Test rapide final ») */
+ homeTab="test";screenHome();ok(app.querySelectorAll(".pday").length>=L+1&&!!document.getElementById("prepgo"),"4 programme J-"+L);}
+// 5. dernier tour avec une erreur du carnet sur une notion du test, puis marquage fait
+/* 27.11 : prio (réponse numérique) au lieu de fracadd (problème à fractions que le test ne sait pas remplir) */
+state.carnet=[{id:"prio",d:1,code:"x",date:day(),ok:0}];state.prep={ids,date:addDays(day(),4),start:addDays(day(),-1)};startPrepTask("revision");
+ok(session.plan[0]==="prio|1|carnet","5 carnet en tête de la révision ciblée "+session.plan.join());
+answer(true);ok((state.carnet||[]).length===0&&Engine.struggling(state)||(state.carnet[0]&&state.carnet[0].ok===1),"5 réussite comptée pour le carnet "+JSON.stringify(state.carnet)+" struggling="+Engine.struggling(state)); /* 27.11 (décision n° 28) : élève en grande difficulté = une réussite efface l'erreur */
+for(let k=0;k<40&&!/Réussies/.test(app.textContent);k++) /* 28.11 : « Score » → « Réussies » au bilan (enseignant) */{const b=document.getElementById("nx");if(b)b.click();else if(document.getElementById("idk"))document.getElementById("idk").click();}
+ok((state.prep.log||{})[day()]==="revision","5 tâche du jour marquée "+JSON.stringify(state.prep.log));
+// 6. test rapide « après » (onglet Test ; plus une tâche du programme depuis le 26.11) ; autoévaluation du 1er jour cochée dans la frise
+state.prep={ids,date:addDays(day(),1),start:addDays(day(),-3)};startPrepTask("apres");ok(/Autoévaluation/.test(app.textContent),"6 test rapide sans grille : autoévaluation");
+state.prep={ids,date:addDays(day(),5)};state.autotest=null;homeTab="test";screenHome();ok(/étape 1 sur 6/.test(app.textContent)&&/Autoévaluation/.test(app.querySelector(".prep-now").textContent),"6 1er jour : autoévaluation, étape 1 sur 6");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC\n"+fails.join("\n"):"OK")+"</pre>");
+});
+/* ======== ctest (ancienne page tests/ctest.html) ======== */
+Lot.section("ctest", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+try{ state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state); save(); screenComps();
+const b=document.querySelector('.ctest[data-id="arith"][data-d="1"]'); b.click();
+const L=["écran : "+(document.querySelector(".eyebrow")||{}).textContent, "question : "+(document.querySelector(".qtext, .q, h2, p")||{}).textContent];
+const qs=[]; for(let i=0;i<30;i++){ const q=Engine.make(state,"arith",1); qs.push(/PGDC/.test(q.q)&&!/bus/.test(q.q)); } L.push("30 tirages niveau 1 tous PGDC : "+qs.every(Boolean));
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}
+});
+/* ======== sujet (ancienne page tests/sujet.html) ======== */
+Lot.section("sujet", { html: `<main id="app"></main><pre id="log"></pre>`, body: "width:400px" }, function () {
+try{ Element.prototype.scrollIntoView=function(){}; window.print=()=>{};
+state = Engine.newState({ system: "CH", grade: 9, track: "college", minutes: 5 }); Engine.autoInit(state);
+state.prep = { date: addDays(day(), 5), ids: ["fractout", "prio", "decmul"] }; save();
+const L=[]; homeTab="test"; screenHome(); L.push("bouton : "+document.getElementById("mock").textContent);
+document.getElementById("mock").click();
+L.push("titre : "+document.querySelector(".eyebrow").textContent);
+L.push("parties : "+[...document.querySelectorAll(".mock-part h3")].map(x=>x.textContent).join(" | "));
+L.push("exercices : "+[...document.querySelectorAll(".mock-ex h4")].map(x=>x.textContent).join(" | "));
+L.push("questions : "+document.querySelectorAll(".mock-q").length+" ; V/F : "+[...document.querySelectorAll(".mock-q")].filter(x=>/raison \? Justifie/.test(x.textContent)).length);
+for (const lv of ["facile","exigeant"]) { document.querySelector('#mlv button[data-lv="'+lv+'"]').click(); L.push(lv+" : "+document.querySelector(".eyebrow").textContent+" / "+document.querySelectorAll(".mock-q").length+" questions / "+document.querySelector(".mock-head .small").textContent.split("·").pop()); }
+document.getElementById("corr").click();
+document.querySelectorAll(".mock-mark").forEach((g,i)=>g.querySelectorAll("button")[i%3===0?2:0].click());
+document.getElementById("valid").click();
+L.push("bilan : "+document.querySelector(".card b").textContent+" | à retravailler : "+[...document.querySelectorAll("li")].map(x=>x.textContent).join(", "));
+L.push("comps : "+Object.keys(state.comps||{}).length);
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}
+});
+/* ======== riche11c (ancienne page tests/riche11c.html) ======== */
+Lot.section("riche11c", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+const L=[];try{for(const ch of ["ang11","thal11","fct11","simil11","proba11","pr10","pct10","deg2c","fct1c","geo1c","trig1c","no1c","ens1c","arg1c"]){const C=RICH[ch];let bad=0,n=0;for(const arr of [C.ex,C.raison])for(const f of arr)for(let s=1;s<80;s++){R.seed(s);const x=f();n++;const t=x.q+x.sol+x.parts.map(p=>p.label).join("");if(/NaN|undefined|Infinity|null/.test(t)||!C.ids.includes(x.id)){bad++;if(bad<3)L.push(ch+" ÉCHEC "+x.titre+" : "+t.slice(0,160));}}
+const lv=[1,2,3].map(l=>C.ex.filter(f=>{R.seed(1);return f().lv===l}).length);L.push(ch+" : "+n+" tirages, défauts "+bad+", ex par niveau "+lv.join("/")+", raisonnements "+C.raison.length);
+for(const lev of ["facile","standard","exigeant"]){const it=mockPlan(C.ids,lev);L.push("  "+lev+" : "+it.map(i=>i.part).join(""));}}}catch(e){L.push("ERR "+e.stack)} document.body.innerHTML="<pre id=\"log\">"+L.join("\n")+"</pre>";
+});
+/* ======== evacom (ancienne page tests/evacom.html) ======== */
+Lot.section("evacom", { html: `<main id="app"></main><pre id="out"></pre>`, body: "width:360px;margin:0" }, function () {
+// Parcours EVACOM 11e (24.11, chantier L) : toutes les formes sur 30 graines, 20 sujets complets, rendu à 360 px, correction et bilan.
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); }, log = [];
+const bad = (s) => /NaN|undefined|Infinity|\[object/.test(s);
+const known = (id) => !!NOTIONS.find((n) => n.id === id);
+// Garde-fou : une forme qui tourne en rond (tirage sans fin) fait échouer le test au lieu de bloquer la page.
+let cnt = 0; const r0 = R.rand, b0 = EVACOM.build; R.rand = () => { if (++cnt > 200000) throw new Error("boucle sans fin"); return r0(); }; EVACOM.build = (it) => { cnt = 0; return b0(it); };
+try {
+  // 1. Chaque forme : pas de NaN/undefined, un corrigé par sous-question, notions connues.
+  let nForms = 0;
+  EVACOM.SLOTS.forEach((sl, s) => sl.forms.forEach((f, k) => { nForms++;
+    for (let r = 1; r <= 30; r++) { const it = { s, f: k, seed: 1000 * s + 37 * k + r }; let x;
+      try { x = EVACOM.build(it); } catch (e) { fails.push("forme " + s + "/" + k + " graine " + it.seed + " : " + e.message); continue; }
+      const all = [x.titre, x.q, ...(x.parts || []), ...(x.sol || [])].join(" ");
+      ok(!bad(all), "NaN/undefined " + s + "/" + k + " : " + all.slice(0, 200));
+      ok(x.titre && x.sol && x.sol.length, "titre ou corrigé manquant " + s + "/" + k);
+      ok((x.parts && x.parts.length) ? x.sol.length === x.parts.length : x.sol.length === 1, "un corrigé par sous-question " + s + "/" + k + " (" + (x.parts || []).length + " / " + x.sol.length + ")");
+      ok(x.q || (x.parts && x.parts.length), "énoncé vide " + s + "/" + k);
+      ok(known(x.id) && (x.also || []).every(known), "notion inconnue " + x.id + " " + (x.also || []).join());
+      ok(x.sol.every((t) => t && t.replace(/<[^>]+>/g, "").trim().length > 2), "corrigé vide " + s + "/" + k);
+      ok(!/\\cdot -|\+ -|- -\d|\+ \+/.test(all.replace(/\\left\(-/g, "")), "signe double " + s + "/" + k + " : " + (all.match(/.{30}(\\cdot -|\+ -|- -\d|\+ \+).{20}/) || [""])[0]);
+      (x.parts || []).forEach((p) => { const o = [...p.matchAll(/class="evc-opt">☐ (.*?)<\/span>/g)].map((m) => m[1]); if (o.length) { ok(o.length === 4 && new Set(o).size === 4, "QCM : 4 choix distincts " + s + "/" + k + " : " + o.join(" | ")); } });
+    } }));
+  log.push(EVACOM.SLOTS.length + " emplacements, " + nForms + " formes");
+  // 2. 20 sujets complets : 14 questions (7 + 7), sujets tous différents, formes du sujet précédent évitées.
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true;
+  const sigs = new Set(); let prev = null, same = 0;
+  for (let k = 0; k < 20; k++) { evacomNew(); const qs = evacomQs(), sig = qs.map((x) => x.q + (x.parts || []).join("|")).join("#");
+    ok(qs.length === 14 && qs.filter((x) => x.p === 1).length === 7, "14 questions, 7 par partie");
+    ok(new Set(qs.map((x) => x.q + (x.parts || []).join("|"))).size === qs.length, "deux questions identiques dans le sujet " + k);
+    ok(!sigs.has(sig), "sujet déjà vu " + k); sigs.add(sig);
+    ok(qs.every((x) => !bad([x.q, ...(x.parts || []), ...x.sol].join(" "))), "NaN dans le sujet " + k);
+    if (prev) state.evacom.items.forEach((it, i) => { if (EVACOM.SLOTS[i].forms.length > 1 && prev[i].f === it.f) same++; });
+    prev = state.evacom.items; }
+  ok(same === 0, "formes reprises du sujet précédent : " + same);
+  // 3. Accès : 11e seulement ; carte sous « Mon test » et dans « Progrès » (pas de 7e case sur l'accueil).
+  homeTab = "today"; screenHome(); ok(document.querySelectorAll(".door").length === 6, "6 cases sur l'accueil");
+  homeTab = "prog"; screenHome(); ok(!document.getElementById("evacom"), "pas de carte dans Progrès (25.11)");
+  homeTab = "test"; screenHome(); ok(!!document.getElementById("evacom"), "carte sous Mon test (sans test prévu)");
+  state.prep = { ids: ["fracadd", "rel"], date: addDays(day(), 4) }; screenHome(); ok(!!document.getElementById("evacom"), "carte sous Mon test (test prévu)"); state.prep = null;
+  const s10 = Engine.newState({ system: "CH", grade: 10, track: "college", minutes: 5 }), s11 = state; state = s10; ok(evacomCard() === "", "pas de parcours en 10e"); state = Object.assign(Engine.newState({ system: "CH", grade: 12, track: "college", minutes: 5 })); ok(evacomCard() === "", "pas de parcours en 1re"); state = s11;
+  // 4. Sujet affiché à 360 px : pas de débordement.
+  homeTab = "test"; screenHome(); document.getElementById("evacom").click();
+  ok(/Évaluation bilan blanche/.test(app.textContent) && /95 minutes/.test(app.textContent) && /sans calculatrice/.test(app.textContent), "en-tête du sujet");
+  ok(!/\bpts?\b|points?\)/.test(app.querySelector(".mock-part").textContent), "pas de barème affiché");
+  ok(document.querySelectorAll(".mock-part").length === 2 && document.querySelectorAll(".mock-q").length === 14, "2 parties, 14 questions");
+  let over = []; for (let k = 0; k < 20; k++) { screenEvacom(true); const W = document.body.getBoundingClientRect().right;
+    app.querySelectorAll("*").forEach((el) => { const r = el.getBoundingClientRect(); if (r.right > W + 1 && !el.closest("mjx-container")) over.push(el.tagName + "." + el.className + " " + Math.round(r.right) + " " + el.textContent.slice(0, 40)); }); }
+  ok(!over.length, "débordements : " + over.length + " " + [...new Set(over)].slice(0, 3).join(" | "));
+  // 5. Corrigé, auto-correction, bilan.
+  const c0 = JSON.stringify(state.comps || {});
+  document.getElementById("corr").click(); ok(document.querySelectorAll(".mock-mark").length === 14, "14 questions à cocher");
+  document.getElementById("valid").click(); ok(/Il te reste 14/.test(app.textContent), "tout cocher d'abord");
+  [...document.querySelectorAll(".mock-mark")].forEach((g, i) => g.querySelector('button[data-v="' + (i % 3 === 0 ? 0 : i % 3 === 1 ? 1 : 0.5) + '"]').click());
+  document.getElementById("valid").click();
+  ok(/Où tu en es/.test(app.textContent) && /Partie 1/.test(app.textContent), "bilan");
+  ok(JSON.stringify(state.comps) !== c0, "compétences mises à jour");
+  ok(state.evacom.runs.length === 1 && state.evacom.done.juste === 5 && state.evacom.done.faux === 5, "résultat gardé : " + JSON.stringify(state.evacom.done && { j: state.evacom.done.juste, f: state.evacom.done.faux }));
+  ok(document.querySelectorAll(".evc-weak li").length >= 3, "notions à retravailler");
+  const les = document.querySelector(".evc-les"); if (les) { les.click(); ok(!!document.getElementById("go") || /Manipule|Rappel/.test(app.textContent), "rappel de cours"); screenEvacomResult(); }
+  document.getElementById("rev").click(); ok(session && session.plan.length >= 2 && session.plan.every((p) => GEN[p.split("|")[0]]), "révision ciblée");
+  homeTab = "test"; screenHome(); ok(/Dernier sujet blanc : 5 questions justes sur 14/.test(app.textContent), "carte : dernier résultat");
+  document.getElementById("evcbilan").click(); ok(/Où tu en es/.test(app.textContent), "bilan rouvert");
+  homeTab = "test"; screenHome(); document.getElementById("evacom").click(); ok(!state.evacom.done && state.evacom.runs.length === 1, "nouveau sujet après un sujet fini");
+  // Un sujet en clair pour la relecture (non bloquant).
+  log.push("exemple : " + evacomQs().map((x, i) => (i + 1) + ". " + x.titre).join(" · "));
+} catch (e) { fails.push("EXC " + e.message + " " + (e.stack || "").split("\n")[1]); }
+document.getElementById("out").textContent = (fails.length ? "ÉCHEC " + fails.length + "\n" + [...new Set(fails)].slice(0, 25).join("\n") : "ok") + "\n" + log.join("\n");
+});
+/* ======== variete (ancienne page tests/variete.html) ======== */
+Lot.section("variete", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+try{ state = Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(state); save();
+const L=[];
+let bad=0; for (let d=1; d<=3; d++) for (let r=0;r<40;r++){ const q=GEN.fracetage(d); const c=checkAnswer(q.spec, q.spec.expr); if(c.status!=="correct"){bad++; L.push("KO "+q.q+" -> "+c.status+" "+(c.message||""));} }
+L.push("réponses attendues acceptées (120 tirages) : "+(bad===0));
+const b=[...document.querySelectorAll(".ctest")]; screenComps(); const t=document.querySelector('.ctest[data-id="fracetage"]'); t.click();
+L.push("plan Me tester : "+session.plan.join(", "));
+const st=Engine.newState({ system: "CH", grade: 13, track: "college", minutes: 5 }); Engine.autoInit(st);
+for (let t=0;t<3;t++){ const qs=session.plan.map((e)=>{const [id,lv]=e.split("|"); return qForm(Engine.make(st,id,+lv)).replace(/\\/g,"").slice(40,95);}); L.push("test "+(t+1)+" : "+qs.join("  ||  ")); }
+document.getElementById("log").textContent=L.join("\n"); }catch(e){document.getElementById("log").textContent="ERR "+e.stack}
+});
+/* ======== free_vue (ancienne page tests/free_vue.html) ======== */
+Lot.section("free_vue", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px", apercu: true }, function () {
+try{window.scrollTo=()=>{};state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);Object.keys(state.notions).filter((i)=>GEN[i]).slice(0,30).forEach((id,k)=>{state.notions[id].seen=3;state.notions[id].m=[0.85,0.3,0.55][k%3];});state.placed=true;homeTab=location.hash.slice(1)||"today";screenHome();}catch(e){document.body.insertAdjacentHTML("afterbegin","<pre>ERR "+e.stack+"</pre>")}
+});
+Lot.lance();
+</script>

@@ -1,0 +1,243 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="255000">
+<title>Tests : actives</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Leçons actives jouées de bout en bout (devine, chaque défi gagné, question ajoutée, Retiens) : 1re Collège, MP 2e, 11e (fractions, puissances, Pythagore, volumes ; proportionnalité), équations et systèmes, manipulations, petits défis d'arithmétique. Sections *_vue : aperçus d'une leçon (#section=act_ch11b_vue&id=pythrec ; #section=act_manip_vue&id=affine).
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : act_1c, act_mp2, act_ch11b, act_prop11, act_eq1c, act_sys1c, act_manip, act_arith, act_cercletan, act_divcrit, act_fractout, act_multdiv, act_premiers, act_prio, act_ch11b_vue, act_ch11c_vue, act_manip_vue.
+     Une seule section : actives.html#section=act_1c -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
+<script>
+/* ======== act_1c (ancienne page tests/act_1c.html) ======== */
+Lot.section("act_1c", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+// Chaque défi : on fait varier le curseur (d'abord vers le haut, puis vers le bas) jusqu'à ce que le message change.
+const gfb=()=>document.querySelector('#gfb').textContent;
+const C=[];for(let v=-12;v<=120;v++)C.push(v);
+const seek=()=>{const b=gfb();const inp=()=>document.querySelector(".act-in");
+if(inp()){for(const v of C){const el=inp();if(!el)return gfb()!==b;el.value=String(v);click("[data-go]");if(gfb()!==b)return true;}return false;}for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
+  for(let k=0;k<(typeof actPrep!=="undefined"?actPrep(A):A).defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,60)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+for(const id of ["pct","racenc","tradexpr","fimg","modaff","f2","optim","euclide","angtri","trigexact","ensembles","domaine","racinv","transf","absval","ineq","trinfact","f2formes","f2trois","inter","geocomb","droitesrem","lectgraph","morceaux","polyop","factor2","f2expr","interpar","ineq2","ineqfrac","exactes","trigo","trigrel","vabs","ratden","fracrat","valint","eqparam"]) run(id);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_mp2 (ancienne page tests/act_mp2.html) ======== */
+Lot.section("act_mp2", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+// Leçons actives MP 2e (20.11) : chaque défi est cherché parmi des entiers et quelques décimaux ou fractions.
+const gfb=()=>document.querySelector('#gfb').textContent;
+const C=["-1/3","-0.5","0.5","0.8","-0.6"];for(let v=-12;v<=360;v++)C.push(String(v));
+const seek=()=>{const b=gfb();for(const v of C){const el=document.querySelector(".act-in");if(!el)return gfb()!==b;el.value=v;click("[data-go]");if(gfb()!==b)return true;}return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; if(!A){log.push(id+" : ÉCHEC pas de leçon active");return;} click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
+  for(let k=0;k<(typeof actPrep!=="undefined"?actPrep(A):A).defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,50)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+for(const id of ["droites","droitesinter","recipaff","trigcercle","trigfn","sinlaw","trigeq","trigassoc","trigeq2","triaire","statfreq","stats","quartiles"]) run(id);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_ch11b (ancienne page tests/act_ch11b.html) ======== */
+Lot.section("act_ch11b", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+// Chaque défi : on fait varier le curseur (d'abord vers le haut, puis vers le bas) jusqu'à ce que le message change.
+const gfb=()=>document.querySelector('#gfb').textContent;
+const C=[];for(let v=-12;v<=400;v++)C.push(v); /* 25.11 : jusqu'à 400 (airepyr : aire totale 384 cm², défi qui mêle hauteur et apothème) */
+const seek=()=>{const b=gfb();const inp=()=>document.querySelector(".act-in");
+if(inp()){for(const v of C){const el=inp();if(!el)return gfb()!==b;el.value=String(v);click("[data-go]");if(gfb()!==b)return true;}return false;}for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
+  for(let k=0;k<(typeof actPrep!=="undefined"?actPrep(A):A).defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,60)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+for(const id of ["fracadd","fracmul","puiss","sci","scicalc","pythfig","pythrec","vol","volcone","airepyr","volcomp","volmanq"]) run(id);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_prop11 (ancienne page tests/act_prop11.html) ======== */
+Lot.section("act_prop11", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+const st=(id,d,n)=>{for(let i=0;i<n;i++)click('[data-st="'+id+'"][data-d="'+d+'"]');};
+const run=(id,pred,steps)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; let done=false; screenLesson(id,()=>{done=true;});
+  click('#pc button[data-i="'+pred+'"]'); const msgs=[];
+  for(const s of steps){ s(); msgs.push(document.querySelector('#gfb').textContent); }
+  log.push(id+" : "+(document.getElementById("s3").hidden?"ÉCHEC (défis non réussis)":"OK")+" · "+msgs.join(" | ").slice(0,260));
+  log.push("   retiens : "+document.querySelector('#s3 .rule').textContent.slice(0,90)+" … piège : "+document.querySelector('#s3 .trap').textContent.slice(0,60));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+// utemps : départ 30 min → 45, puis 12, puis 21
+run("utemps",1,[()=>st("m",1,15),()=>st("m",-1,33),()=>st("m",1,9)]);
+// ucomp : départ 5 m/s → 10, 25, 28
+run("ucomp",0,[()=>st("v",1,5),()=>st("v",1,15),()=>st("v",1,3)]);
+// vitesse : départ 60 km/h, 60 min → 150 min (60 km/h) ; puis 80 km/h et 75 min ; puis 90 km : 60 km/h 90 min puis 90 km/h 60 min
+run("vitesse",1,[()=>st("t",1,6),()=>{st("v",1,2);st("t",-1,5);},()=>{st("v",-1,2);st("t",1,1);st("v",1,3);st("t",-1,2);}]);
+// gquot : or 3 → 6 ; aluminium 7 ; glace 50
+run("gquot",2,[()=>st("V",1,3),()=>{click('.act-mat button[data-i="2"]');st("V",1,1);},()=>{click('.act-mat button[data-i="3"]');st("V",1,43);}]);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_eq1c (ancienne page tests/act_eq1c.html) ======== */
+Lot.section("act_eq1c", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+const st=(id,d,n)=>{for(let i=0;i<n;i++)click('[data-st="'+id+'"][data-d="'+d+'"]');};
+// 24.11 : questions ajoutées après les défis (A.plus, actPlus dans active.js) : une réponse fausse est refusée, la bonne valide.
+const plusAns=(id,msgs)=>{(ACTIVE[id].plus||[]).forEach((p,j)=>{const go=(v)=>{const i=document.querySelector(".act-plus .act-in");if(!i)return false;i.value=v;i.closest(".act-ans").querySelector("[data-go]").dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+  const b=document.querySelector("#gfb").textContent;if(!go("9999")){msgs.push("✗ question ajoutée "+(j+1)+" absente");return;}if(document.querySelector("#gfb").textContent!==b)msgs.push("✗ réponse fausse acceptée");
+  go(String(p.ans));msgs.push(document.querySelector("#gfb").textContent!==b?"✓ question ajoutée "+(j+1):"✗ question ajoutée "+(j+1)+" refusée");});};
+const run=(id,pred,steps)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  click('#pc button[data-i="'+pred+'"]'); const msgs=[];
+  for(const s of steps){ s(); msgs.push(document.querySelector('#gfb').textContent.slice(0,70)); }
+  plusAns(id,msgs);
+  log.push(id+" : "+(msgs.some((m)=>/^✗/.test(m))?"ÉCHEC (question ajoutée) ":document.getElementById("s3").hidden?"ÉCHEC (défis non réussis) "+(document.querySelector('.act-hint')||{}).textContent:"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+const op=(o)=>click('[data-o="'+o+'"]'), ch=(i)=>click('[data-ch="'+i+'"]');
+run("eq1",0,[()=>{st("k",1,4);op("-");st("k",-1,2);op("/");},()=>{st("k",1,1);op("-x");st("k",1,1);op("+");op("/");},()=>{st("k",1,6);op("-");st("k",-1,8);op("/");}]);
+run("eqfrac",1,[()=>{st("k",1,5);op("*");st("k",-1,1);op("/");},()=>{st("k",1,11);op("*");st("k",-1,10);op("-x");st("k",1,10);op("+");},()=>{st("k",1,5);op("*");st("k",-1,4);op("-x");st("k",1,1);op("-");}]);
+run("eqspec",1,[()=>{st("k",1,1);op("-x");click('[data-c="none"]');},()=>{st("k",1,2);op("-x");click('[data-c="all"]');},()=>{op("-x");op("-");st("k",1,2);op("/");}]);
+run("formule",0,[()=>ch(0),()=>{ch(1);ch(0);},()=>{ch(1);ch(0);ch(1);}]);
+run("probeq",1,[()=>st("n",1,5),()=>st("n",1,9),()=>{click('[data-k="4"]');st("n",-1,1);}]);
+run("eq2fact",1,[()=>st("x",1,2),()=>st("x",-1,3),()=>st("x",-1,4)]);
+run("eq2",1,[()=>st("x",1,2),()=>st("x",-1,7),()=>st("x",1,1)]);
+run("eq2disc",1,[()=>st("c",1,3),()=>st("c",1,1),()=>st("c",-1,6)]);
+run("probeq2",0,[()=>st("x",1,3),()=>st("x",1,2),()=>st("x",-1,3)]);
+run("eq3",2,[()=>st("x",1,1),()=>st("x",-1,4),()=>st("x",1,2)]);
+run("bicarre",0,[()=>st("x",1,1),()=>st("x",1,1),()=>{st("x",-1,3);st("x",-1,1);}]);
+run("eqirr",1,[()=>st("x",1,2),()=>st("x",-1,5),()=>st("x",1,12)]);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_sys1c (ancienne page tests/act_sys1c.html) ======== */
+Lot.section("act_sys1c", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return false;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+// Chaque défi : on fait varier le curseur (d'abord vers le haut, puis vers le bas) jusqu'à ce que le message change.
+const gfb=()=>document.querySelector('#gfb').textContent;
+const C=[];for(let v=-12;v<=120;v++)C.push(v);for(let v=-12;v<=12;v+=0.5)if(!Number.isInteger(v))C.push(v);
+const seek=()=>{const b=gfb();const inp=()=>document.querySelector(".act-in");
+if(inp()){for(const v of C){const el=inp();if(!el)return gfb()!==b;el.value=String(v);click("[data-go]");if(gfb()!==b)return true;}return false;}for(let i=0;i<70;i++){click('[data-st="x"][data-d="1"]');if(gfb()!==b)return true;}for(let i=0;i<160;i++){click('[data-st="x"][data-d="-1"]');if(gfb()!==b)return true;}return false;};
+const run=(id)=>{ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  const A=ACTIVE[id]; click('#pc button[data-i="'+A.predict.good+'"]'); const msgs=[];
+  for(let k=0;k<(typeof actPrep!=="undefined"?actPrep(A):A).defis.length;k++){ if(!seek()) msgs.push("défi "+(k+1)+" non trouvé"); else msgs.push(gfb().slice(0,60)); }
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,""); const bad=/NaN|undefined|Infinity/.test(html);
+  log.push(id+" : "+(document.getElementById("s3").hidden||bad?"ÉCHEC "+(bad?"(NaN/undefined) ":""):"OK")+" · "+msgs.join(" | "));
+  }catch(e){log.push(id+" ERR "+e.stack)} };
+for(const id of ["sys2","sysprob","sysgraph","sys3","affzero"]) run(id);
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_manip (ancienne page tests/act_manip.html) ======== */
+Lot.section("act_manip", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+const gfb=()=>document.querySelector('#gfb').textContent;
+const box=()=>[...document.querySelectorAll("div")].find((d)=>d.__manip);
+const answer=(v)=>{const i=document.querySelector(".manip-ask input");if(!i)return;i.value=String(v);click(".manip-ask [data-go]");};
+// geste réel : pointerdown / pointermove / pointerup sur la poignée k, vers le point SVG (sx, sy)
+const drag=(k,sx,sy)=>{const svg=document.querySelector("svg.manip"),r=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal,cx=r.left+sx*r.width/vb.width,cy=r.top+sy*r.height/vb.height,g=svg.querySelectorAll(".manip-h")[k],c=g.querySelector("circle"),x0=r.left+(+c.getAttribute("cx"))*r.width/vb.width,y0=r.top+(+c.getAttribute("cy"))*r.height/vb.height;
+  const ev=(t,x,y)=>g.dispatchEvent(new PointerEvent(t,{bubbles:true,clientX:x,clientY:y,pointerId:1,isPrimary:true}));ev("pointerdown",x0,y0);ev("pointermove",(x0+cx)/2,(y0+cy)/2);ev("pointermove",cx,cy);ev("pointerup",cx,cy);};
+// 24.11 : questions ajoutées après les défis (A.plus, actPlus dans active.js) : une réponse fausse est refusée, la bonne valide.
+const plusAns=(id,msgs)=>{(ACTIVE[id].plus||[]).forEach((p,j)=>{const go=(v)=>{const i=document.querySelector(".act-plus .act-in");if(!i)return false;i.value=v;i.closest(".act-ans").querySelector("[data-go]").dispatchEvent(new MouseEvent("click",{bubbles:true}));return true;};
+  const b=document.querySelector("#gfb").textContent;if(!go("9999")){msgs.push("✗ question ajoutée "+(j+1)+" absente");return;}if(document.querySelector("#gfb").textContent!==b)msgs.push("✗ réponse fausse acceptée");
+  go(String(p.ans));msgs.push(document.querySelector("#gfb").textContent!==b?"✓ question ajoutée "+(j+1):"✗ question ajoutée "+(j+1)+" refusée");});};
+const SOL={
+  pyth:[["drag",0,90+1*24,165-2*24],100,[(s)=>{s.C=[4,2]}],13,[(s)=>{s.C=[2.5,1]}],0],
+  affine:[[(s)=>{s.P=[0,1];s.Q=[1,3]}],7,[(s)=>{s.P=[0,0];s.Q=[2,-1]}],-0.5,[(s)=>{s.P=[0,3];s.Q=[1,2]}],3],
+  fracconv:[[(s)=>{s.v=[.5,.25,.75]}],75,[(s)=>{s.v=[.6,.35,.8]}],20,[(s)=>{s.v=[.375,.45,.2]}],0.4],
+  sysineq:[[(s)=>{s.L=-1;s.Lc=false;s.R=4;s.Rc=true}],null,[(s)=>{s.L=2;s.Lc=false;s.R=5;s.Rc=true}],3,[(s)=>{s.L=-5;s.Lc=true;s.R=-2;s.Rc=false}],3]};
+for(const [id,seq] of Object.entries(SOL)){ try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson(id,()=>{});
+  click('#pc button[data-i="'+ACTIVE[id].predict.good+'"]'); const msgs=[];
+  for(let k=0;k<seq.length;k+=2){ const act=seq[k][0]; const b=gfb();
+    if(act==="drag") drag(seq[k][1],seq[k][2],seq[k][3]); else box().__manip.set(act);
+    if(seq[k+1]!==null) answer(seq[k+1]);
+    msgs.push(gfb()!==b?"✓":"✗ défi "+(k/2+1)+" (étape "+box().__manip.step+")"); }
+  plusAns(id,msgs);
+  const html=document.body.innerHTML.replace(/<script[\s\S]*?<\/script>/g,"").replace(/<pre id="log"[\s\S]*?<\/pre>/,"");
+  log.push(id+" : "+(document.getElementById("s3").hidden||/NaN|undefined/.test(html)||msgs.some((m)=>/^✗/.test(m))?"ÉCHEC":"OK")+" · "+msgs.join(" "));
+  }catch(e){log.push(id+" ERR "+e.stack)} }
+document.getElementById("log").hidden=false; document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_arith (ancienne page tests/act_arith.html) ======== */
+Lot.section("act_arith", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("arith",()=>log.push("cont"));click('#pc button[data-i="1"]');
+for(let i=0;i<4;i++) click('#ja'); for(let i=0;i<3;i++) click('#jb'); log.push("bus: "+document.querySelector("#gfb").textContent);
+setTimeout(()=>{ for(let i=0;i<4;i++) document.querySelector('[data-st="s"][data-d="1"]').click(); const L=["s=6: "+document.querySelector("#gfb").textContent, "s3 "+!document.getElementById("s3").hidden]; document.getElementById("log").textContent+="\n"+L.join("\n"); },2500);
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_cercletan (ancienne page tests/act_cercletan.html) ======== */
+Lot.section("act_cercletan", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("cercletan",()=>log.push("cont"));click('#pc button[data-i="1"]');
+const sl=(v)=>{const e=document.querySelector('#play input'); e.value=v; e.dispatchEvent(new Event("input"));};
+log.push("T(3;4): "+document.querySelector(".act-out").textContent);
+sl(3); log.push("d1: "+document.querySelector("#gfb").textContent);
+sl(4); log.push("T(-3;4): "+document.querySelector(".act-out").textContent);
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_divcrit (ancienne page tests/act_divcrit.html) ======== */
+Lot.section("act_divcrit", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("divcrit",()=>log.push("cont"));click('#pc button[data-i="0"]'); for (let i=0;i<5;i++) click('.act-num[data-i="2"]');
+log.push("après 9: "+document.querySelector("#gfb").textContent+" | "+document.querySelector(".act-expr").textContent);
+for (let i=0;i<3;i++) click('.act-num[data-i="2"]'); for (let i=0;i<1;i++) click('.act-num[data-i="1"]');
+log.push("nombre: "+document.querySelector(".act-expr").textContent);
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_fractout (ancienne page tests/act_fractout.html) ======== */
+Lot.section("act_fractout", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("fractout",()=>log.push("cont"));
+click('#pc button[data-i="0"]');
+click('.act-b button[data-b="3"]'); click('.act-part[data-k="0"]'); click('.act-part[data-k="1"]');
+click('.act-b button[data-b="4"]'); click('.act-part[data-k="0"]'); click('.act-part[data-k="1"]'); click('.act-part[data-k="2"]');
+ log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_multdiv (ancienne page tests/act_multdiv.html) ======== */
+Lot.section("act_multdiv", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("multdiv",()=>log.push("cont"));click('#pc button[data-i="0"]'); for (const d of [-1,-1,1,1,1,1]) { const b=document.querySelector('[data-st="r"][data-d="'+d+'"]'); b.click(); }
+log.push("après 12: "+document.querySelector("#gfb").textContent);
+for (let i=0;i<18;i++){ const b=document.querySelector('[data-st="r"][data-d="1"]'); b.click(); }
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_premiers (ancienne page tests/act_premiers.html) ======== */
+Lot.section("act_premiers", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("premiers",()=>log.push("cont"));click('#pc button[data-i="1"]');
+const cut=(p)=>{ click('.act-num'); click('[data-p="'+p+'"]'); };
+cut(2); cut(2); cut(3); log.push("84: "+document.querySelector("#gfb").textContent);
+setTimeout(()=>{ const cut=(p)=>{ click('.act-num'); click('[data-p="'+p+'"]'); }; cut(5); cut(2); cut(3); cut(3); const L=[]; L.push("90: "+document.querySelector("#gfb").textContent, "ladder: "+document.querySelector(".act-ladder").textContent, "s3 "+!document.getElementById("s3").hidden); document.getElementById("log").textContent+="\n"+L.join("\n"); },2500);
+log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_prio (ancienne page tests/act_prio.html) ======== */
+Lot.section("act_prio", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px" }, function () {
+const log=[];const click=(s)=>{const e=document.querySelector(s);if(!e){log.push("MANQUE "+s);return;} e.dispatchEvent(new MouseEvent("click",{bubbles:true}));};
+try{ window.scrollTo=()=>{}; Element.prototype.scrollIntoView=function(){}; screenLesson("prio",()=>log.push("cont"));
+click('#pc button[data-i="1"]');
+click('.act-num[data-i="0"]'); click('.act-num[data-i="1"]');
+log.push(document.querySelector('#gfb').textContent);
+click('.act-num[data-i="2"]'); click('.act-num[data-i="3"]');
+ log.push("gfb: "+document.querySelector("#gfb").textContent, "s3 visible: "+!document.getElementById("s3").hidden, "go visible: "+!document.getElementById("go").hidden);}catch(e){log.push("ERR "+e.stack)}
+document.getElementById("log").textContent=log.join("\n");
+});
+/* ======== act_ch11b_vue (ancienne page tests/act_ch11b_vue.html) ======== */
+Lot.section("act_ch11b_vue", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px", apercu: true }, function () {
+try{window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};const id=location.hash.slice(1)||"pyth";screenLesson(id,()=>{});const A=ACTIVE[id];document.querySelector('#pc button[data-i="'+A.predict.good+'"]').dispatchEvent(new MouseEvent("click",{bubbles:true}));const inp=document.querySelector('.act-in');if(inp){inp.value=new URLSearchParams(location.search).get('v')||'2';document.querySelector('[data-go]').dispatchEvent(new MouseEvent('click',{bubbles:true}));}else{for(let i=0;i<2;i++)document.querySelector('[data-st="x"][data-d="1"]').dispatchEvent(new MouseEvent("click",{bubbles:true}));}}catch(e){document.body.insertAdjacentHTML("afterbegin","<pre>ERR "+e.stack+"</pre>")}
+});
+/* ======== act_ch11c_vue (ancienne page tests/act_ch11c_vue.html) ======== */
+Lot.section("act_ch11c_vue", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px", apercu: true }, function () {
+try{window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};const id=location.hash.slice(1)||"pyth";screenLesson(id,()=>{});const A=ACTIVE[id];document.querySelector('#pc button[data-i="'+A.predict.good+'"]').dispatchEvent(new MouseEvent("click",{bubbles:true}));const inp=document.querySelector('.act-in');if(inp){inp.value=new URLSearchParams(location.search).get('v')||'2';document.querySelector('[data-go]').dispatchEvent(new MouseEvent('click',{bubbles:true}));}else{for(let i=0;i<2;i++)document.querySelector('[data-st="x"][data-d="1"]').dispatchEvent(new MouseEvent("click",{bubbles:true}));}}catch(e){document.body.insertAdjacentHTML("afterbegin","<pre>ERR "+e.stack+"</pre>")}
+});
+/* ======== act_manip_vue (ancienne page tests/act_manip_vue.html) ======== */
+Lot.section("act_manip_vue", { html: `<main id="app"></main><pre id="log" hidden></pre>`, body: "width:400px", apercu: true }, function () {
+try{window.scrollTo=()=>{};Element.prototype.scrollIntoView=function(){};const id=location.hash.slice(1)||"pyth";screenLesson(id,()=>{});document.querySelector('#pc button[data-i="'+ACTIVE[id].predict.good+'"]').dispatchEvent(new MouseEvent("click",{bubbles:true}));
+const b=[...document.querySelectorAll("div")].find((d)=>d.__manip);const S={pyth:(s)=>{s.C=[1,2]},affine:(s)=>{s.P=[-1,-2];s.Q=[2,4]},fracconv:(s)=>{s.v=[.5,.3,.75]},sysineq:(s)=>{s.L=-1;s.Lc=false;s.R=3;s.Rc=true}};b.__manip.set(S[id]);}catch(e){document.body.insertAdjacentHTML("afterbegin","<pre>ERR "+e.stack+"</pre>")}
+});
+Lot.lance();
+</script>

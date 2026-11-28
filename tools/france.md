@@ -341,8 +341,8 @@ Anciennes grilles « Livret de connaissances et de compétences » (Sources/Offi
 | 1re | 95 % | 96 % | `posrelc` (position relative de deux courbes, AN.09) |
 | Tle | 91 % | 95 % | `intmaj` (majorer, encadrer une intégrale, AN.24), `suiteint` (suites d'intégrales, AN.26) |
 
-Notions dans `src/fr_fin.js`, leçons actives (curseurs) dans `src/fr_act.js`, contrôles `tests/frfin.html` et
-`tests/act_frfin.html`. Notes scolaires : pour un profil français, les questions de `statfreq`, `stats`, `diagr`, `probeq`
+Notions dans `src/fr_fin.js`, leçons actives (curseurs) dans `src/fr_act.js`, contrôles `tests/france.html#section=frfin` et
+`tests/france.html#section=act_frfin`. Notes scolaires : pour un profil français, les questions de `statfreq`, `stats`, `diagr`, `probeq`
 à notes suisses (1 à 6) sont remplacées par des notes sur 20 (`FR_NOTES`, lu par `Engine.finalize`) ; profils suisses
 inchangés. Reste : leçons actives suisses de moyenne (`act_9b.js`, `act_manip2.js` : « notes 6 ; 6 ; 3 ») non localisées.
 
