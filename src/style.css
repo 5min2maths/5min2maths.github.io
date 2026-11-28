@@ -208,10 +208,10 @@ h1 { font-size: clamp(2rem, 7vw, 2.6rem); }
 .keypad button:active { transform: translateY(2px); box-shadow: none; }
 .elo .num { background: linear-gradient(transparent 58%, var(--fluo) 58%, var(--fluo) 92%, transparent 92%); color: var(--ink); padding: 0 4px; }
 .burst { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 20; }
-.burst span { position: absolute; font-family: var(--font-display); font-weight: 800; color: var(--blue); animation: fly 900ms cubic-bezier(.15, .8, .3, 1) forwards; }
-.burst span:nth-child(3n) { color: var(--margin); }
-.burst span:nth-child(4n) { color: var(--ok); }
-@keyframes fly { from { transform: translate(0, 0) rotate(0) scale(0.6); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1.1); opacity: 0; } }
+/* 28.11 : étincelles dorées ✦ des grands moments (burst, src/app.js), style de l'écran d'ouverture */
+.burst span { position: absolute; line-height: 1; color: var(--gold); text-shadow: 0 0 6px rgba(242, 183, 5, .45); animation: fly 800ms cubic-bezier(.15, .8, .3, 1) both; }
+.burst span.deep { color: var(--gold-deep); }
+@keyframes fly { 0% { transform: translate(-50%, -50%) scale(.3) rotate(0); opacity: 0; } 15% { opacity: 1; } 60% { opacity: 1; } 100% { transform: translate(calc(var(--dx) - 50%), calc(var(--dy) - 50%)) scale(1) rotate(var(--r)); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .burst { display: none; } }
 .part label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.98rem; }
 .part .mk { font-family: var(--font-display); font-weight: 800; }
@@ -239,7 +239,7 @@ details.lesson[open] { background: var(--paper); }
 
 .skips { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px; }
 .skips .easy { margin-left: auto; }
-.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 50; max-width: calc(100% - 32px);
+.toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; /* 28.11 (animations) : translate et non transform, que l'animation .pop remplaçait (le message partait de la droite puis sautait au centre) */ z-index: 50; max-width: calc(100% - 32px);
   background: var(--ink, #1d3f8f); color: var(--paper); padding: 10px 16px; border-radius: 10px; font-size: .95rem; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
 
 /* Mes compétences */
@@ -475,7 +475,7 @@ details.solfull summary { cursor: pointer; color: var(--blue); font-size: 0.9em;
 
 /* 21.11 : améliorations UX (progression du positionnement, série, bilan par notion, légendes du clavier) */
 .pbar { display: block; height: 6px; border-radius: 3px; background: var(--line, #dde3f0); margin-top: 6px; overflow: hidden; }
-.pbar i { display: block; height: 100%; background: var(--blue); border-radius: 3px; transition: width .3s; }
+.pbar i { display: block; height: 100%; background: var(--blue); border-radius: 3px; transition: width .45s cubic-bezier(.3, .8, .4, 1); } /* 28.11 (animations, n° 5) : la barre glisse (seanceBar, src/app.js) */
 .sum-line { display: flex; gap: 10px; align-items: flex-start; }
 .sum-line > span { font-size: 1.2rem; line-height: 1.4; }
 .keypad button { position: relative; }
@@ -1090,3 +1090,32 @@ html.ecran-ordi { scrollbar-gutter: stable; }
 @media (prefers-reduced-motion: reduce) { .splash *, .splash ::before { animation: none !important; opacity: 1 !important; } .splash-circle circle { stroke-dasharray: none; } .splash-glint { display: none; } }
 
 .niv-elo { margin: 0; font-size: 1.05rem; font-weight: 700; } .niv-elo .mark { padding: 0 6px; font-size: 1.15rem; } /* 28.11 : Mathélo bien visible dans Mon niveau */
+
+/* ===== 28.11 (décision de l'enseignant, « d'autres animations, pas trop, juste pour dynamiser », n° 1 à 5) =====
+   Des retours, pas un décor : < 0,5 s (défilement 0,6 s), jamais d'attente (pointer-events: none), rien si mouvement
+   réduit (règle générale plus haut + garde-fous ci-dessous et dans src/app.js). Style de l'écran d'ouverture (.splash). */
+/* n° 1 : pépite qui s'envole (nugFly) */
+.nugfly { position: fixed; z-index: 60; pointer-events: none; display: inline-flex; align-items: center; gap: 4px; width: 100px; justify-content: center; will-change: transform, opacity; }
+.nugfly-ic svg { width: 46px; height: 30px; display: block; filter: drop-shadow(0 2px 2px rgba(60, 40, 0, .25)); }
+/* 28.11 : mini-pépite à la place de l'emoji 🟡 (NUG_IC, src/curriculum.js) : hauteur du texte, sur la ligne de base */
+.nug-ic { display: inline-block; height: 0.9em; width: 1.39em; vertical-align: -0.1em; overflow: visible; }
+.nugfly b { font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; color: var(--gold-ink); background: var(--gold-soft); border: 1.5px solid var(--gold-deep); border-radius: 8px; padding: 0 6px; line-height: 1.25; box-shadow: 0 2px 6px rgba(60, 40, 0, .18); } /* 28.11 : plus gros, contraste ≥ 9:1 clair et sombre (--gold-ink sur --gold-soft) */
+.nug-dot { display: block; width: 22px; height: 18px; border-radius: 45% 55% 50% 40%; background: linear-gradient(135deg, #ffe071, var(--gold) 50%, #9a6400); }
+/* n° 2 : pépites qui défilent au bilan (ypCount) : le chiffre réel reste dans le DOM, transparent pendant 0,6 s, sous un compteur CSS */
+@property --ypc { syntax: "<integer>"; initial-value: 0; inherits: false; }
+.yp-cnt { font-variant-numeric: tabular-nums; }
+.yp-cnt.cnt { position: relative; color: transparent; }
+.yp-cnt.cnt::after { content: counter(ypc); counter-reset: ypc var(--ypc); position: absolute; right: 0; top: 0; color: var(--gold-ink); animation: ypCount .6s cubic-bezier(.3, .5, .5, 1) forwards; }
+@keyframes ypCount { from { --ypc: 0; } to { --ypc: var(--n); } }
+/* n° 3 : pépite polie : un éclat doré balaie le message */
+.toast.shine { overflow: hidden; }
+.toast.shine::after { content: ""; position: absolute; top: -10%; bottom: -10%; width: 40%; left: -50%; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(255, 215, 94, .75), rgba(255, 248, 216, .9), rgba(255, 215, 94, .75), transparent); transform: skewX(-18deg); animation: shineSweep .45s ease-in-out .12s both; }
+@keyframes shineSweep { from { left: -50%; } to { left: 115%; } }
+/* n° 4 : filon qui augmente : la flamme grossit un instant (bilan, en-tête de l'accueil) */
+.flame.flame-up, .streak-chip.flame-up .chip-fl { display: inline-block; animation: flameUp .45s cubic-bezier(.3, 1.6, .5, 1) .2s both; transform-origin: 50% 80%; }
+@keyframes flameUp { 0% { transform: scale(1); } 45% { transform: scale(1.5) rotate(-6deg); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .nugfly { display: none !important; }
+  .yp-cnt.cnt { color: inherit; } .yp-cnt.cnt::after { content: none; }
+  .toast.shine::after, .flame.flame-up, .streak-chip.flame-up .chip-fl { animation: none !important; }
+}

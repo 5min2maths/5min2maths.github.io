@@ -78,10 +78,14 @@ puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11
   l'exactitude des faits par l'enseignant**. MP en suspens : les sujets MP 2e remplacés par des sujets 11e / 1C.
   Liés au programme de l'année : curieux 11e 6 → 16, 1C 0 → 8, 2C 1 → 4 ; histoires 11e 19 → 25, 1C 6 → 14, 2C 4 → 7
   (sonde corrigée : elle comptait toutes les histoires comme pour un 9e). Reste : 1C grandeurs (`exactes`), 3e–4e Collège.
-- **`/app animations`** (validé 28.11, n° 1 à 5) : bonne réponse → petite pépite qui s'envole vers le compteur (« +2 ») ;
-  bilan → nombre de pépites qui défile ; pépite polie → éclat doré sur la carte ; filon qui augmente → flamme qui grossit ;
-  barre de séance qui se remplit en glissant. Règles : < 0,5 s, un retour (pas un décor), jamais d'attente, rien si
-  mouvement réduit. Pas de tremblement sur une erreur (vécu comme une sanction). GIF de chaque avant publication.
+- **`/app animations`** (validé 28.11, n° 1 à 5) : FAIT sur `agent/app2`, **GIF à valider** par l'enseignant
+  (`tests/_shots/app/animations/*.gif`, régénérer : `tests/_gif_animations.py`), puis fusion. Pépite « +N » qui s'envole
+  de la réponse (0,7 s, plus grosse depuis le retour du 28.11), pépites qui défilent au bilan (0,6 s), éclat doré sur « Polie » (0,45 s), flamme du filon qui
+  grossit (bilan + en-tête, 0,45 s), barre de séance qui glisse (0,45 s) ; rien en mouvement réduit, rien ne bloque.
+  Avec : emoji 🟡 remplacé partout par une mini-pépite dessinée (`NUG_IC`, src/curriculum.js ; captures
+  `icone_avant_apres_*.png`). GIF validés (28.11) ; puis gerbe de symboles (burst) remplacée par des étincelles dorées ✦,
+  réservées aux grands moments (nouveau grade, badge, niveau qui monte), plus aucune à chaque bonne réponse. Rapport :
+  `tools/archive/app_animations_28-11.md`.
 
 0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
    (tout : sources, tests, tools, historique complet) ; dépôt public `5min2maths.github.io` réduit à l'app publiée

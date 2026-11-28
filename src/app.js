@@ -116,6 +116,7 @@ window.addEventListener("unhandledrejection", (e) => {
 /* 27.11 (accessibilité ; test : tests/a11y.html) : « réduire les animations » du système. Les défilements demandés en
    JavaScript avec behavior: "smooth" (une trentaine d'appels) deviennent instantanés ; animations et transitions sont
    coupées par la feuille de style (prefers-reduced-motion), les confettis ne partent pas (burst). */
+let flameChip = false, sbLast = null; /* 28.11 (animations, voir nugFly) : déclarés tôt (h() peut servir avant la fin du chargement) */
 const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) { return false; } };
 function a11yMotion() {
   const calm = (a) => (a && typeof a === "object" && a.behavior === "smooth" && reducedMotion() ? { ...a, behavior: "auto" } : a);
@@ -239,7 +240,7 @@ const boldData = (html) => {
   }).join("");
 };
 
-const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; ecranSplit(); addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); };
+const h = (html) => { const tr = document.getElementById("tour"); if (tr) tr.remove(); sigClose(); pageQ = null; if (typeof Upd !== "undefined" && Upd) Upd.scr = ""; app.classList.remove("has-tabs"); app.innerHTML = html; ecranSplit(); addTabs(); addFab(); const sh = document.getElementById("fabs"); if (sh) sh.hidden = true; placeFab(); typeset(app); window.scrollTo(0, 0); bindLessonFeedback(app); bindLessonOpen(app); if (typeof bindDyn !== "undefined") bindDyn(app); seanceBar(); };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // Textes de l'app (indices, erreurs typiques) : échappés, sauf <b>, <i>, <br> (16.11 : les balises s'affichaient telles quelles).
 const escT = (s) => esc(s).replace(/&lt;(\/?)(b|i|br)&gt;/g, "<$1$2>");
@@ -686,7 +687,7 @@ function screenGrades() {
   const y = ypSync(), r = y.pts, g = gradeOf(r);
   const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >= at).pop(); return `<li>${esc(x.c)} · ${yearLabel(+x.k.split("|")[0])} : ${G[1]} ${G[2]} atteint</li>`; }).reverse().join("");
   h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
-  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted"><span class="yp-gems">🟡 ${nbFmt(r)} ${r > 1 ? "pépites" : "pépite"}</span> trouvée${r > 1 ? "s" : ""} cette année : elles ne se perdent jamais.</div></div></div>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted"><span class="yp-gems">${NUG_IC} ${nbFmt(r)} ${r > 1 ? "pépites" : "pépite"}</span> trouvée${r > 1 ? "s" : ""} cette année : elles ne se perdent jamais.</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+${YP.weekly}</b>.</p>
     <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
@@ -710,7 +711,7 @@ function eloBanner() {
   const r = ypPts(), g = gradeOf(r);
   return `<button type="button" class="elo-band elo-compact" id="eloband" aria-label="Grade ${g.title}, ${nbFmt(r)} pépites cette année, voir mes grades">
     <span class="eb-num"><b class="num">${nbFmt(r)}</b><span class="eb-unit">${r > 1 ? "pépites" : "pépite"}</span></span> <!-- 27.11 : unité sous le nombre, visible à toutes les largeurs -->
-    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} 🟡</span>` : ""}</span>
+    <span class="eb-grade"><b><span class="eb-gic" aria-hidden="true">${g.ic}</span> ${esc(g.title)}</b>${g.next ? `<span class="pbar"><i style="width:${g.pct}%"></i></span><span class="eb-next">${g.next.ic} ${g.next.name} dans ${nbFmt(g.next.at - r)} ${NUG_IC}</span>` : ""}</span>
     <span class="eb-chev" aria-hidden="true">›</span></button>`;
 }
 function themeBars(lv) {
@@ -833,7 +834,8 @@ function screenHome() {
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
   panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades</button></div>${niveauCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
-  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" /* 27.11 (revue, n° 6) : série perdue : l'icône seule, plus de « 0 j » au-dessus de « Content de te revoir ! » */}</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
+  const fc = flameChip; flameChip = false; /* 28.11 (animations, n° 4) : la flamme de l'en-tête grossit une fois après la hausse du filon */
+  const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip${fc && alive && s.count ? " flame-up" : ""}" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? '<span class="chip-fl" aria-hidden="true">🔥</span> <b>' + s.count + "</b> j" : "✏️" /* 27.11 (revue, n° 6) : série perdue : l'icône seule, plus de « 0 j » au-dessus de « Content de te revoir ! » */}</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
     const T = { prob: "La mine", test: "Jour J", carnet: "À polir", prog: "Mon trésor" }; /* 27.11 : portes d'entrée de l'app */
     h(`${head}<button type="button" class="btn-ghost back-home" id="hb">← Accueil</button><h2 class="sub-title">${T[homeTab]}</h2>
@@ -1452,7 +1454,7 @@ function screenRestore(code) {
     let s;
     try { s = await Backup.decode(document.getElementById("code").value); } catch (e) { box.innerHTML = '<div class="card flat"><b>Code illisible.</b><p class="small muted">Vérifie qu\'il est complet (copie-le en entier).</p></div>'; return; }
     const nb = Object.keys(s.badges || {}).length, days = s.bc ? s.bc.days : s.history.length;
-    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} ${s.yp && s.yp.pts ? ` · 🟡 ${nbFmt(s.yp.pts)} pépite${s.yp.pts > 1 ? "s" : ""}` : ""} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
+    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} ${s.yp && s.yp.pts ? ` · ${NUG_IC} ${nbFmt(s.yp.pts)} pépite${s.yp.pts > 1 ? "s" : ""}` : ""} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
     ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
     document.getElementById("check").style.display = "none";
     document.getElementById("ok").onclick = () => { if (!s.a11y && state && state.a11y) s.a11y = state.a11y; state = s; save(); uiApply(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
@@ -2155,7 +2157,7 @@ function nextQuestion(redo) {
     sub: session.ctest ? session.ctest.label : "", /* revue p5, n° 11 : intitulé de l'objectif en texte normal sous l'en-tête */
     /* 25.11 (revue) : compteur qui compte aussi l'étape leçon ; « Nouvelle notion » (et non « Révision ») pour la question
        qui suit la leçon ou pour une notion encore jamais travaillée. */
-    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Ma pépite du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine" /* 27.11 */ : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
+    eyebrow: ((s) => s + (ST.total > 1 && !session.weekly ? `<span class="pbar" aria-hidden="true" data-done="${Math.round((Math.min(ST.pos, ST.total) / ST.total) * 100)}"><i style="width:${Math.round((Math.min(ST.pos - 1, ST.total) / ST.total) * 100)}%"></i></span>` /* 28.11 (animations) : data-done = largeur après la réponse (seanceBarDone) */ : ""))((session.carnet ? "À polir · " + nTxt : session.free ? "Ma pépite du jour · " + nTxt : session.weekly ? "⛏️ La mine · problème de la semaine" /* 27.11 */ : session.ctest ? "Me tester · " + nTxt /* 26.11 (revue p5, n° 11 : intitulé en majuscules sur 4 lignes à 360 px) : intitulé en dessous (sub) */ : session.prep ? "Révision de l'évaluation · " + nTxt : ST.total === 1 ? (fmtLab || "Question du jour") : (fmtLab ? fmtLab + " · " : "") + nTxt) + (kind && KIND_LABEL[kind] && !(session.fmt && FORMATS[session.fmt] && FORMATS[session.fmt].slots.every((x) => x.replace(/\d+$/, "") === kind)) ? " · " + KIND_LABEL[kind] : "") + (ns && !session.prep && !Engine.isRecent(state, id) ? " · 🔙 Rappel" : "") + (redo || (session.replayQ && session.replayAt === session.i) ? " · nouvelles valeurs" : "")),
     /* 26.11 : pas à pas réussi jusqu'au bout (étapes toutes justes) : moitié de la perte de Mathélo rendue, +1 point de
        l'année (dans le plafond du jour), et le bilan le dit. Rien si une étape est fausse, ni en « Refaire ». */
     onGuided: (delta) => {
@@ -2167,10 +2169,10 @@ function nextQuestion(redo) {
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
-      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("✨ Polie ! Une pépite de plus ✓"); } else if (r === "encore") toast("✨ 1 réussite sur 2 : encore une, du premier coup, et elle est polie.", 4000); else if (r === "rate") toast("✨ Pas encore polie : il faut " + carnetRule() + ".", 4000); } /* 28.11 : messages du carnet d'erreurs → « À polir » */
+      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("✨ Polie ! Une pépite de plus ✓", 2200, "shine"); } else if (r === "encore") toast("✨ 1 réussite sur 2 : encore une, du premier coup, et elle est polie.", 4000); else if (r === "rate") toast("✨ Pas encore polie : il faut " + carnetRule() + ".", 4000); } /* 28.11 : messages du carnet d'erreurs → « À polir » */
       else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("✨ Pépite brute : rangée dans « À polir », tu pourras la refaire.");
       /* 27.11 (n° 28) : élève en grande difficulté : une réussite du premier coup en séance efface les erreurs de la notion */
-      else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓"); } }
+      else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓", 2200, "shine"); } }
       /* 27.11 (décision de l'enseignant, n° 27) : rejouer au lieu d'ajouter (Engine.replayNext) : élève en grande difficulté,
          question pas réussie du premier coup → la suivante prévue devient la même notion, d'autres nombres, un niveau en
          dessous ; une fois par séance ; le total « n sur N » ne change pas. Elle passe avant la remédiation et l'allègement. */
@@ -2198,7 +2200,9 @@ function nextQuestion(redo) {
       session.score += sc; session.answered++; session.ids.add(id); if (res.solved) session.solvedN = (session.solvedN || 0) + 1; /* 27.11 : bilan des réussites (n° 31) */
       if (res.parts) { session.parts = [(session.parts ? session.parts[0] : 0) + res.parts[0], (session.parts ? session.parts[1] : 0) + res.parts[1]]; session.nP = (session.nP || 0) + 1; } /* 26.11 soir : bilan d'un problème en parties */
       session.res = session.res || {}; const rr = (session.res[id] = session.res[id] || { n: 0, ok: 0 }); rr.n++; if (res.solved) rr.ok++;
+      const fil0 = (state.streak && state.streak.count) || 0; /* 28.11 (animations, n° 4) : filon qui augmente → flamme qui grossit (bilan, en-tête) */
       if (Engine.finishDay(state, 1, sc) === "joker") toast("🛡 Joker de filon utilisé : ton filon continue !"); save();
+      if (((state.streak && state.streak.count) || 0) > fil0) { session.filonUp = true; flameChip = true; }
       return res.delta;
     },
     onNext: (wantRedo) => {
@@ -2488,9 +2492,11 @@ function renderProblem(q, opt) {
     const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
     const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-    if (frac === 1) burst();
     buzz(frac === 1);
+    const yp0 = ypPts(); /* 28.11 (animations, n° 1) */
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0), parts: [ok.filter(Boolean).length, q.parts.length] });
+    if (frac === 1) nugFly(active || app.querySelector(".card input.ans") || document.getElementById("check"), ypPts() - yp0);
+    seanceBarDone();
     const d = ""; /* 26.11 : Mathélo caché pendant les questions */
     const pSteps = frac < 1 && splitSol(q.sol); /* 24.11 : corrigé progressif aussi pour les problèmes */
     /* 25.11 soir (revue d'un testeur : « le corrigé n'affiche que la partie c, l'élève ne voit jamais la bonne réponse de a ») :
@@ -2610,8 +2616,10 @@ function renderQuestion(q, opt) {
     setTimeout(() => { const f = document.getElementById("fb"); if (f && f.getBoundingClientRect().top > innerHeight * 0.75) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     const res = { solved, tries, dontKnow, diag: solved ? null : lastDiag, ans: solved ? null : lastAns }; // 22.11 : diag et réponse pour le carnet (Ma fiche)
     if (S) { S.issue = solved ? (tries === 1 ? "ok1" : "ok2") : dontKnow ? "idk" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-    if (solved) burst();
+    const yp0 = ypPts(); /* 28.11 (animations, n° 1) : pépites gagnées par cette question → pépite qui s'envole */
     const delta = opt.onDone(res);
+    if (solved) nugFly(inp, ypPts() - yp0);
+    seanceBarDone();
     if (opt.single) {
       fb.innerHTML = `<div class="fb ${solved ? "ok" : "bad"} pop"><b>${solved ? "✓ Juste ! " + pick(PRAISE.filter((x) => x !== "Juste !")) : dontKnow ? "D'accord, on s'en occupera. Voici la solution :" : "✗ Pas tout à fait. Voici la solution :"}</b>${solved ? (q.sol ? '<details class="solfull"><summary>Voir la correction</summary><div class="sol">' + q.sol + "</div></details>" : "") /* 26.11 soir (n° 15 : « Bien vu ! » sans explication au positionnement) : correction repliée */ : '<span class="sol">' + q.sol + "</span>"}</div>`;
       qbarSet("", '<button class="btn-primary" id="nx">Suivant</button>'); /* 26.11 : barre fixe, même place que « Vérifier » */
@@ -2755,30 +2763,86 @@ function runGuide(q, box, done) {
   step();
 }
 
+/* ---- 28.11 (décision de l'enseignant, « d'autres animations, pas trop, juste pour dynamiser », n° 1 à 5) ----
+   Des retours, pas un décor : chacune < 0,5 s (défilement des pépites : 0,6 s), aucune n'attend ni ne bloque (pointer-events
+   none, rien n'est désactivé pendant), éléments décoratifs aria-hidden, textes réels inchangés dans le DOM. Rien si
+   « réduire les animations » (système ; l'app n'a pas de réglage propre). Pas de tremblement sur une erreur (refusé :
+   vécu comme une sanction). Style : celui de l'écran d'ouverture (.splash). GIF : tests/_shots/app/animations/. */
+const NUG_MINI = () => (typeof NUG_IC === "string" ? NUG_IC : '<i class="nug-dot"></i>'); /* même icône que les compteurs (NUG_IC, src/curriculum.js) */
+// n° 1 : bonne réponse → une petite pépite et « +N » partent de la zone de réponse vers le compteur de pépites s'il est
+// visible, sinon vers le haut, et s'effacent (≈ 0,7 s ; 28.11 : d'abord 0,45 s, pas assez visible).
+function nugFly(from, n) {
+  if (!(n > 0) || reducedMotion()) return;
+  const r = [from, document.getElementById("check"), app.querySelector(".card.pop")].map((e) => e && e.getBoundingClientRect && e.getBoundingClientRect()).find((b) => b && b.width && b.bottom > 0 && b.top < innerHeight);
+  if (!r) return;
+  const f = document.createElement("div"); f.className = "nugfly"; f.setAttribute("aria-hidden", "true");
+  f.innerHTML = `<span class="nugfly-ic">${NUG_MINI()}</span><b>+${n}</b>`;
+  const x0 = Math.min(innerWidth - 108, Math.max(8, r.left + r.width / 2 - 50)), y0 = Math.max(8, r.top + Math.min(r.height, 60) / 2 - 20);
+  f.style.left = x0 + "px"; f.style.top = y0 + "px";
+  document.body.appendChild(f);
+  const tg = [...document.querySelectorAll(".eb-unit, .yp-gems, .yp-row .yp-n")].map((e) => e.getBoundingClientRect()).find((b) => b.width && b.bottom > 0 && b.top < innerHeight);
+  /* 28.11 (enseignant : « je n'ai pas vu la pépite qui s'envole ») : plus grosse, « pop » au départ (0,6 → 1,15 → 1), puis
+     montée en légère courbe et fondu, 0,7 s en tout. */
+  const dx = tg ? tg.left + tg.width / 2 - (x0 + 50) : 26, dy = tg ? tg.top + tg.height / 2 - (y0 + 20) : -Math.min(150, y0 + 10);
+  const a = f.animate([{ transform: "translate(0,0) scale(.6)", opacity: 0 }, { transform: "translate(0,-4px) scale(1.15)", opacity: 1, offset: 0.16 },
+    { transform: "translate(0,-8px) scale(1)", opacity: 1, offset: 0.3 }, { transform: `translate(${dx * 0.35}px,${dy * 0.6}px) scale(1)`, opacity: 1, offset: 0.65 },
+    { transform: `translate(${dx}px,${dy}px) scale(${tg ? 0.6 : 0.92})`, opacity: 0 }], { duration: 700, easing: "cubic-bezier(.35,.6,.45,1)", fill: "forwards" });
+  a.onfinish = () => f.remove(); setTimeout(() => f.remove(), 1100);
+}
+// n° 2 : bilan → le nombre de pépites gagnées défile de 0 à N (0,6 s). Le texte réel reste « +N » dans le DOM : le chiffre
+// affiché pendant le défilement est un compteur CSS (@property --ypc, style.css) ; sans @property, rien ne défile.
+function ypCount() {
+  const c = app.querySelector(".yp-cnt"); if (!c || reducedMotion() || !(+c.style.getPropertyValue("--n") > 1) || !(window.CSS && CSS.registerProperty)) return;
+  c.classList.add("cnt"); setTimeout(() => c.classList.remove("cnt"), 800);
+}
+// n° 5 : barre de la séance qui se remplit en glissant : à la réponse (seanceBarDone : largeur « après »), puis d'un écran au
+// suivant depuis la dernière largeur affichée (seanceBar, appelée par h()). Jamais à reculons (« Refaire » garde la largeur).
+function seanceBar() {
+  const i = app.querySelector(".eyebrow .pbar > i"); if (!i || !session) { if (!i) sbLast = null; return; }
+  const to = parseFloat(i.style.width) || 0, from = sbLast && sbLast.s === session ? sbLast.w : null;
+  if (from !== null && from > to) i.style.width = from + "%";
+  sbLast = { s: session, w: Math.max(to, from || 0) };
+  if (from === null || from >= to || reducedMotion()) return;
+  i.style.transition = "none"; i.style.width = from + "%"; void i.offsetWidth; i.style.transition = ""; i.style.width = to + "%";
+}
+function seanceBarDone() {
+  const p = app.querySelector(".eyebrow .pbar[data-done]"), i = p && p.firstElementChild; if (!i || !session) return;
+  const w = Math.max(+p.dataset.done || 0, parseFloat(i.style.width) || 0);
+  i.style.width = w + "%"; sbLast = { s: session, w };
+}
+
 // Petit message éphémère.
-function toast(msg, ms = 2200) {
+function toast(msg, ms = 2200, cls) {
   const t = document.createElement("div");
-  t.className = "toast pop"; t.setAttribute("role", "status"); t.textContent = msg;
+  t.className = "toast pop" + (cls ? " " + cls : ""); /* 28.11 (animations, n° 3) : « shine » = éclat doré (pépite polie) */ t.setAttribute("role", "status"); t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(() => t.remove(), ms);
 }
 
-function burst() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const b = document.createElement("div");
-  b.className = "burst";
-  const syms = ["π", "√", "∞", "Σ", "x²", "½", "Δ", "∫", "≈", "%", "θ", "+"];
-  const cx = window.innerWidth / 2, cy = window.innerHeight * 0.55;
-  for (let i = 0; i < 22; i++) {
-    const s = document.createElement("span"), a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 180;
-    s.textContent = syms[i % syms.length];
-    s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.fontSize = 16 + Math.random() * 18 + "px";
-    s.style.setProperty("--dx", Math.cos(a) * r + "px"); s.style.setProperty("--dy", Math.sin(a) * r - 80 + "px"); s.style.setProperty("--r", (Math.random() * 120 - 60) + "deg");
+/* 28.11 (enseignant, GIF du bilan : la gerbe de symboles π √ ∞ partait en pile au centre et faisait une tache bleue) :
+   gerbe d'ÉTINCELLES DORÉES ✦ (style de l'écran d'ouverture), en éventail depuis le haut de la carte concernée, ≈ 0,8 s,
+   décorative, rien en mouvement réduit. Réservée aux GRANDS MOMENTS (nouveau grade, nouveau badge, « Ton niveau monte ! ») :
+   plus de gerbe à chaque bonne réponse (la pépite qui s'envole suffit). burst() sans carte (leçons actives, QCM, sujet,
+   exercices riches) ne fait plus rien. */
+function burst(el) {
+  if (!el || !el.getBoundingClientRect || reducedMotion()) return;
+  const r = el.getBoundingClientRect(); if (!r.width || r.bottom < 0 || r.top > innerHeight) return;
+  const b = document.createElement("div"); b.className = "burst"; b.setAttribute("aria-hidden", "true");
+  // carte : éventail vers le haut depuis son bord supérieur ; élément près du haut de l'écran (titre) : tout autour, aplati
+  const top = r.top < 140, cx = r.left + Math.min(r.width, 300) / 2 + (top ? 0 : (r.width - Math.min(r.width, 300)) / 2), cy = top ? r.top + r.height / 2 : Math.max(12, r.top + 18), N = 16;
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement("span"), a = top ? 2 * Math.PI * (i / N) + (Math.random() - 0.5) * 0.3 : Math.PI * (1.08 + 0.84 * (i / (N - 1))) + (Math.random() - 0.5) * 0.12, d = (70 + Math.random() * 90) * (top ? 1.1 : 1);
+    s.textContent = "✦"; s.className = i % 3 ? "" : "deep";
+    s.style.left = cx + (Math.random() - 0.5) * Math.min(r.width * 0.5, 160) + "px"; s.style.top = cy + "px"; s.style.fontSize = 10 + Math.random() * 14 + "px";
+    s.style.setProperty("--dx", Math.cos(a) * d + "px"); s.style.setProperty("--dy", Math.sin(a) * d * (top ? 0.55 : 1) + "px"); s.style.setProperty("--r", (Math.random() * 90 - 45) + "deg");
+    s.style.animationDelay = Math.round(Math.random() * 90) + "ms";
     b.appendChild(s);
   }
   document.body.appendChild(b);
   setTimeout(() => b.remove(), 1000);
 }
+// La carte est souvent sous le pli au téléphone (360 × 640) : sinon, les étincelles partent du titre du bilan.
+const bigMoment = () => { const c = app.querySelector(".grade-up, .bdg-new"), v = c && c.getBoundingClientRect(); burst(v && v.top < innerHeight - 40 && v.bottom > 0 ? c : app.querySelector("h2") || c); };
 
 // Identifiant anonyme de l'appareil (aléatoire, sans lien avec une personne) : sert uniquement à compter les testeurs.
 function deviceId() {
@@ -3185,7 +3249,7 @@ function screenSummary() {
   const nivUp = hasE0 && nvB.i > nvA.i && !Engine.isProvisional(state) ? `<div class="card stack grade-up niv-up"><div class="eyebrow">📈 Ton niveau monte !</div><h3>Ton niveau passe à « ${esc(nvB.mot)} »</h3><p class="small">Ton Mathélo actuel : <span class="mark">${nvB.r}</span></p><button type="button" class="btn-sec" id="nivup">Voir mon niveau</button></div>` : "";
   /* 26.11 (revue élèves : « Points de l'année +0 » après une bonne séance, plafond du jour déjà atteint) : on le dit. */
   const ypCapped = !yg && ((ypSync() || {}).dp || 0) >= YP.cap;
-  const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b><span class="yp-n">+${yg} ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
+  const ypRow = ypCapped ? `<div class="spread yp-row"><span>${NUG_IC} Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>${NUG_IC} Pépites</span><b><span class="yp-n">+<span class="yp-cnt" style="--n:${yg}">${yg}</span> ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
   /* 25.11 soir (revue d'un testeur : une séance d'une question du Carnet affichait le grand écran de fin, lourd) :
      petite séance du Carnet → bilan léger (résultat, ce qui reste à effacer, continuer). */
   /* 27.11 (revue, n° 7 : fin du Carnet « Aujourd'hui : 1 question réussie. » — réussie au 2e essai, donc rien effacé — avec
@@ -3200,8 +3264,8 @@ function screenSummary() {
     ${newGrade}${nivUp}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">✨ Continuer à polir</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
-    if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
-    updBanner("bilan"); /* 27.11 : nouvelle version prête */
+    if (nb || newGrade || nivUp) setTimeout(bigMoment, 250); /* 28.11 : étincelles dorées, grands moments seulement */ { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+    updBanner("bilan"); /* 27.11 : nouvelle version prête */ ypCount(); /* 28.11 (animations, n° 2) */
     document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après « À polir », retour sur la page de l'onglet) */
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
     return;
@@ -3213,7 +3277,7 @@ function screenSummary() {
     : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
   // 26.11 : Mathélo caché par défaut : titre selon le score seulement (22.11 : il suivait le Mathélo).
   h(`${brand}${session.weekly ? '<div class="eyebrow">⛏️ La mine · problème de la semaine</div>' /* 27.11 : bilan du problème = « La mine » */ : ""}<h2>${esc(sumTitle(n, sc))}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${plur(state.streak.count + 1, "jour", "jours")}${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
+  <div class="card flat streak"><span class="flame${session.filonUp ? " flame-up" : ""}" aria-hidden="true">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${plur(state.streak.count + 1, "jour", "jours")}${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack">${scoreRow(n, sc)}
@@ -3229,8 +3293,8 @@ function screenSummary() {
   ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
-  if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
-  updBanner("bilan");
+  if (nb || newGrade || nivUp) setTimeout(bigMoment, 250); /* 28.11 : étincelles dorées, grands moments seulement */ { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+  updBanner("bilan"); ypCount(); /* 28.11 (animations, n° 2) : pépites qui défilent */
   document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après le problème de la semaine, « Retour à l'accueil » rouvrait la page du problème) */
   const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
   bindCur();

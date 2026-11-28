@@ -228,7 +228,7 @@ function screenParents() {
     <div class="card stack par-week pz-anim"><div class="eyebrow">📅 Exemple</div>
       <div class="par-days">${JR.map((d, i) => `<span class="${ON[i] ? "on" : ""}">${d}</span>`).join("")}</div>
       <p><b>4 jours de pratique sur 7.</b> Belle régularité !</p>
-      <p class="par-gems">🟡 Cette semaine, votre enfant a trouvé <b>38 pépites</b> et en a poli <b>2</b>.</p>
+      <p class="par-gems">${typeof NUG_IC === "string" ? NUG_IC : ""} Cette semaine, votre enfant a trouvé <b>38 pépites</b> et en a poli <b>2</b>.</p>
       <div><b>Ce qui a été travaillé</b><ul class="plain par-list small"><li>• Équations du 1er degré</li><li>• Théorème de Pythagore</li></ul></div>
       <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur enfin réussie : une pépite polie !</div></div></div></div>
     <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni niveau, ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
