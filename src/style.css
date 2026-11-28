@@ -1043,3 +1043,13 @@ html.ecran-ordi { scrollbar-gutter: stable; }
 /* 27.11 (nouveau nom) : touches dorées discrètes : carte du filon au bilan, pépites trouvées (parents). */
 .card.streak { border-left: 4px solid var(--gold); }
 .par-gems b { color: var(--gold-ink); background: var(--gold-soft); padding: 0 4px; border-radius: 4px; }
+
+/* 28.11 : portes d'entrée en couleur (une couleur par porte, case teintée ; or en accent). Mode sombre : teintes claires. */
+:root { --d-prob: #9a5a24; --d-cur: #0e8f7e; --d-hist: #7b4bd6; --d-test: #d93a40; --d-carnet: #2a63d4; --d-prog: #c2410c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --d-prob: #e0a96e; --d-cur: #3fc9b4; --d-hist: #b99bff; --d-test: #ff8a8f; --d-carnet: #8fb0ff; --d-prog: #ff9a5c; } }
+:root[data-theme="dark"] { --d-prob: #e0a96e; --d-cur: #3fc9b4; --d-hist: #b99bff; --d-test: #ff8a8f; --d-carnet: #8fb0ff; --d-prog: #ff9a5c; }
+.door-sq.dc { background: color-mix(in srgb, var(--c) 14%, var(--card)); border-color: var(--c); color: var(--c); }
+.door-sq.dc svg { width: 46px; height: 46px; fill: none; stroke: none; }
+.door-sq.dc .S { fill: none; stroke: var(--c); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.door-sq.dc .F { fill: var(--c); }
+.door-sq.dc .G { fill: var(--gold); }

@@ -2710,7 +2710,8 @@ return CXP("cube", P("Un cube a des arêtes de " + M(a + "\\sqrt{" + k + "}") + 
 [["a) Diagonale d'une face (cm)", RAD(e * Math.SQRT2)], ["b) Diagonale du cube (cm)", RAD(e * Math.sqrt(3))], ["c) Aire totale des six faces (cm²)", 6 * a * a * k]],
 ["Diagonale d'une face : Pythagore dans un carré, d = arête · √2. Simplifie √" + 2 * k + " si possible.",
 "Diagonale du cube : Pythagore dans le triangle formé d'une arête et d'une diagonale de face, D = arête · √3. Aire d'une face : (" + a + "√" + k + ")² = " + a * a + " · " + k + "."],
-"a) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{2} = " + a + "\\sqrt{" + 2 * k + "}" + (RSIMP(a, 2 * k) !== a + "\\sqrt{" + 2 * k + "}" ? " = " + RSIMP(a, 2 * k) : "")) + " cm. b) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{3} = " + a + "\\sqrt{" + 3 * k + "}" + (RSIMP(a, 3 * k) !== a + "\\sqrt{" + 3 * k + "}" ? " = " + RSIMP(a, 3 * k) : "")) + " cm. c) " + M("6 \\cdot (" + a + "\\sqrt{" + k + "})^2 = 6 \\cdot " + a * a * k + " = " + 6 * a * a * k) + " cm²."));
+"a) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{2} = " + a + "\\sqrt{" + 2 * k + "}" + (RSIMP(a, 2 * k) !== a + "\\sqrt{" + 2 * k + "}" ? " = " + RSIMP(a, 2 * k) : "")) + " cm. b) " + M(a + "\\sqrt{" + k + "} \\cdot \\sqrt{3} = " + a + "\\sqrt{" + 3 * k + "}" + (RSIMP(a, 3 * k) !== a + "\\sqrt{" + 3 * k + "}" ? " = " + RSIMP(a, 3 * k) : "")) + " cm. c) " + M("6 \\cdot (" + a + "\\sqrt{" + k + "})^2 = 6 \\cdot " + a * a * k + " = " + 6 * a * a * k) + " cm².",
+FIG.cube(a + "√" + k + " cm", "diag") ));
 });
 
 if (typeof PROB_EXTRA !== "undefined") {

@@ -8,7 +8,7 @@ const VOTE_ENDPOINT = "https://script.google.com/macros/s/AKfycbym3jQKGDc1RrOsR7
 
 
 
-const BUILD = "e18581241a";
+const BUILD = "74917cbdb8";
 const ERR_MAX = 5;
 var errMem = null;
 
@@ -571,7 +571,7 @@ const GRADES = [[0, "🌱", "Pousse"], [150, "✏️", "Apprenti"], [350, "📏"
 
 
 
-const YP = { cap: 40, session: 10, carnet: 5, weekly: 10, start: "08-15" };
+const YP = { cap: 40, session: 10, carnet: 5, weekly: 30,  start: "08-15" };
 const schoolYear = (d = day()) => +d.slice(0, 4) - (d.slice(5) >= YP.start ? 0 : 1);
 const yearLabel = (y) => y + "-" + String(y + 1).slice(2);
 
@@ -666,7 +666,7 @@ const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >
 h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
   <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">🟡 ${nbFmt(r)} pépites cette année</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
-  <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
+  <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+${YP.weekly}</b>.</p>
     <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
   <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>
   <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
@@ -851,10 +851,20 @@ const DOOR_NAME = { prob: "La mine", cur: "Trésors cachés", hist: "Chercheurs 
 
 
 if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
-const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "tes erreurs", prog: "grades, badges, pépites" };
+const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "ton carnet d'erreurs", prog: "grades, badges, pépites" };
 const hintOn = true;
-const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
+const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq${DI[id] ? " dc" : ""}" style="${DI[id] ? "--c:var(--d-" + id + ")" : ""}">${DI[id] || ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
 const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
+
+
+const dI = (d) => `<svg viewBox="0 0 48 48" aria-hidden="true">${d}</svg>`, GN = '<path class="G" d="M30 37.5l4.6-4 6.4.9 3.1 5.5-2.8 4.2-7.3.7-4.6-3.1z"/>';
+const DI = {
+prob: dI('<path class="S" d="M10 40 30 17" style="stroke-width:4"/><path class="F" d="M8.5 14.5c7-7.4 21.4-9.4 32.6 1.5 1 1 .3 2.4-1 2C29.7 13.5 19.5 13.2 10 16.8c-1.4.5-2.6-1.1-1.5-2.3z"/><rect class="F" x="26.5" y="12" width="7" height="6.5" rx="1.5" transform="rotate(40 30 15.2)"/>' + GN),
+cur: dI('<circle class="S" cx="20" cy="20" r="11.5"/><path class="S" d="M29 29l11 11" style="stroke-width:5"/><path class="G" d="M20 12.5l2 5.5 5.5 2-5.5 2-2 5.5-2-5.5-5.5-2 5.5-2z"/>'),
+hist: dI('<path class="F" d="M14.5 24l3-11.5c.6-2.2 2.8-3 4.6-1.8L24 12l1.9-1.3c1.8-1.2 4-.4 4.6 1.8l3 11.5z"/><path class="F" d="M4 25.5c6 4 34 4 40 0-1.2-2.8-6-4.2-11.5-4.3h-17C10 21.3 5.2 22.7 4 25.5z"/><path class="G" d="M16.5 18.5h15v2.6h-15z"/><path class="G" d="M19 36.5l4-3.4 5.6.8 2.8 4.8-2.4 3.7-6.4.6-4-2.7z"/>'),
+test: dI('<rect class="S" x="8" y="11" width="32" height="29" rx="5"/><path class="F" d="M8 20v-4a5 5 0 0 1 5-5h22a5 5 0 0 1 5 5v4z"/><path class="S" d="M16 7v7M32 7v7"/><path class="G" d="M24 22.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8z"/>'),
+carnet: dI('<path class="G" d="M14 14h20l7.5 8.5L24 41 6.5 22.5z"/><path class="S" d="M6.5 22.5h35M19.5 14 16 22.5 24 41l8-18.5L28.5 14" style="stroke-width:2.4"/><path class="F" d="M41 4l1.3 3.2 3.2 1.3-3.2 1.3L41 13l-1.3-3.2-3.2-1.3 3.2-1.3z"/>'),
+prog: dI('<path class="F" d="M14 4h8l5 13h-8zM34 4h-8l-5 13h8z"/><circle class="G" cx="24" cy="30" r="13"/><circle class="S" cx="24" cy="30" r="8.6" style="stroke-width:2.2"/>') };
 
 
 const prepNow = prep && !paused && !(state.prep.log || {})[today] && prepKind() !== "mock";
@@ -872,7 +882,7 @@ h(`<div class="hub">${head}
     <div class="doors">
       ${door("prob", svgI(TI.prob), "La mine", "", dots.prob ? "!" : "")}
       ${door("cur", svgI('<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'), "Trésors cachés", "", "") }
-      ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Chercheurs d'or", "", "")}
+      ${door("hist", svgI('<path d="M2 8.5c3 1.2 17 1.2 20 0"/><path d="M6.5 8.6 7.6 3.8c.3-1 1.2-1.3 2.1-.8l2.3 1.2 2.3-1.2c.9-.5 1.8-.2 2.1.8l1.1 4.8"/><circle cx="9" cy="12.3" r="1.9"/><circle cx="15" cy="12.3" r="1.9"/><path d="M10.9 12.3h2.2"/><path d="M6.3 12.5v2.2c0 4.3 2.6 7.3 5.7 7.3s5.7-3 5.7-7.3v-2.2"/><path d="M9.6 16.8c1.5.9 3.3.9 4.8 0"/>'), "Chercheurs d'or" , "", "")}
       ${door("test", svgI(TI.test), "Jour J", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
       ${door("carnet", svgI('<path d="M7 4h10l4 5-9 11L3 9z"/><path d="M3 9h18M10 4l2 16 2-16"/>'), "À polir", nC ? nC + " à polir" : "", nC || "")}
       ${door("prog", svgI(TI.prog), "Mon trésor", "", dots.prog ? "!" : "")}
@@ -1620,7 +1630,8 @@ if (best) pinned.add(best[0]); else if (!pinned.size) { const e = G0.find(([, l]
 const recentG = (l) => G0.some(([th, l2]) => l2 === l && pinned.has(th));
 
 
-const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : " + esc(c.ex) : " du chapitre") : c.label; };
+
+const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : \\(" + esc(c.ex) + "\\)" : " du chapitre") : c.label; };
 const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><h3>${thL}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
 h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="muted">Choisis les notions de ton évaluation et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
@@ -2891,7 +2902,9 @@ function screenCurious(q, back, from = "") {
 if (!q) { toast("Pas encore de trésor caché pour toi : ils arrivent avec les notions vues en classe."); return back(); }
 if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
 const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
-const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) };
+
+const roundC = q.calc.round || (!q.calc.range && Math.abs(q.calc.value * 1e4 - Math.round(q.calc.value * 1e4)) > 1e-6 ? 0.01 : 0);
+const spec = { kind: "value", value: q.calc.value, ...(roundC ? { round: roundC } : {}) };
 h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Trésors cachés · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
@@ -2932,7 +2945,7 @@ const finish = (calcOk, idk) => {
 if (S) { S.issue = calcOk ? (tries === 0 ? "ok1" : "ok2") : idk && tries === 0 ? "idk" : "faux"; S.essais = tries + (calcOk ? 1 : 0); S.sec = sigSec(S); if (idk) sigAide(S, "s"); }
 inp.disabled = true; ["kp", "cok", "cidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
 app.querySelectorAll("#cbet button").forEach((x) => { if (+x.dataset.i === q.bet.good) x.classList.add("act-ok-btn"); else if (x.getAttribute("aria-pressed") === "true") x.classList.add("act-wrong"); });
-const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
+const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(roundC ? Math.max(0, -Math.floor(Math.log10(roundC))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
 $("cfb").innerHTML = `<div class="fb ${calcOk ? "ok" : "hint"} pop">${calcOk ? "✓ Juste !" : "Réponse : " + val}
       <span>${betOk ? "Et ton intuition était la bonne : bravo !" : "Ton pari était : « " + esc(q.bet.choices[+app.querySelector('#cbet button[aria-pressed="true"]').dataset.i]) + " ». La bonne réponse : « " + q.bet.choices[q.bet.good] + " ». Beaucoup de gens se trompent ici : c'est tout l'intérêt !"}</span></div>`;
 show($("cs3")); $("cnext").hidden = false;
@@ -3157,7 +3170,7 @@ h(`${brand}<h2>${esc(title)}</h2>
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
 if (nb || newGrade) setTimeout(burst, 250);
 updBanner("bilan");
-document.getElementById("home").onclick = screenHome;
+document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); };
 if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
 return;
 }
@@ -3186,7 +3199,7 @@ ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
 if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
 if (nb || newGrade) setTimeout(burst, 250);
 updBanner("bilan");
-document.getElementById("home").onclick = screenHome;
+document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); };
 const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
 bindCur();
 

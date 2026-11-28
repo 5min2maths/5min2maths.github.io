@@ -41,7 +41,9 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 4. `ref_formes.js` (décision n° 22 du 26.11, faite en partie) : il reste les tables de formes pour Collège 2e–4e, France
    6e–5e et lycée, et les notions sans étiquette ctx (`diagr`, `airelat`, `agrand`, `premiers`, `prop`, `symetries`,
    `rotation`, `optim` n. 1, `eqverif`).
-5. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
+5. `tools/run_tests.sh` : « verrou des tests occupé … série annulée » sort avec le code 0 → un commit enchaîné passe sans
+   test (28.11). Le verrou occupé doit être un échec (code ≠ 0). (`/entretien`)
+6. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
 
 ## Décisions de l'enseignant
 
@@ -49,6 +51,13 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   Le Mathélo devient un indicateur de niveau : retiré de l'accueil, de l'en-tête et du bilan ; visible seulement dans
   « Mon trésor », dans une carte « Mon niveau » (jauge, palier en mots, nombre en petit, évolution sur plusieurs semaines).
   Le moteur n'est pas modifié. En cours sur la branche `agent/pepite-ecrans`.
+
+- **28.11 : grand problème de la semaine** (« pas toujours si grand, un seul = rubrique faiblarde ») : (1) tiré seulement
+  parmi les problèmes riches (≥ 4 parties, vrai contexte, figure si utile, 10–15 min, niveau évaluation) ; élève faible :
+  même problème avec plus d'aide (pas à pas, indices) plutôt que raccourci (remplace pour ce problème la n° 24 du 26.11) ;
+  (2) « Creuser encore » dans la mine une fois le problème fait : problèmes des semaines passées et autres problèmes des
+  chapitres récents, pépites normales (plafond du jour), bonus +30 seulement pour celui de la semaine ; facultatif, hors
+  séance. À faire : `/contenu` (sélection) puis `/app` (écran de la mine), après la fusion des branches Pépite².
 
 ### Avant le 28.11
 

@@ -1014,7 +1014,7 @@ const x = 70, y = 50, s = 110, dx = 39, dy = -39, D = 'stroke-dasharray="5 4"';
 const F = [[x, y + s], [x + s, y + s], [x + s, y], [x, y]], B = F.map((p) => [p[0] + dx, p[1] + dy]);
 let g = P([F[0], F[1], F[2], F[3]], "f-shape") + P([F[3], F[2], B[2], B[3]], "f-shape2") + P([F[1], B[1], B[2], F[2]], "f-shape2");
 g += L(B[0][0], B[0][1], F[0][0], F[0][1], "f-line", D) + L(B[0][0], B[0][1], B[1][0], B[1][1], "f-line", D) + L(B[0][0], B[0][1], B[3][0], B[3][1], "f-line", D);
-if (withPyr) {
+if (withPyr === true) {
 const S = [(F[3][0] + B[2][0]) / 2, (F[3][1] + B[2][1]) / 2], H = [(F[0][0] + B[1][0]) / 2, (F[0][1] + B[1][1]) / 2];
 g += '<polygon points="' + [F[0], F[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.18"/>' + '<polygon points="' + [F[1], B[1], S].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.28"/>';
 const E = 'style="stroke:var(--margin);stroke-width:2.2"', Eh = 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"';
@@ -1022,7 +1022,26 @@ g += L(F[0][0], F[0][1], S[0], S[1], "f-line", E) + L(F[1][0], F[1][1], S[0], S[
 g += L(S[0], S[1], H[0], H[1], "f-line", 'style="stroke:var(--ink-soft);stroke-width:1.2" stroke-dasharray="2 3"');
 g += '<circle cx="' + S[0] + '" cy="' + S[1] + '" r="3" fill="var(--margin)"/>';
 }
+
+
+if (withPyr === "diag") {
+const A = 'style="stroke:var(--margin);stroke-width:2.2"';
+g += L(F[3][0], F[3][1], F[1][0], F[1][1], "f-line", A) + L(F[0][0], F[0][1], B[2][0], B[2][1], "f-line", A + ' stroke-dasharray="7 4"');
+g += t(x + s * 0.72 + 6, y + s * 0.72 + 12, "d", "f-accent f-txt", "start") + t(F[0][0] + (B[2][0] - F[0][0]) * 0.75 + 8, F[0][1] + (B[2][1] - F[0][1]) * 0.75 + 4, "D", "f-accent f-txt", "start");
+return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start"), "cube : diagonale d'une face d et diagonale du cube D");
+}
 return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
+}
+
+
+function polyTri(n) {
+const cx = 150, cy = 92, pts = Array.from({ length: n }, (_, i) => { const a = (2 * Math.PI * i) / n - Math.PI / 2, r = 74 * (1 + 0.1 * Math.sin(3 * i + 1)); return [+(cx + r * Math.cos(a)).toFixed(1), +(cy + r * Math.sin(a) * 0.95).toFixed(1)]; });
+let g = "";
+for (let i = 1; i < n - 1; i++) g += '<polygon points="' + [pts[0], pts[i], pts[i + 1]].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="' + (i % 2 ? 0.08 : 0.25) + '" stroke="none"/>';
+g += P(pts, "f-shape");
+for (let i = 2; i < n - 1; i++) g += L(pts[0][0], pts[0][1], pts[i][0], pts[i][1], "f-line", 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"');
+g += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="var(--margin)"/>';
+return svg(300, 185, g, "polygone à " + n + " côtés découpé en triangles depuis un sommet");
 }
 function pyramid(lc, lh) {
 const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
@@ -1298,7 +1317,7 @@ else g += L(cx + v * r, 8, cx + v * r, 182, "f-accent", 'stroke-width="2" stroke
 return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
 }
 
-return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
 
 
@@ -5298,7 +5317,7 @@ V("polyreg", 1,
 () => { const n = R.pick([5, 6, 8, 9, 10, 12]); return QV("Une roue a " + n + " rayons régulièrement espacés. Quel angle forment deux rayons voisins (en degrés) ?", 360 / n, M("360° : " + n + " = " + 360 / n + "°") + ".", { guide: [GS("Combien d'angles égaux entre les " + n + " rayons sur un tour complet ?", n, M(n) + " (on revient au premier rayon)."), GS("Un angle : " + M("360 : " + n) + " = ?", 360 / n, M(360 / n + "°") + ".")], traps: [TRAP(180 / n, "Le tour complet mesure 360°."), TRAP(360 / (n - 1), "Il y a " + n + " angles entre " + n + " rayons (on revient au premier).")] }); },
 );
 V("polyreg", 2,
-() => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + ".", { guide: [GS("Depuis un sommet, en combien de triangles se découpe le polygone ? (n − 2)", n - 2, M(n - 2) + " triangles."), GS("Somme : " + M((n - 2) + " \\cdot 180") + " = ?", (n - 2) * 180, M((n - 2) * 180 + "°") + ".")], traps: [TRAP(n * 180, "Un polygone à " + n + " côtés se découpe en " + (n - 2) + " triangles, pas " + n + "."), TRAP(360, "360° est la somme pour un quadrilatère seulement.")] }); },
+() => { const n = R.int(5, 12); return QV("Quelle est la somme des angles intérieurs d'un polygone à " + n + " côtés (en degrés) ?", (n - 2) * 180, M("(" + n + " - 2) \\cdot 180° = " + (n - 2) * 180 + "°") + ".", { guide: [GS("Depuis un sommet, en combien de triangles se découpe le polygone ? (n − 2)", n - 2, M(n - 2) + " triangles."), GS("Somme : " + M((n - 2) + " \\cdot 180") + " = ?", (n - 2) * 180, M((n - 2) * 180 + "°") + ".")], traps: [TRAP(n * 180, "Un polygone à " + n + " côtés se découpe en " + (n - 2) + " triangles, pas " + n + "."), TRAP(360, "360° est la somme pour un quadrilatère seulement.")], fig: FIG.polyTri(n)  }); },
 () => { const [n, nom] = R.pick([[5, "pentagone"], [6, "hexagone"], [8, "octogone"], [10, "décagone"]]); return QV("Quelle est la mesure d'un angle intérieur d'un " + nom + " régulier, c'est-à-dire l'angle entre deux côtés voisins (marqué sur la figure), en degrés ?", 180 - 360 / n, "Angle au centre " + M("\\frac{360°}{" + n + "} = " + 360 / n + "°") + " ; angle intérieur " + M("180° - " + 360 / n + "° = " + (180 - 360 / n) + "°") + ".", { guide: [GS("Angle au centre d'un " + nom + " : " + M("360 : " + n) + " = ?", 360 / n, M(360 / n + "°") + "."), GS("Angle intérieur = 180° − angle au centre = ?", 180 - 360 / n, M((180 - 360 / n) + "°") + ".")], traps: [TRAP(360 / n, "C'est l'angle au centre ; l'angle intérieur vaut 180° − " + 360 / n + "°."), TRAP(180 / n, "Angle intérieur = 180° − angle au centre.")], fig: FIG.regPoly(n, "?", true) }); },
 );
 V34("polyreg",

@@ -146,7 +146,7 @@ const CUR_FAM = { arnaque: { label: "Vrai ou arnaque ?", ic: "🕵️" }, parado
       const m = pk([50, 100, 200]), [w1, w2] = pk([[99, 98], [99, 97], [98, 96], [99, 96]]), dry = (m * (100 - w1)) / 100, F = dry / ((100 - w2) / 100), [food, fem] = pk([["pommes de terre", 1], ["concombres", 0], ["pastèques", 1]]), E = fem ? "elles" : "ils", fa = fem ? "faites" : "faits";
       return { titre: "Les " + food + " qui sèchent", q: "Tu as " + M(m + "\\ \\text{kg}") + " de " + food + ", " + fa + " à " + pc(w1) + " d'eau. Tu les laisses sécher au soleil, et maintenant " + E + " sont " + fa + " à " + pc(w2) + " d'eau.",
         bet: { q: "Combien pèsent-" + E + " maintenant ?", choices: ["Presque pareil (un peu moins de " + m + " kg)", "Environ les trois quarts", "Beaucoup moins : la moitié ou moins"], good: 2 },
-        calc: { label: "Leur masse maintenant (en kg)", value: r6(F) },
+        calc: { label: "Leur masse maintenant (en kg, au dixième ou en fraction)", value: F, round: Number.isInteger(r6(F * 10)) ? undefined : 0.1 }, /* 28.11 (testeur : 200/3 refusé, valeur stockée arrondie) */
         reveal: "La matière sèche ne s'évapore pas : " + pc(100 - w1) + " de " + m + " kg = " + M(N(dry)) + " kg. Maintenant, elle représente " + pc(100 - w2) + " de la masse : " + M(N(dry) + " \\div " + N((100 - w2) / 100) + " = " + N(F)) + " kg. La part sèche a été multipliée par " + N((100 - w2) / (100 - w1)) + " : la masse est divisée d'autant." };
     } });
   add({ key: "monty", fam: "paradoxe", uses: ["proba"], outil: "les probabilités : ton premier choix a 1 chance sur 3 d'être bon ; l'animateur, qui sait, ne change pas cela.",

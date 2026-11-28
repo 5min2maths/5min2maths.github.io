@@ -4204,8 +4204,9 @@ return Qv("Un polygone de périmètre " + M(p) + " cm est agrandi de rapport " +
 { ctx: "perimetre", guide: [GS("Le périmètre est une longueur : multiplié par " + M("k") + " ou " + M("k^2") + " ? Tape le facteur.", k, M(N(k)) + "."), GS("Nouveau périmètre ?", r6(p * k), M(N(p * k)) + " cm.")], traps: [TR(r6(p * k * k), "k², c'est pour les aires ; le périmètre est une longueur.")] }); },
 ],
 3: [
-() => { const e = pk([10, 20, 50]), V = R.int(2, 12);
-return Qv("Une maquette est à l'échelle " + M("1\\,:\\," + e) + ". Son volume est de " + M(V) + " cm³. Quel est le volume réel, en litres ?", (V * e ** 3) / 1000, "Les volumes sont multipliés par " + M(e + "^3 = " + N(e ** 3)) + " : " + M(V + " \\cdot " + N(e ** 3) + " = " + N(V * e ** 3)) + " cm³ " + M("= " + N((V * e ** 3) / 1000)) + " L.",
+() => {
+const [e, V, obj] = pk([[50, R.int(2, 12), "d'une citerne"], [20, R.int(10, 40), "d'un aquarium"], [50, R.int(4, 16), "d'une cuve à vin"]]);
+return Qv("La maquette " + obj + " est à l'échelle " + M("1\\,:\\," + e) + ". Son volume est de " + M(V) + " cm³. Quel est le volume réel, en litres ?", (V * e ** 3) / 1000, "Les volumes sont multipliés par " + M(e + "^3 = " + N(e ** 3)) + " : " + M(V + " \\cdot " + N(e ** 3) + " = " + N(V * e ** 3)) + " cm³ " + M("= " + N((V * e ** 3) / 1000)) + " L.",
 { ctx: "maquette", guide: [GS("Facteur des volumes " + M(e + "^3") + " ?", e ** 3, M(N(e ** 3)) + "."), GS("Volume réel en cm³ ?", V * e ** 3, M(N(V * e ** 3)) + " cm³."), GS("En litres (÷ 1000) ?", (V * e ** 3) / 1000, M(N((V * e ** 3) / 1000)) + " L.")], traps: [TR((V * e * e) / 1000, "Les volumes sont multipliés par k³."), TR(V * e ** 3, "Convertis en litres (1 L = 1000 cm³).")] }); },
 () => { const k = pk([2, 3, 4]), A = R.int(2, 12), p = A + R.int(5, 9);
 return Qv("Deux figures semblables ont pour aires " + M(A) + " cm² et " + M(A * k * k) + " cm². Le périmètre de la petite est " + M(p) + " cm. Quel est le périmètre de la grande (en cm) ?", p * k,
@@ -5069,7 +5070,7 @@ return QN("On donne " + PCW(lin(a, b), c, tri(1, 0, e)) + ". Calcule " + M("f(" 
 { ctx: "image", fig: PL([{ f: (x) => a * x + b, to: c - 0.001 }, { f: (x) => x * x + e, from: c }], { yr: [-6, 8] }), guide: [GS("On compare " + M(k) + " à la frontière " + M(c) + ". Numéro du morceau à utiliser (1 ou 2) ?", first ? 1 : 2, first ? M(k + " < " + c) + " : morceau 1." : M(k + " \\ge " + c) + " : morceau 2" + (k === c ? " (à la frontière, « ≥ » : c'est le second)." : ".")), GS(M("f(" + k + ")") + " = ?", v, M(v) + ".")],
 traps: [TR(other, k === c ? "À la frontière x = " + c + ", c'est « x ≥ " + c + " » qui s'applique : le second morceau." : "Mauvais morceau : compare d'abord " + k + " à " + c + ".")] }); },
 () => { const c = R.int(-1, 2), a = pk([1, -1, 2]), b = R.int(-2, 3), d = pk([-1, 1, -2, 0.5]), g = a * c + b + pk([0, 2, -2]) - d * c, f = (x) => (x < c ? a * x + b : d * x + g);
-const xs = [-4, -3, -2, -1, 0, 1, 2, 3, 4].filter((x) => Number.isInteger(f(x)) && Math.abs(f(x)) <= 5 && x !== c); if (!xs.length) return null; const k = pk(xs), v = f(k), wrongPiece = k < c ? d * k + g : a * k + b;
+const xs = [-4, -3, -2, -1, 0, 1, 2, 3, 4].filter((x) => Number.isInteger(f(x)) && Math.abs(f(x)) <= 5 && x !== c && f(x) !== 0 && f(x) !== 1);  if (!xs.length) return null; const k = pk(xs), v = f(k), wrongPiece = k < c ? d * k + g : a * k + b;
 return QN("La fonction " + M("f") + " est définie par morceaux (graphique). Lis " + M("f(" + k + ")") + ".", v, "En " + M("x = " + k) + ", on est sur la partie " + (k < c ? "gauche" : "droite") + " de la courbe : on lit " + M("f(" + k + ") = " + v) + ".",
 { ctx: "lecture", fig: PL([{ f: (x) => a * x + b, to: c - 0.001 }, { f: (x) => d * x + g, from: c }]), guide: [GS("En " + M("x = " + k) + ", la courbe est-elle sur la partie gauche (1) ou droite (2) ?", k < c ? 1 : 2, k < c ? "Gauche : " + M(k + " < " + c) + "." : "Droite : " + M(k + " \\ge " + c) + "."), GS("Ordonnée lue ?", v, M(v) + ".")],
 traps: [TR(wrongPiece, "Ce morceau-là ne vaut que de l'autre côté de x = " + c + "."), TR(k, "f(" + k + ") est une ordonnée (hauteur), pas une abscisse.")] }); },
@@ -6291,7 +6292,7 @@ if (typeof PROB !== "undefined") delete PROB[id];
 PROB_EXTRA[id] = PROBS[id];
 }
 Object.assign(HINTS_EXTRA, {
-rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit : même signe → +.",
+rel: "Addition : même signe → on additionne les distances ; signes contraires → on soustrait. Soustraire, c'est ajouter l'opposé. Produit et quotient : même signe → +, signes contraires → −.",
 fracops: "Signe d'abord, puis priorités : × et : avant + et −. Diviser, c'est multiplier par l'inverse. Simplifie à la fin (ou avant de multiplier).",
 rac: "La racine carrée de a est le nombre positif dont le carré vaut a : √49 = 7. Pour l'encadrer, cherche les carrés parfaits voisins : 7² = 49 < 55 < 64 = 8². La racine cubique de a est le nombre dont le cube vaut a : ∛125 = 5.",
 racprop: "√(a · b) = √a · √b et √(a ÷ b) = √a ÷ √b ; sors les carrés parfaits : √72 = √(36 · 2) = 6√2. On additionne seulement des racines semblables : 2√3 + 5√3 = 7√3. Mais √(a + b) ≠ √a + √b. Racine cubique : ∛(−8) = −2, ∛1080 = ∛(216 · 5) = 6∛5.",
@@ -7726,7 +7727,7 @@ return QN("Quelle est la période (en degrés) de " + M("f(x) = " + sinTxt(a, f,
 () => { const b = pk([2, 3, 4, 0.5]), f = pk(["sin", "cos"]), per = 2 * Math.PI / b;
 return mk("Quelle est la période de " + M("f(x) = \\" + f + "(" + N(b) + "x)") + " (x en radians) ? (valeur exacte, avec " + M("\\pi") + ")", { kind: "value", value: per }, "Période de " + M("\\" + f) + " : " + M("2\\pi") + " ; avec " + M(N(b) + "x") + " : " + M("\\frac{2\\pi}{" + N(b) + "}") + ".",
 { ctx: "periode-rad", canon: b === 0.5 ? "4π" : b === 2 ? "π" : "2π/" + b, guide: [G("Période de " + M("\\" + f + "(x)") + " en radians ? (avec π)", 2 * Math.PI, M("2\\pi") + "."), G("Divisée par " + M(N(b)) + " ?", per, M("\\frac{2\\pi}{" + N(b) + "}") + ".")], traps: [TR(r6(2 * Math.PI * b), "On divise par b, on ne multiplie pas."), TR(r6(Math.PI / b), "La période de sin et cos est 2π (pas π).")] }); },
-() => { const a = pk([2, 3, 4]), d = R.int(-3, 3), x = pk([30, 90, 150, 270, 0, 180]), f = pk(["sin", "cos"]), base = f === "sin" ? sinD(x) : cosD(x), v = r6(a * base + d); if (!Number.isInteger(v * 2)) return null;
+() => { const a = pk([2, 3, 4]), d = R.int(-3, 3), x = pk([30, 90, 150, 270, 0, 180]), f = pk(["sin", "cos"]), base = f === "sin" ? sinD(x) : cosD(x), v = r6(a * base + d); if (!Number.isInteger(v * 2) || v === 0 || v === 1) return null;
 return QN("Soit " + M("f(x) = " + sinTxt(a, f, 1, d)) + " (x en degrés). Calcule " + M("f(" + x + "°)") + ".", v, M("\\" + f + " " + x + "° = " + exT(base)) + " ; " + M("f(" + x + "°) = " + a + " \\cdot " + pT(base) + sg(d) + " = " + N(v)) + ".",
 { ctx: "image", guide: [G(M("\\" + f + " " + x + "°") + " = ?", base, M(exT(base)) + "."), G(M("f(" + x + "°)") + " = ?", v, M(N(v)) + ".")], traps: [TR(r6(a * base), "Ajoute " + d + "."), TR(r6(a * (f === "sin" ? cosD(x) : sinD(x)) + d), "Attention : " + f + ", pas " + (f === "sin" ? "cos" : "sin") + ".")] }); },
 ],
