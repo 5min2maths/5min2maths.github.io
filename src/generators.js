@@ -131,7 +131,7 @@ const GEN = {
   prio(d) {
     if (d === 1) {
       const a = R.int(2, 9), b = R.int(2, 9), c = R.int(2, 9);
-      return { fig: FIG.blocks(b + " groupes de " + c + ", puis + " + a), q: "Calcule : " + M(a + " + " + b + " \\cdot " + c), spec: { kind: "value", value: a + b * c }, sol: M(a + " + " + b * c + " = " + (a + b * c)) + " : la multiplication passe avant l'addition.",
+      return { /* 28.11 (enseignant : illustration superficielle et confusante, et elle donnait la méthode) : plus de figure */ q: "Calcule : " + M(a + " + " + b + " \\cdot " + c), spec: { kind: "value", value: a + b * c }, sol: M(a + " + " + b * c + " = " + (a + b * c)) + " : la multiplication passe avant l'addition.",
         traps: [TRAP((a + b) * c, "Tu as calculé de gauche à droite. Mais la multiplication passe avant l'addition.")],
         guide: [GS("On commence par la multiplication : combien font " + M(b + " \\cdot " + c) + " ?", b * c, M(b + " \\cdot " + c + " = " + b * c) + "."), GS("Il reste l'addition : " + M(a + " + " + b * c) + " = ?", a + b * c, M(a + " + " + b * c + " = " + (a + b * c)) + ".")] };
     }
