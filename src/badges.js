@@ -44,6 +44,9 @@ const Badges = {
   // Badges de l'élève : les badges de thème suivent le découpage de son référentiel (CO, matu ou MP).
   list(state) {
     const themes = state && state.profile ? Engine.themeOrder(Engine.catalog(state.profile).filter((c) => c.current), state.profile) : Object.keys(THEMES);
+    /* 28.11 (agent pepite-ecrans, séparation France / romand) : le profil France n'a pas de notes 1–6 (niveaux de maîtrise
+       du LSU) ; les critères des badges de maîtrise le disent sans note. Seuils de calcul inchangés. */
+    const fr = !!(state && state.profile && state.profile.system === "FR");
     const L = [
       { id: "premier", fam: "reg", icon: "👣", name: "Premier pas", crit: "Terminer une première séance.", prog: (s, b) => [Math.min(b.days, 1), 1] },
       /* 26.11 (revue d'un testeur, validé par l'enseignant) : palier précoce de la régularité, entre « Premier pas » et
@@ -53,10 +56,10 @@ const Badges = {
       { id: "mois", fam: "reg", icon: "🗓️", name: "Un mois fidèle", crit: "4 semaines pleines, pas forcément d'affilée.", prog: (s, b) => [Math.min(b.full, 4), 4] },
       { id: "rentree", fam: "reg", icon: "🎒", name: "Rentrée", crit: "Reprendre l'entraînement après au moins 10 jours de pause.", prog: (s, b) => [b.rentree ? 1 : 0, 1] },
       { id: "s50", fam: "reg", icon: "🏅", name: "50 séances", crit: "50 jours d'entraînement au total.", prog: (s, b) => [Math.min(b.days, 50), 50] },
-      { id: "comp5", fam: "mai", icon: "⭐", name: "Première compétence", crit: "Une compétence atteint la note 5.", prog: (s) => [this.notes(s).some((n) => n >= 5) ? 1 : 0, 1] },
-      { id: "notion", fam: "mai", icon: "🎯", name: "Notion maîtrisée", crit: "Toutes les compétences d'une notion à 5 ou plus.",
+      { id: "comp5", fam: "mai", icon: "⭐", name: "Première compétence", crit: fr ? "Une compétence bien maîtrisée." : "Une compétence atteint la note 5.", prog: (s) => [this.notes(s).some((n) => n >= 5) ? 1 : 0, 1] },
+      { id: "notion", fam: "mai", icon: "🎯", name: "Notion maîtrisée", crit: fr ? "Toutes les compétences d'une notion bien maîtrisées." : "Toutes les compétences d'une notion à 5 ou plus.",
         prog: (s) => Object.keys(s.notions).map((id) => this.notionProgress(s, id)).reduce((a, p) => (p[1] && p[0] / p[1] > a[0] / a[1] ? p : a), [0, 3]) },
-      { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
+      { id: "expert", fam: "mai", icon: "💎", name: "Expert", crit: fr ? "Une compétence parfaitement maîtrisée." : "Une compétence atteint la note 6.", prog: (s) => [this.notes(s).some((n) => n >= 6) ? 1 : 0, 1] },
       ...themes.map((th) => ({ id: "th-" + th, fam: "mai", icon: this.themeIcon(Engine.themeLabel(th, state && state.profile)), name: Engine.themeLabel(th, state && state.profile),
         crit: th.includes(".") ? "Toutes les notions ouvertes de ce chapitre maîtrisées." : "Toutes les notions ouvertes de ce thème cette année maîtrisées (au moins 2 notions).",
         // Au moins 2 notions, sauf pour un chapitre qui n'en compte qu'une (ex. Ensembles).
@@ -68,7 +71,7 @@ const Badges = {
       { id: "retry", fam: "per", icon: "🔁", name: "Deuxième essai", crit: "Réussir 10 fois une question au deuxième essai.", prog: (s, b) => [Math.min(b.retry, 10), 10] },
       { id: "compris", fam: "per", icon: "💡", name: "Ça y est !", crit: "Après « pas compris » sur un rappel de cours, réussir 3 questions de suite de cette notion.",
         prog: (s, b) => [b.compris ? 3 : Math.max(0, ...Object.values(b.down)), 3] },
-      { id: "pente", fam: "per", icon: "⛰️", name: "Remonter la pente", crit: "Faire passer une compétence de 3 ou moins à 5 ou plus.", prog: (s, b) => [b.pente ? 1 : 0, 1] },
+      { id: "pente", fam: "per", icon: "⛰️", name: "Remonter la pente", crit: fr ? "Faire remonter une compétence très fragile jusqu'à bien maîtrisée." : "Faire passer une compétence de 3 ou moins à 5 ou plus.", prog: (s, b) => [b.pente ? 1 : 0, 1] },
       { id: "d3", fam: "per", icon: "🧗", name: "Niveau supérieur", crit: "Réussir 5 questions de difficulté 3 du premier coup.", prog: (s, b) => [Math.min(b.d3, 5), 5] },
       { id: "lecteur", fam: "cur", icon: "📖", name: "Lecteur", crit: "Ouvrir 10 rappels de cours différents.", prog: (s, b) => [Math.min(b.lessons.length, 10), 10] },
       { id: "testeur", fam: "cur", icon: "💬", name: "Testeur", crit: "Donner un avis (👍 / 👎) ou envoyer un commentaire.", prog: (s, b) => [Math.min(b.fb, 1), 1] },

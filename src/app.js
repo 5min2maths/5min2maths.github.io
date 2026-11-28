@@ -535,7 +535,6 @@ function screenPlacementDone() {
     : "Merci d'avoir joué le jeu : ces questions servaient à te situer, pas à te noter. On commence par les bases, à ton rythme, et ça va monter.";
   h(`${brand}<h2>Ton <span class="mark">point de départ</span></h2>
   <p class="placement-cheer">${cheer}</p>
-  <div class="card">${eloBlock()}</div>
   <div class="card flat"><h3>Par thème</h3><div class="bars">${themeBars(lv)}</div>
   <p class="small muted">Ton niveau va se préciser au fil des séances : les 20 premières questions servent de calibrage.</p></div>
   <div class="card flat"><p class="small muted">Les notions de ton année s'ajoutent au fur et à mesure, dans l'ordre du programme. Si une question porte sur quelque chose que tu n'as pas encore vu en classe, touche « Pas encore vu en classe » : elle reviendra plus tard, sans pénalité.</p></div>
@@ -544,18 +543,36 @@ function screenPlacementDone() {
 }
 
 // ---------------- Accueil ----------------
-function eloBlock() {
-  const e = state.elo, prev = e.log.length > 1 ? e.log[e.log.length - 2][1] : null, d = prev === null ? 0 : e.r - prev;
-  const pts = e.log.slice(-30).map((x) => x[1]);
-  let spark = "";
-  if (pts.length > 1) {
-    const lo = Math.min(...pts) - 10, hi = Math.max(...pts) + 10, X = (i) => (i / (pts.length - 1)) * 300, Y = (v) => 52 - ((v - lo) / (hi - lo)) * 48;
-    const line = pts.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
-    spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/><circle cx="300" cy="${Y(pts[pts.length - 1]).toFixed(1)}" r="3.5"/></svg>`;
+/* 28.11 (décision de l'enseignant, « pépites seul score ») : un seul score à poursuivre, les pépites (accueil, en-tête,
+   bilan). Le Mathélo devient un indicateur de NIVEAU, visible seulement dans Mon trésor : carte « Mon niveau », palier en
+   mots, jauge, nombre en petit, évolution sur plusieurs semaines (pas séance par séance). Plus de Mathélo à la fin du
+   positionnement ni dans Mes grades. Le moteur l'utilise comme avant (aucun calcul changé).
+   Paliers (proposition, tools/pepite_ecrans.md) : écart au Mathélo typique de FIN d'année de la classe (ELO_REF, engine.js) ;
+   une rentrée normale (départ = repère − 50) tombe sur « en bonne voie ». */
+const NIVEAUX = [[-Infinity, "à consolider"], [-300, "en construction"], [-150, "en bonne voie"], [-40, "de fin d'année"], [60, "solide"], [200, "très solide"]];
+function niveauOf(st) {
+  const p = st.profile, h = harmos(p.system, p.grade), ref = (ELO_REF.find((x) => x[0] === h) || ELO_REF[ELO_REF.length - 1])[1];
+  const r = st.elo.r, gap = r - ref, mot = NIVEAUX.filter(([at]) => gap >= at).pop()[1];
+  return { r, mot, pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
+}
+function niveauCard() {
+  const e = state.elo, nv = niveauOf(state), log = e.log || [], today = day();
+  const at = (d) => { const L = log.filter((x) => x[0] <= d); return L.length ? L[L.length - 1][1] : null; };
+  /* une valeur par semaine, 8 semaines au plus (la courbe ne suit pas chaque séance) */
+  const W = [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (k ? at(addDays(today, -7 * k)) : e.r)).filter((v) => v !== null);
+  let evo = "Ton évolution apparaîtra après deux semaines d'entraînement.", spark = "";
+  if (W.length >= 3) {
+    const n = Math.min(4, W.length - 1), d = e.r - W[W.length - 1 - n];
+    evo = d >= 25 ? `↗ En hausse sur ${n} semaines.` : d <= -25 ? "↘ Un peu en baisse ces dernières semaines : les questions suivent ton niveau, la pratique le fait remonter." : `→ Stable sur ${n} semaines.`;
+    const lo = Math.min(...W) - 15, hi = Math.max(...W) + 15, X = (i) => (i / (W.length - 1)) * 300, Y = (v) => 52 - ((v - lo) / (hi - lo)) * 48;
+    const line = W.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1)).join(" ");
+    spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/></svg>`;
   }
-  return `<div class="elo"><div><div class="eyebrow">Mathélo ${Engine.isProvisional(state) ? '<span class="badge">provisoire</span>' : ""}</div><div class="num">${e.r}</div>
-  ${d ? `<div class="delta ${d > 0 ? "up" : "down"}">${d > 0 ? "▲ +" : "▼ "}${d} depuis hier</div>` : ""}</div>
-  <div class="stack">${spark}</div></div>`;
+  const prov = Engine.isProvisional(state) ? ` <span class="badge">se précise</span>` : "";
+  return `<div class="card flat stack niv-card"><div class="eyebrow">📈 Mon niveau</div><h3>Niveau ${esc(nv.mot)}${prov}</h3>
+    <span class="pbar niv-bar" role="img" aria-label="Niveau ${esc(nv.mot)}"><i style="width:${nv.pct}%"></i></span>
+    <p class="small">${evo}</p>${spark}
+    <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais. <span class="niv-num">Mathélo ${e.r}</span></p></div>`;
 }
 // Grades de l'année (25.11, décision de l'enseignant « Progrès de l'année ») : l'échelle de 🌱 Pousse à 🌟 Légende se
 // parcourt PAR CLASSE et RECOMMENCE CHAQUE ANNÉE (rentrée au 15 août, ou changement de classe). On monte avec des points
@@ -664,11 +681,10 @@ function screenGrades() {
   const y = ypSync(), r = y.pts, g = gradeOf(r);
   const past = (y.past || []).map((x) => { const G = GRADES.filter(([at]) => x.p >= at).pop(); return `<li>${esc(x.c)} · ${yearLabel(+x.k.split("|")[0])} : ${G[1]} ${G[2]} atteint</li>`; }).reverse().join("");
   h(`${brand}${backTop()}<div class="eyebrow">Grades de l'année\u00a0· ${esc(y.c)}</div><h2>Mes grades</h2>
-  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted">🟡 ${nbFmt(r)} pépites cette année</div></div></div>
+  <div class="card stack grade-now"><div class="ic-row"><button type="button" class="ic grade-big grade-open" data-g="${g.name}" aria-label="Voir la carte du grade ${g.name}">${g.ic}</button><div><div class="eyebrow">Mon grade</div><h2>${esc(g.title)}</h2><div class="small muted"><span class="yp-gems">🟡 ${nbFmt(r)} ${r > 1 ? "pépites" : "pépite"}</span> trouvée${r > 1 ? "s" : ""} cette année : elles ne se perdent jamais.</div></div></div>
     ${g.next ? `<div class="stack" style="gap:4px"><span class="pbar"><i style="width:${g.pct}%"></i></span><span class="small">Prochain grade : <b>${g.next.ic} ${g.next.name}</b>, encore ${nbFmt(g.next.at - r)} pépites.</span></div>` : '<p class="small">Le plus haut grade : bravo !</p>'}</div>
   <div class="card flat stack yp-rules"><h3>Gagner des pépites</h3><p class="small">Question faite <b>+1</b>, réussie <b>+2</b>, du premier coup <b>+1</b>, difficile jusqu'à <b>+3</b> ; séance finie <b>+10</b> ; pépite polie <b>+5</b> ; problème de la semaine réussi <b>+10</b>.</p>
     <p class="small muted">Au plus ${YP.cap} pépites par jour (hors problème de la semaine) ; « Refaire » ne rapporte rien. Tout le monde repart 🌱 Pousse à la rentrée et au changement de classe.</p></div>
-  <div class="card">${eloBlock()}<p class="small muted yp-explain">Mathélo = ton niveau : il monte et descend selon tes réponses · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>
   <div class="card flat stack"><h3>L'échelle de l'année</h3><p class="small muted">Touche un grade atteint pour voir sa carte.</p>
     <ol class="grades">${GRADES.slice().reverse().map(([at, ic, name]) => { const st = r >= at ? (g.name === name ? "cur" : "ok") : "todo";
       const no = st !== "todo" && at && (isAuthor() ? "0" : (state.gradeNo || {})[name]);
@@ -731,7 +747,7 @@ function eloHintCard() {
   return ""; /* 26.11 : Mathélo caché par défaut (expliqué dans Progrès, « Mes grades ») */
   if (state.eloSeen || !state.tourDone) return "";
   const g = gradeOf(ypPts());
-  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton score de maths. Ton <b>grade</b>, lui, monte avec tes pépites de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
+  return `<div class="card flat stack elo-hint"><p class="small"><b>📈 Mathélo</b> = ton niveau. Ton <b>grade</b>, lui, monte avec tes pépites de l'année (séances, réussites) : tu es ${g.ic} ${g.name}${g.next ? `, le prochain est ${g.next.ic} ${g.next.name}` : ""}.</p>
     <div class="row"><button class="btn-ghost small" id="elohok">Compris</button><button class="btn-ghost small" id="elohmore">Voir tous les grades</button></div></div>`;
 }
 // Bilan de la semaine passée (21.11) : du lundi au mercredi, une fois par semaine, si l'élève a pratiqué.
@@ -810,7 +826,7 @@ function screenHome() {
   // 22.11 : accueil à cases (maquette design/maquette_accueil.html) ; chaque case ouvre une page « ← Accueil ».
   panels.carnet = () => carnetCard(true) || `<div class="card flat stack"><div class="eyebrow">✨ À polir</div><p class="small muted">Rien à polir : bravo ! Chaque question ratée devient une pépite brute, rangée ici : réussis-la plus tard et elle est polie.</p>${carnetWeekN() ? `<p class="small carnet-week">${carnetWeekTxt()}</p>` : ""}</div>`;
   // 22.11 : « Ma fiche » (src/fiche.js) : une fiche par chapitre derrière Progrès. Retirée le 23.11 (branche archive/fiche) : inactif sans fiche.js.
-  panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades et mon Mathélo</button><p class="small muted yp-explain">Mathélo = ton niveau · Pépites = ton travail de l'année, elles font monter ton grade.</p></div>${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
+  panels.prog = () => `${weekCard()}<div class="card flat stack grades-go"><button type="button" class="btn-sec" id="gradesgo">🏅 Mes grades</button></div>${niveauCard()}${newBadgesCard()}${typeof ficheProgCard === "function" ? ficheProgCard() : ""}${themeMapCard()}${compsCard()}${typeof parentCard === "function" ? parentCard() : ""}`; /* 24.11 : espace parent (src/parents.js) */
   if (!panels[homeTab]) homeTab = "today";
   const head = `<div class="spread home-head">${brand}<span class="row" style="gap:6px"><span class="streak-chip" title="${alive && s.count ? "Ton filon : jours d'affilée" : "une séance aujourd'hui et ton filon repart à 1"}${s.best > 1 ? " · record " + s.best : ""}">${alive && s.count ? "🔥 <b>" + s.count + "</b> j" : "✏️" /* 27.11 (revue, n° 6) : série perdue : l'icône seule, plus de « 0 j » au-dessus de « Content de te revoir ! » */}</span><span class="small muted hh-cl" title="Ta classe"><span class="hh-w">Classe </span>${classTag(state.profile) /* 26.11 (revue élèves, B9 : « Classe 2e MP » et « MP 2e ») : même forme partout */}</span><button class="btn-ghost gear" id="settings" aria-label="Réglages">⚙️</button></span></div>`;
   if (homeTab !== "today") {
@@ -1118,7 +1134,7 @@ function screenSettings() {
   document.getElementById("backup").onclick = screenBackup;
   document.getElementById("level").onclick = () => { draft = { ...state.profile, keepSys: true }; screenLevel(); };
   document.getElementById("r1").onclick = () => {
-    document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression et ton Mathélo ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
+    document.getElementById("reset").innerHTML = '<span class="small">Effacer ta progression (pépites, grades, badges, Mathélo) ?</span><button id="r2">Oui, effacer</button><button class="btn-ghost" id="r3">Non</button>';
     document.getElementById("r2").onclick = () => { Store.clear(); try { localStorage.removeItem("m2m-device"); localStorage.removeItem("m2m-ping"); localStorage.removeItem(ERRLOG_KEY); } catch (e) {} state = null; uiApply(); screenWelcome(); };
     document.getElementById("r3").onclick = screenSettings;
   };
@@ -1305,7 +1321,7 @@ function screenPrivacy(back) {
   <p class="muted">Pas de compte, pas de nom, pas d'adresse e-mail. Ta progression reste sur ton appareil.</p>
   <div class="card flat"><b>Ton choix :</b> ${statsAsked() ? (statsOk() ? "tu aides à améliorer l'app (statistiques anonymes envoyées)." : "rien n'est envoyé (sauf les commentaires 💬 que tu écris toi-même).") : "pas encore choisi : rien n'est envoyé tant que tu n'as pas dit oui."} Modifiable dans les Réglages.</div>
   <div class="card flat stack"><b>Ce qui reste sur ton appareil</b>
-  <ul class="plain"><li>Ta progression : ${isFR() ? "tes niveaux de maîtrise" : "tes notes de compétences"}, tes badges, ton Mathélo, l'historique de tes réponses.</li>
+  <ul class="plain"><li>Ta progression : tes pépites et ton grade, ${isFR() ? "tes niveaux de maîtrise" : "tes notes de compétences"}, tes badges, ton Mathélo, l'historique de tes réponses.</li>
   <li>Un journal des 3 dernières erreurs techniques de l'app (message court, endroit dans le code, version, jour ; rien sur toi) : il ne part avec les statistiques que si tu as dit oui.</li>
   <li>Rien de tout cela n'est envoyé (sauf ce qui est décrit ci-dessous, question par question, sans rien qui te désigne). Le code de sauvegarde, lui aussi, n'est envoyé nulle part : c'est toi qui le gardes.</li></ul></div>
   <div class="card flat stack"><b>Ce qui est envoyé, de façon anonyme</b>
@@ -1315,7 +1331,7 @@ function screenPrivacy(back) {
   <li><b>Pour chaque question et chaque rappel de cours</b> : le code de la question, si tu as trouvé (du premier coup ou non), si tu as quitté avant de répondre, le temps passé, l'aide utilisée (pas à pas, correction) et ta première réponse fausse (un nombre ou un calcul ; si tu as écrit des mots, seulement « [texte] »), avec le même identifiant. Ça sert à repérer les questions mal posées, trop dures, ou que l'app corrige mal.</li>
   <li><b>Tes avis</b> 👍 / 👎, « trop facile » et « pas compris », avec le code de la question ou du rappel et le même identifiant.</li>
   <li><b>Tes commentaires</b>, si tu en écris, avec ta classe (par exemple « ${exClasse()} ») et le même identifiant. N'y écris pas ton nom.</li>
-  <li><b>Tes grades Mathélo</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
+  <li><b>Tes grades de l'année</b>, quand tu en atteins un : le nom du grade et le même identifiant, pour te donner ton numéro de « collector ».</li>
   <li><b>Ton chapitre du moment</b>, si tu en choisis un : les notions, ta classe et le mois, sans identifiant. Ça sert à proposer les notions dans l'ordre où elles se font vraiment en classe.</li>
   <li><b>Les erreurs techniques</b> de l'app, si elle plante : le message d'erreur, l'endroit dans le code, la version de l'app, l'écran ou le code de la question, ta classe et le même identifiant (au plus 5 par jour). Ça sert à réparer les bugs qu'on ne voit pas.</li></ul></div>
   <p class="small muted">Identifiant tiré au hasard pour cet appareil : <code>${esc(deviceId() || "—")}</code></p>${isAuthor() ? '<p class="small"><b>Appareil de l\'auteur</b> : rien n\'est envoyé depuis cet appareil, sauf les commentaires 💬 (marqués « auteur »).</p>' : ""}
@@ -1348,12 +1364,12 @@ function screenLegal(back) {
   ${sec("2. À quoi servent les données ?", `<p>Uniquement à améliorer l'app pendant sa phase de test : compter combien de personnes l'utilisent, repérer les questions mal posées, trop difficiles ou mal corrigées, ajuster la durée des séances, réparer les erreurs techniques, proposer les notions dans l'ordre où elles se font en classe.</p>
   <p class="small muted">Pas de publicité, pas de revente, pas d'évaluation des élèves : les données ne servent pas à noter ni à juger qui que ce soit.</p>`)}
   ${sec("3. Quelles données ?", `<p><b>Jamais demandé :</b> nom, prénom, adresse e-mail, numéro de téléphone, école, compte. Il n'y a pas d'inscription.</p>
-  <p><b>Gardé seulement sur l'appareil</b> (stockage local du navigateur) : la progression (notions, compétences, badges, Mathélo, historique des réponses), les réglages d'affichage, et un identifiant tiré au hasard, propre à l'appareil.</p>
+  <p><b>Gardé seulement sur l'appareil</b> (stockage local du navigateur) : la progression (pépites et grades, notions, compétences, badges, Mathélo, historique des réponses), les réglages d'affichage, et un identifiant tiré au hasard, propre à l'appareil.</p>
   <p><b>Envoyé vers un tableau tenu par l'éditeur</b> (Google Sheets), avec cet identifiant :</p>
   <ul class="plain"><li>l'ouverture de l'app (au plus une fois par jour), le début et la fin de chaque séance, avec la date, la classe (par exemple « ${exClasse()} »), le format, le nombre de questions, le score et la durée ;</li>
   <li>pour chaque question ou rappel de cours : son code, le résultat (trouvé ou non, du premier coup ou non, quitté), le temps passé, l'aide utilisée et la première réponse fausse (un nombre ou un calcul ; des mots sont remplacés par « [texte] ») ;</li>
   <li>les avis (👍 / 👎, « trop facile », « pas compris ») et les commentaires écrits librement (500 caractères au plus ; il est demandé de ne pas y écrire de nom) ;</li>
-  <li>les grades Mathélo atteints ;</li>
+  <li>les grades de l'année atteints ;</li>
   <li>les erreurs techniques de l'app (message, endroit dans le code, version, écran), 5 par jour au plus.</li></ul>
   <p>Envoyé <b>sans identifiant</b> : le chapitre du moment choisi par l'élève (notions, classe, mois).</p>
   <p class="small muted">Le détail, écran par écran, est dans « Ce que l'app envoie ». Ces données ne permettent pas, à elles seules, de savoir qui est l'élève. Elles concernent toutefois un appareil précis : elles sont donc traitées comme des données personnelles.</p>`)}
@@ -1389,7 +1405,7 @@ async function screenBackup() {
   if (!code) { h(`${brand}<div class="card flat"><p>Impossible de créer le code sur ce navigateur.</p></div><button class="btn-primary btn-big" id="back">Retour</button>`); document.getElementById("back").onclick = screenHome; return; }
   const url = Backup.url(code), qr = url.length <= 2000 ? QR.svg(url) : "";
   h(`${brand}<h2>Sauvegarder <span class="mark">ma progression</span></h2>
-  <p class="muted">Ce code contient toute ta progression : notions, compétences, badges, Mathélo. Rien n'est envoyé sur Internet. Garde-le pour changer de téléphone ou continuer sur un ordinateur.</p>
+  <p class="muted">Ce code contient toute ta progression : pépites et grade, notions, compétences, badges, Mathélo. Rien n'est envoyé sur Internet. Garde-le pour changer de téléphone ou continuer sur un ordinateur.</p>
   ${qr ? `<div class="card flat stack center"><b>Sur un autre appareil</b><span class="small muted">Scanne ce QR code avec l'appareil photo : l'app s'ouvre et propose de reprendre ta progression.</span><div class="qrwrap">${qr}</div></div>` : ""}
   <div class="card flat stack"><b>Ou garde le code</b><span class="small muted">Envoie-le-toi (message, mail) ou colle-le dans tes notes. Le code d'aujourd'hui remplace les anciens.</span>
   <textarea class="code-box" readonly rows="4">${code}</textarea>
@@ -1421,7 +1437,7 @@ function screenRestore(code) {
     let s;
     try { s = await Backup.decode(document.getElementById("code").value); } catch (e) { box.innerHTML = '<div class="card flat"><b>Code illisible.</b><p class="small muted">Vérifie qu\'il est complet (copie-le en entier).</p></div>'; return; }
     const nb = Object.keys(s.badges || {}).length, days = s.bc ? s.bc.days : s.history.length;
-    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
+    box.innerHTML = `<div class="card flat stack"><b>Progression trouvée</b><span>${SYSTEMS[s.profile.system].label} · ${gradeName(s.profile)} ${s.yp && s.yp.pts ? ` · 🟡 ${nbFmt(s.yp.pts)} pépite${s.yp.pts > 1 ? "s" : ""}` : ""} · Mathélo ${s.elo.r} · ${days} jour${days > 1 ? "s" : ""} d'entraînement · ${nb} badge${nb > 1 ? "s" : ""}</span>
     ${state && state.placed ? '<span class="small">Elle remplacera la progression de cet appareil.</span>' : ""}<button class="btn-primary" id="ok">Reprendre cette progression</button></div>`;
     document.getElementById("check").style.display = "none";
     document.getElementById("ok").onclick = () => { if (!s.a11y && state && state.a11y) s.a11y = state.a11y; state = s; save(); uiApply(); history.replaceState(null, "", location.pathname); toast("Progression reprise."); screenHome(); };
@@ -1492,7 +1508,7 @@ function screenStats(back) {
     if (!g || !Array.isArray(g.grades)) { $("st4").innerHTML = `<h3>Grades atteints</h3><p class="small">Indisponible${g && g.erreur ? " : " + esc(g.erreur) : " : redéploie l'Apps Script (tools/votes.gs)"}.</p>`; return; }
     const L = g.grades.filter(([, n]) => n > 0), max = Math.max(1, ...L.map(([, n]) => n)), ic = Object.fromEntries(GRADES.map(([, i, name]) => [name, i]));
     $("st4").innerHTML = `<h3>Grades atteints (appareils)</h3>${L.length ? `<table class="st-table"><tbody>${L.map(([name, n]) => `<tr><td>${ic[name] || ""} ${esc(name)}</td><td><span class="st-bar" style="width:${Math.round((n / max) * 100)}%"></span></td><td>${n}</td></tr>`).join("")}</tbody></table>` : '<p class="small muted">Aucun grade enregistré pour l\'instant.</p>'}
-      <p class="small muted">Depuis le 25.11, grades de l'année (points de travail, remis à zéro à la rentrée), et non plus le Mathélo. Comptés depuis la mise en place des numéros collector : un grade atteint avant est enregistré quand l'élève ouvre « Mes grades » ou passe un nouveau grade. Tes appareils ne sont pas comptés.</p>`;
+      <p class="small muted">Depuis le 25.11, grades de l'année (pépites, remises à zéro à la rentrée), et non plus le Mathélo. Comptés depuis la mise en place des numéros collector : un grade atteint avant est enregistré quand l'élève ouvre « Mes grades » ou passe un nouveau grade. Tes appareils ne sont pas comptés.</p>`;
   }).catch(() => { $("st4").innerHTML = '<h3>Grades atteints</h3><p class="small">Indisponible (réseau ?).</p>'; });
   // 22.11 : les commentaires ne s'affichent plus ici (demande de l'auteur) : onglet Commentaires du tableau de suivi (tools/suivi.py).
 }
@@ -2124,12 +2140,12 @@ function nextQuestion(redo) {
       if (redo || session.weekly) return;
       const back = Engine.eloRefund(state, delta), yp = ypAdd(state, 1);
       session.ypg = (session.ypg || 0) + yp; session.rebuilt = (session.rebuilt || 0) + 1; save();
-      if (back || yp) toast("🪜 Tu as reconstruit la solution" + (yp ? " : +1 point de l'année" : "") + ".");
+      if (back || yp) toast("🪜 Tu as reconstruit la solution" + (yp ? " : +1 pépite" : "") + "." /* 28.11 : « point de l'année » → pépite */);
     },
     onDone: (res) => {
       const sc = Engine.record(state, id, q.d, res.tries, res.solved, res.partial);
       // Carnet d'erreurs (20.11) : séance « carnet » → progression ; ailleurs, une question ratée y entre.
-      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("📕 Effacée de ton carnet d'erreurs ✓"); } else if (r === "encore") toast("📕 1 réussite sur 2 : encore une, du premier coup, et elle sort du carnet.", 4000); else if (r === "rate") toast("📕 Elle reste dans ton carnet : il faut " + carnetRule() + ".", 4000); }
+      if ((session.carnet || kind === "carnet") && !redo) { const r = carnetResult(id, q.d, res.solved && res.tries === 1); if (r === "efface") { session.fixedN = (session.fixedN || 0) + 1; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet); toast("✨ Polie ! Une pépite de plus ✓"); } else if (r === "encore") toast("✨ 1 réussite sur 2 : encore une, du premier coup, et elle est polie.", 4000); else if (r === "rate") toast("✨ Pas encore polie : il faut " + carnetRule() + ".", 4000); } /* 28.11 : messages du carnet d'erreurs → « À polir » */
       else if (!res.solved && !q.parts && !session.weekly && carnetAdd(id, q.d, q.code, res.diag, res.ans)) toast("✨ Pépite brute : rangée dans « À polir », tu pourras la refaire.");
       /* 27.11 (n° 28) : élève en grande difficulté : une réussite du premier coup en séance efface les erreurs de la notion */
       else if (res.solved && res.tries === 1 && !q.parts && !session.weekly) { const k = carnetSessionOk(id, q.d); if (k) { session.fixedN = (session.fixedN || 0) + k; session.ypg = (session.ypg || 0) + ypAdd(state, YP.carnet * k); toast("✨ Polie ! " + (k > 1 ? k + " pépites polies" : "Une pépite de plus") + " ✓"); } }
@@ -3137,10 +3153,10 @@ function screenSummary() {
   if (!session.weekly && !session.ypDone && n >= Math.min(3, session.plan.length)) { session.ypDone = true; session.ypg = (session.ypg || 0) + ypAdd(state, YP.session, "s"); save(); }
   const yg = session.ypg || 0, ypt = ypPts(), g0 = gradeOf(ypt - yg), g1 = gradeOf(ypt);
   if (g1.i > g0.i) gradeNumbers();
-  const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " points." : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " pépites." /* 28.11 : points → pépites */ : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
   /* 26.11 (revue élèves : « Points de l'année +0 » après une bonne séance, plafond du jour déjà atteint) : on le dit. */
   const ypCapped = !yg && ((ypSync() || {}).dp || 0) >= YP.cap;
-  const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b>+${yg} ${yg > 1 ? "pépites" : "pépite"}${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
+  const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b><span class="yp-n">+${yg} ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
   /* 25.11 soir (revue d'un testeur : une séance d'une question du Carnet affichait le grand écran de fin, lourd) :
      petite séance du Carnet → bilan léger (résultat, ce qui reste à effacer, continuer). */
   /* 27.11 (revue, n° 7 : fin du Carnet « Aujourd'hui : 1 question réussie. » — réussie au 2e essai, donc rien effacé — avec
@@ -3168,7 +3184,7 @@ function screenSummary() {
     : Date.now() - session.start < 4 * 6e4 ? "Séance courte aujourd'hui. Tu peux continuer autant que tu veux." : "";
   // 26.11 : Mathélo caché par défaut : titre selon le score seulement (22.11 : il suivait le Mathélo).
   h(`${brand}${session.weekly ? '<div class="eyebrow">⛏️ La mine · problème de la semaine</div>' /* 27.11 : bilan du problème = « La mine » */ : ""}<h2>${esc(sumTitle(n, sc))}</h2>
-  <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${state.streak.count + 1} jours${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
+  <div class="card flat streak"><span class="flame">🔥</span><div><b>Ton filon : ${state.streak.count} ${state.streak.count > 1 ? "jours" : "jour"}</b>${state.streak.count >= 3 ? ' <span class="muted">· tu es sur un bon filon !</span>' : ""}${state.streak.best > 1 ? `<span class="small muted"> · record ${state.streak.best}</span>` : ""}<div class="small muted">Reviens demain : ton filon passe à ${plur(state.streak.count + 1, "jour", "jours")}${state.streak.count + 1 > (state.streak.best || 0) ? " (nouveau record)" : ""}.</div><div class="small tomorrow">Demain : <b>${tomorrowLabel()}</b></div>${sumGoal(g1)}</div></div>
   ${summaryByNotion()}
   ${weekLine()}
   <div class="card stack">${scoreRow(n, sc)}

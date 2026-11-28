@@ -179,7 +179,9 @@ sec("UI", () => {
   screenSummary(); const t = app.textContent;
   if (/défi du jour/.test(t) || !/interrompue/.test(t)) fail("bilan : message d'une séance interrompue");
   if (/Mathélo/.test(t)) fail("bilan : « Mathélo » visible");
-  fresh(); homeTab = "prog"; screenHome(); if (!/Mathélo = ton niveau/.test(app.textContent)) fail("Progrès : explication Mathélo / points de l'année absente");
+  fresh(); homeTab = "prog"; screenHome(); if (!/Mon niveau/.test(app.textContent) || !/Niveau (à consolider|en construction|en bonne voie|de fin d'année|solide|très solide)/.test(app.textContent) || !/ne se perdent jamais/.test(app.textContent)) fail("Mon trésor : carte « Mon niveau » (palier en mots) absente"); /* 28.11, décision pépites seul score : le Mathélo n'est plus qu'un indicateur de niveau, dans Mon trésor (avant : « Mathélo = ton niveau » dans Progrès) */
+  fresh(); screenGrades(); if (/Mathélo/.test(app.textContent)) fail("Mes grades : « Mathélo » visible"); /* 28.11, décision pépites seul score */
+  fresh(); screenPlacementDone(); if (/Mathélo/.test(app.textContent)) fail("fin du positionnement : « Mathélo » visible"); /* 28.11, décision pépites seul score */
   // 6. Semaine : le positionnement ne compte pas.
   fresh(); state.history = []; Engine.placementResult(state, "eq1", true, 2); Engine.placementResult(state, "prio", false, 2); if (Engine.week(state).n !== 0) fail("semaine : le positionnement est compté");
   // 7. Pas à pas : la valeur attendue est donnée quand l'explication ne la contient pas.
