@@ -74,6 +74,11 @@ puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux d�
   chapitres récents, pépites normales (plafond du jour), bonus +30 seulement pour celui de la semaine ; facultatif, hors
   séance. À faire : `/contenu` (sélection) puis `/app` (écran de la mine), après la fusion des branches Pépite².
 
+- **28.11 : adresse** — passer de 5min2maths à pepiteaucarre : pas urgent, on attend. Plan retenu quand ce sera le moment :
+  un seul déménagement, directement vers le domaine `pepiteaucarre.ch` (branché d'abord sur GitHub Pages, puis hébergement
+  suisse sans changer d'adresse), avec une page de transfert de la progression (stockage lié à l'adresse : sinon les
+  testeurs repartent de zéro). Jamais par `pepiteaucarre.github.io` (deux déménagements).
+
 ### Avant le 28.11
 
 Toutes les décisions des 26 et 27.11 sont prises et appliquées : `archive/decisions_26-11.md` (19 points) et
