@@ -65,19 +65,19 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
 ## À faire
 
 Ordre (28.11, 2 agents au plus) : fait : figures, élagage, tests regroupés, grand problème (moteur) ;
-puis `/app animations` (en cours) et `/contenu curieux et histoire` (grand problème de la semaine : moteur fusionné le 28.11) ; puis `/app mine` (API digMore) ;
+puis `/app animations` (en cours) et `/contenu curieux et histoire` (fait, `agent/contenu4` à fusionner) ; puis `/app mine` (API digMore) ;
 puis `/contenu niveau 10e` (audit, 9 notions sur ≈ 34) et le « nickel » 9e et 10e chapitre par chapitre (comme le chantier 11e) ;
 puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
 - **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
   (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :
   2 navigateurs au plus) ; tirages réduits le jour, complets la nuit. Cible : suite rapide 1–2 min avant publication
   (la suite complète tourne la nuit, sa durée gêne peu).
-- **`/contenu curieux et histoire`** (validé 28.11) : +20 questions curieuses (78 aujourd'hui, 5 familles) et +15 histoires
-  (55 : événements, anecdotes, portraits), là où il en manque : inventaire par classe et chapitre (notions `uses` / `need`),
-  11e et 1re Collège d'abord, puis France ; vraisemblance, « À toi » au niveau de la classe, faits historiques exacts et
-  vérifiables, séparation France / romand, familles variées.
-  Inventaire fait (28.11, `archive/inventaire_curieux_histoire_28-11.md`) : rien de lié au programme de l'année en
-  1re Collège, MP 2e, 2e–4e Collège, lycée FR ; 20 + 15 sujets proposés (11e, 1C, MP 2e, 2C) à valider.
+- **`/contenu curieux et histoire`** (fait 28.11, branche `agent/contenu4`, à fusionner ; rapport
+  `archive/contenu_curieux_histoire_28-11.md`) : +20 questions curieuses (78 → 98 : 9 en 11e, 8 en 1re Collège, 3 en
+  2e Collège) et +15 histoires (55 → 70 : 6 en 11e, 6 en 1C, 3 en 2C), sources par récit dans le rapport : **relecture de
+  l'exactitude des faits par l'enseignant**. MP en suspens : les sujets MP 2e remplacés par des sujets 11e / 1C.
+  Liés au programme de l'année : curieux 11e 6 → 16, 1C 0 → 8, 2C 1 → 4 ; histoires 11e 19 → 25, 1C 6 → 14, 2C 4 → 7
+  (sonde corrigée : elle comptait toutes les histoires comme pour un 9e). Reste : 1C grandeurs (`exactes`), 3e–4e Collège.
 - **`/app animations`** (validé 28.11, n° 1 à 5) : bonne réponse → petite pépite qui s'envole vers le compteur (« +2 ») ;
   bilan → nombre de pépites qui défile ; pépite polie → éclat doré sur la carte ; filon qui augmente → flamme qui grossit ;
   barre de séance qui se remplit en glissant. Règles : < 0,5 s, un retour (pas un décor), jamais d'attente, rien si
