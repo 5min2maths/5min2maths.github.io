@@ -851,7 +851,7 @@ function screenHome() {
     /* 26.11 (chantier « ergonomie », revue d'un testeur : « Problème, Curieux, Histoire : on ne sait pas ce que c'est ») :
        une demi-ligne sous chaque case sans indication, aux 3 premières ouvertures de l'app seulement (state.doorHints). */
     if (!doorHintCounted) { doorHintCounted = true; state.doorHints = (state.doorHints || 0) + 1; save(); }
-    const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "tes erreurs", prog: "grades, badges, pépites" }; /* 27.11 */
+    const DOOR_HINT = { prob: "le grand problème de la semaine", cur: "maths cachées", hist: "histoire des maths", test: "prépare ton évaluation", carnet: "ton carnet d'erreurs", prog: "grades, badges, pépites" }; /* 27.11 */
     const hintOn = true; /* 27.11 (enseignant) : noms imagés (La mine, Mon trésor…) → sous-titres toujours affichés */
     const door = (id, ic, label, sub0, badge) => { const sub = sub0 || (hintOn ? DOOR_HINT[id] : ""), hint = !sub0 && !!sub; return `<button type="button" class="door" data-door="${id}" aria-label="${esc(DOOR_NAME[id] || label)}${sub ? " : " + esc(sub) : ""}${badge === "!" ? " (nouveau)" : ""}">${badge ? `<span class="door-badge">${badge}</span>` : ""}<span class="door-sq">${ic}</span><b>${label}</b>${sub ? `<small${hint ? ' class="door-hint"' : ""}>${sub}</small>` : ""}</button>`; };
     const svgI = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`, TI = Object.fromEntries(HOME_TABS.map(([k, , ic]) => [k, ic]));
@@ -872,7 +872,7 @@ function screenHome() {
     <div class="doors">
       ${door("prob", svgI(TI.prob), "La mine", "", dots.prob ? "!" : "")}
       ${door("cur", svgI('<circle cx="10" cy="10" r="7.6"/><path d="M15.6 15.6L21.5 21.5" stroke-width="2.6"/><path d="M7.7 8.3a2.4 2.4 0 1 1 3.3 2.2c-.6.3-1 .8-1 1.4v.5" stroke-width="2.1"/><circle cx="10" cy="14.6" r="1.15" fill="currentColor" stroke="none"/>'), "Trésors cachés", "", "") /* 27.11 : loupe « ? » (maths cachées à découvrir), ex-ampoule */}
-      ${door("hist", svgI('<path d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a3 3 0 0 1-3-3V6"/><path d="M4 6a2 2 0 1 0 4 0V4"/><path d="M9 9h7M9 13h7M9 17h4"/>'), "Chercheurs d'or", "", "")}
+      ${door("hist", svgI('<path d="M2 8.5c3 1.2 17 1.2 20 0"/><path d="M6.5 8.6 7.6 3.8c.3-1 1.2-1.3 2.1-.8l2.3 1.2 2.3-1.2c.9-.5 1.8-.2 2.1.8l1.1 4.8"/><circle cx="9" cy="12.3" r="1.9"/><circle cx="15" cy="12.3" r="1.9"/><path d="M10.9 12.3h2.2"/><path d="M6.3 12.5v2.2c0 4.3 2.6 7.3 5.7 7.3s5.7-3 5.7-7.3v-2.2"/><path d="M9.6 16.8c1.5.9 3.3.9 4.8 0"/>'), "Chercheurs d'or" /* 28.11 (idée de l'enseignant) : chercheur d'or, chapeau, lunettes, barbe (le parchemin ressemblait trop à Jour J) */, "", "")}
       ${door("test", svgI(TI.test), "Jour J", prep ? (left === 0 ? "aujourd'hui !" : left === 1 ? "demain" : "dans " + left + " j") : "", dots.test ? "!" : "")}
       ${door("carnet", svgI('<path d="M7 4h10l4 5-9 11L3 9z"/><path d="M3 9h18M10 4l2 16 2-16"/>'), "À polir", nC ? nC + " à polir" : "", nC || "")}
       ${door("prog", svgI(TI.prog), "Mon trésor", "", dots.prog ? "!" : "")}
@@ -2892,7 +2892,9 @@ function screenCurious(q, back, from = "") {
   if (!q) { toast("Pas encore de trésor caché pour toi : ils arrivent avec les notions vues en classe."); return back(); }
   if (state) { state.curSeen = [...(state.curSeen || []).filter((k) => k !== q.key), q.key].slice(-20); save(); }
   const F = CUR_FAM[q.fam] || { label: "Question curieuse", ic: "🤔" };
-  const spec = { kind: "value", value: q.calc.value, ...(q.calc.round ? { round: q.calc.round } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
+  /* 28.11 (testeur : « 200/3 » refusé pour 66,666667) : valeur non décimale finie sans arrondi précisé → accepter au centième (et la fraction exacte) */
+  const roundC = q.calc.round || (!q.calc.range && Math.abs(q.calc.value * 1e4 - Math.round(q.calc.value * 1e4)) > 1e-6 ? 0.01 : 0);
+  const spec = { kind: "value", value: q.calc.value, ...(roundC ? { round: roundC } : {}) }; // calcul tapé accepté (commentaire du 21.11), même au CO
   h(`${brand}${backTop("cback0")}<div class="eyebrow">${F.ic} Trésors cachés · ${F.label}</div>
   <div class="card pop stack"><h2>${q.titre}</h2><div class="qtext">${q.q}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
     <div class="act-step"><div class="act-h"><span class="act-n">1</span> Ton pari</div><p>${q.bet.q}</p>
@@ -2933,7 +2935,7 @@ function screenCurious(q, back, from = "") {
     if (S) { S.issue = calcOk ? (tries === 0 ? "ok1" : "ok2") : idk && tries === 0 ? "idk" : "faux"; S.essais = tries + (calcOk ? 1 : 0); S.sec = sigSec(S); if (idk) sigAide(S, "s"); }
     inp.disabled = true; ["kp", "cok", "cidk"].forEach((x) => $(x) && $(x).remove()); prev.remove();
     app.querySelectorAll("#cbet button").forEach((x) => { if (+x.dataset.i === q.bet.good) x.classList.add("act-ok-btn"); else if (x.getAttribute("aria-pressed") === "true") x.classList.add("act-wrong"); });
-    const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(q.calc.round ? Math.max(0, -Math.floor(Math.log10(q.calc.round))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
+    const val = (q.calc.range ? "environ " : "") + String(+(+q.calc.value).toFixed(roundC ? Math.max(0, -Math.floor(Math.log10(roundC))) : 4)).replace(/^\d+/, (i) => i.replace(/\B(?=(\d{3})+(?!\d))/g, "'")).replace(".", ",");
     $("cfb").innerHTML = `<div class="fb ${calcOk ? "ok" : "hint"} pop">${calcOk ? "✓ Juste !" : "Réponse : " + val}
       <span>${betOk ? "Et ton intuition était la bonne : bravo !" : "Ton pari était : « " + esc(q.bet.choices[+app.querySelector('#cbet button[aria-pressed="true"]').dataset.i]) + " ». La bonne réponse : « " + q.bet.choices[q.bet.good] + " ». Beaucoup de gens se trompent ici : c'est tout l'intérêt !"}</span></div>`;
     show($("cs3")); $("cnext").hidden = false;
@@ -3158,7 +3160,7 @@ function screenSummary() {
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
     if (nb || newGrade) setTimeout(burst, 250);
     updBanner("bilan"); /* 27.11 : nouvelle version prête */
-    document.getElementById("home").onclick = screenHome;
+    document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après « À polir », retour sur la page de l'onglet) */
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
     return;
   }
@@ -3187,7 +3189,7 @@ function screenSummary() {
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
   if (nb || newGrade) setTimeout(burst, 250);
   updBanner("bilan");
-  document.getElementById("home").onclick = screenHome;
+  document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après le problème de la semaine, « Retour à l'accueil » rouvrait la page du problème) */
   const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
   bindCur();
   /* 27.11 (agent poids) : paquet « x » pas encore arrivé (séance très rapide après l'ouverture) : le bouton apparaît à son arrivée */
