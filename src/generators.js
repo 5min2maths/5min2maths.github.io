@@ -177,14 +177,14 @@ const GEN = {
   fracadd(d) {
     if (d === 1) {
       const b = R.int(3, 9), a = R.int(1, b - 1), c = R.int(1, b - 1);
-      return { fig: FIG.fractionBars([[a, b], [c, b]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + b + "}"), spec: { kind: "value", value: (a + c) / b }, sol: M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")),
+      return { q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + b + "}"), spec: { kind: "value", value: (a + c) / b }, sol: M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")),
         traps: [TRAP((a + c) / (2 * b), "On n'additionne pas les dénominateurs : ils sont déjà égaux, on garde " + M(b) + " et on additionne les numérateurs.")],
         guide: [GS("Les dénominateurs sont égaux. On additionne les numérateurs : " + M(a + " + " + c) + " = ?", a + c, M(a + " + " + c + " = " + (a + c)) + ", donc " + M("\\frac{" + (a + c) + "}{" + b + "}") + "."), GS("Écris le résultat (simplifié si possible) :", (a + c) / b, M("\\frac{" + (a + c) + "}{" + b + "}" + (gcd(a + c, b) > 1 ? " = " + frac(a + c, b) : "")) + ".")] };
     }
     if (d === 2) {
       let b, e; do { b = R.int(2, 9); e = R.int(2, 9); } while (b === e);
       const a = R.int(1, b - 1), c = R.int(1, e - 1);
-      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: a / b + c / e }, sol: M("\\frac{" + a * e + " + " + c * b + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + " (dénominateur commun).",
+      return { q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} + \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: a / b + c / e }, sol: M("\\frac{" + a * e + " + " + c * b + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + " (dénominateur commun).",
         traps: [TRAP((a + c) / (b + e), "On n'additionne ni les numérateurs ni les dénominateurs directement : il faut d'abord un dénominateur commun."), TRAP((a + c) / (b * e), "Le dénominateur commun est bon, mais il faut aussi transformer les numérateurs (multiplier par le même nombre).")],
         guide: [GS("Dénominateur commun : " + M(b + " \\cdot " + e) + " = ?", b * e, M(b + " \\cdot " + e + " = " + b * e) + "."), GS("On écrit " + M("\\frac{" + a + "}{" + b + "}") + " avec le dénominateur " + M(b * e) + " : quel numérateur ? (" + M(a + " \\cdot " + e) + ")", a * e, M("\\frac{" + a + "}{" + b + "} = \\frac{" + a * e + "}{" + b * e + "}") + "."), GS("Et " + M("\\frac{" + c + "}{" + e + "}") + " : quel numérateur ? (" + M(c + " \\cdot " + b) + ")", c * b, M("\\frac{" + c + "}{" + e + "} = \\frac{" + c * b + "}{" + b * e + "}") + "."), GS("On additionne les numérateurs et on simplifie : le résultat ?", a / b + c / e, M("\\frac{" + (a * e + c * b) + "}{" + b * e + "} = " + frac(a * e + c * b, b * e)) + ".")] };
     }
@@ -198,7 +198,7 @@ const GEN = {
     if (d === 1) {
       const a = R.int(1, 9), b = R.int(2, 9), c = R.int(1, 9), e = R.int(2, 9);
       if (a === b || c === e) return GEN.fracmul(1);
-      return { fig: FIG.fractionBars([[a, b], [c, e]]), q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} \\cdot \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: (a * c) / (b * e) }, sol: M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "} = " + frac(a * c, b * e)) };
+      return { q: "Calcule et simplifie : " + M("\\frac{" + a + "}{" + b + "} \\cdot \\frac{" + c + "}{" + e + "}"), spec: { kind: "value", value: (a * c) / (b * e) }, sol: M("\\frac{" + a + " \\cdot " + c + "}{" + b + " \\cdot " + e + "} = " + frac(a * c, b * e)) };
     }
     if (d === 2) {
       const a = R.int(1, 9), b = R.int(2, 9), c = R.int(1, 9), e = R.int(2, 9);
@@ -212,14 +212,14 @@ const GEN = {
   pct(d) {
     if (d === 1) {
       const p = R.pick([10, 20, 25, 50, 75]), n = 20 * R.int(2, 15);
-      return { fig: FIG.percentBar(p, n), q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)),
+      return { q: "Calcule " + M(p + "\\,\\%") + " de " + M(n) + ".", spec: { kind: "value", value: (p * n) / 100 }, sol: M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((p * n) / 100)),
         traps: [TRAP(n / p, "Tu as divisé " + n + " par " + p + ". Or " + p + " % de " + n + ", c'est " + p + " centièmes de " + n + " : " + M("\\frac{" + p + "}{100} \\cdot " + n) + "."), TRAP(n - (p * n) / 100, "Ça, c'est ce qui reste après avoir retiré " + p + " %. On demande seulement " + p + " % de " + n + ".")],
         guide: [GS("Combien vaut " + M("1\\,\\%") + " de " + M(n) + " ? (on divise par 100)", n / 100, M(n + " : 100 = " + dec(n / 100)) + "."), GS("Et " + M(p + "\\,\\%") + ", c'est " + M(p) + " fois plus : combien ?", (p * n) / 100, M(p + " \\cdot " + dec(n / 100) + " = " + dec((p * n) / 100)) + ".")] };
     }
     if (d === 2) {
       const p = R.pick([10, 20, 25, 30, 40]), n = 10 * R.int(3, 20), up = R.rand() < 0.5;
       const v = n * (1 + (up ? p : -p) / 100);
-      return { fig: FIG.percentBar(p, n, " CHF"), q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF.",
+      return { q: "Un article coûte " + M(n) + " CHF. Son prix " + (up ? "augmente" : "baisse") + " de " + M(p + "\\,\\%") + ". Quel est le nouveau prix ?", spec: { kind: "value", value: v }, sol: M(n + " \\cdot " + dec(1 + (up ? p : -p) / 100) + " = " + dec(v)) + " CHF.",
         traps: [TRAP((n * p) / 100, "Ça, c'est " + (up ? "l'augmentation" : "la baisse") + " seulement. Il faut encore " + (up ? "l'ajouter au" : "la retirer du") + " prix de départ."), TRAP(n * (1 + (up ? -p : p) / 100), "Attention au sens : le prix " + (up ? "augmente" : "baisse") + ".")],
         guide: [GS("Combien font " + M(p + "\\,\\%") + " de " + M(n) + " CHF ?", (n * p) / 100, M("\\frac{" + p + "}{100} \\cdot " + n + " = " + dec((n * p) / 100)) + " CHF."), GS("Le prix " + (up ? "augmente" : "baisse") + " : nouveau prix ?", v, M(n + (up ? " + " : " - ") + dec((n * p) / 100) + " = " + dec(v)) + " CHF.")] };
     }
@@ -232,7 +232,7 @@ const GEN = {
   puiss(d) {
     if (d === 1) {
       const a = R.pick([2, 3, 10]), m = R.int(1, 3), n = R.int(1, 3);
-      return { fig: FIG.blocks(a + "^" + m + " · " + a + "^" + n), q: "Calcule : " + M(a + "^" + m + " \\cdot " + a + "^" + n), spec: { kind: "value", value: a ** (m + n) }, sol: M(a + "^{" + (m + n) + "} = " + a ** (m + n)) };
+      return { q: "Calcule : " + M(a + "^" + m + " \\cdot " + a + "^" + n), spec: { kind: "value", value: a ** (m + n) }, sol: M(a + "^{" + (m + n) + "} = " + a ** (m + n)) };
     }
     if (d === 2) {
       const m = R.int(2, 7), n = R.int(-6, -1);
@@ -246,7 +246,7 @@ const GEN = {
     if (d === 1) {
       const m = R.int(11, 99) / 10, e = R.int(-5, -2);
       const v = m * 10 ** e;
-      return { fig: FIG.sciScale(e), q: "Écris " + M(dec(v)) + " en notation scientifique (par exemple " + M("2{,}5 \\cdot 10^{-3}") + ").", spec: { kind: "value", value: v }, sol: M(dec(v) + " = " + dec(m) + " \\cdot 10^{" + e + "}") };
+      return { q: "Écris " + M(dec(v)) + " en notation scientifique (par exemple " + M("2{,}5 \\cdot 10^{-3}") + ").", spec: { kind: "value", value: v }, sol: M(dec(v) + " = " + dec(m) + " \\cdot 10^{" + e + "}") };
     }
     if (d === 2) {
       const a = R.int(2, 9), b = R.int(2, 9), m = R.int(3, 8), n = R.int(-6, -2);
@@ -262,12 +262,12 @@ const GEN = {
   rac(d) {
     if (d === 1) {
       const k = R.int(2, 20);
-      return { fig: FIG.areaSquare("aire " + k * k), q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
+      return { q: "Calcule " + M("\\sqrt{" + k * k + "}") + ".", spec: { kind: "value", value: k }, sol: M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
         guide: [GS("On cherche le nombre qui, multiplié par lui-même, donne " + M(k * k) + ". Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) + "^2 = " + (k - 1) ** 2) + " : c'est moins que " + M(k * k) + ", essaie un peu plus."), GS("Alors " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k + "^2 = " + k * k) + ", donc " + M("\\sqrt{" + k * k + "} = " + k) + ".")] };
     }
     if (d === 2) {
       const k = R.int(2, 7), m = R.pick([2, 3, 5, 6, 7]);
-      return { fig: FIG.areaSquare("aire " + k * k * m), q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}"),
+      return { q: "Écris " + M("\\sqrt{" + k * k * m + "}") + " sous la forme " + M("a\\sqrt{b}") + " (tape par exemple " + M("3\\sqrt{2}") + " avec la touche √).", spec: { kind: "value", value: k * Math.sqrt(m), radical: true }, canon: k + "√" + m, sol: M("\\sqrt{" + k * k + " \\cdot " + m + "} = " + k + "\\sqrt{" + m + "}"),
         guide: [GS("Quel est le plus grand carré parfait qui divise " + M(k * k * m) + " ? (4, 9, 16, 25, 36, 49…)", k * k, M(k * k * m + " = " + k * k + " \\cdot " + m) + "."), GS("La racine de ce carré : " + M("\\sqrt{" + k * k + "}") + " = ?", k, M("\\sqrt{" + k * k + "} = " + k) + "."), GSR("Donc " + M("\\sqrt{" + k * k * m + "} = \\sqrt{" + k * k + "} \\cdot \\sqrt{" + m + "}") + " = ? (forme " + M("a\\sqrt{b}") + ")", k * Math.sqrt(m), M("\\sqrt{" + k * k * m + "} = " + k + "\\sqrt{" + m + "}") + ".")] };
     }
     const m = R.pick([2, 3, 5]), a = R.int(2, 4), b = R.int(2, 5);
@@ -279,7 +279,7 @@ const GEN = {
     const x = R.nz(-5, 5);
     if (d === 1) {
       const a = R.nz(-6, 6), b = R.nz(-9, 9);
-      return { fig: FIG.numberLine(0, [x]), q: "Calcule " + M(poly([a, b])) + " pour " + M("x = " + x) + ".", spec: { kind: "value", value: a * x + b }, sol: M(a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
+      return { q: "Calcule " + M(poly([a, b])) + " pour " + M("x = " + x) + ".", spec: { kind: "value", value: a * x + b }, sol: M(a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
     }
     if (d === 2) {
       const a = R.nz(-4, 4), b = R.nz(-6, 6);
@@ -307,11 +307,11 @@ const GEN = {
   distrib(d) {
     if (d === 1) {
       const k = R.pick([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7]), a = R.int(1, 6), b = R.nz(-9, 9);
-      return { fig: FIG.tiles(160, 70, poly([a, b]).replace(/\^2/g,"²"), String(k)), q: "Développe : " + M(k + "(" + poly([a, b]) + ")"), spec: { kind: "expr", expr: k + "*(" + a + "x+(" + b + "))", form: "expanded" }, sol: M(poly([k * a, k * b])) };
+      return { q: "Développe : " + M(k + "(" + poly([a, b]) + ")"), spec: { kind: "expr", expr: k + "*(" + a + "x+(" + b + "))", form: "expanded" }, sol: M(poly([k * a, k * b])) };
     }
     if (d === 2) {
       const a = R.nz(-8, 8), b = R.nz(-8, 8);
-      return { fig: FIG.tiles(170, 90, "x " + (a < 0 ? "− " + -a : "+ " + a), "x " + (b < 0 ? "− " + -b : "+ " + b)), q: "Développe et réduis : " + M("(" + poly([1, a]) + ")(" + poly([1, b]) + ")"), spec: { kind: "expr", expr: "(x+(" + a + "))(x+(" + b + "))", form: "expanded" }, sol: M("x^2 " + (b < 0 ? "- " + -b : "+ " + b) + "x " + (a < 0 ? "- " + -a : "+ " + a) + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([1, a + b, a * b])) };
+      return { q: "Développe et réduis : " + M("(" + poly([1, a]) + ")(" + poly([1, b]) + ")"), spec: { kind: "expr", expr: "(x+(" + a + "))(x+(" + b + "))", form: "expanded" }, sol: M("x^2 " + (b < 0 ? "- " + -b : "+ " + b) + "x " + (a < 0 ? "- " + -a : "+ " + a) + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([1, a + b, a * b])) };
     }
     const a = R.int(2, 5), b = R.nz(-7, 7), c = R.int(2, 5), e = R.nz(-7, 7);
     return { q: "Développe et réduis : " + M("(" + poly([a, b]) + ")(" + poly([c, e]) + ")"), spec: { kind: "expr", expr: "(" + a + "x+(" + b + "))(" + c + "x+(" + e + "))", form: "expanded" }, sol: M(poly([a * c, a * e + b * c, b * e])) };
@@ -319,7 +319,7 @@ const GEN = {
 
   idrem(d) {
     const a = R.int(1, 9);
-    if (d === 1) return { fig: FIG.tiles(120, 120, "x + " + a, "x + " + a), q: "Développe : " + M("(x + " + a + ")^2"), spec: { kind: "expr", expr: "(x+" + a + ")^2", form: "expanded" }, sol: M("x^2 + 2 \\cdot " + a + "x + " + a + "^2 = " + poly([1, 2 * a, a * a])) };
+    if (d === 1) return { q: "Développe : " + M("(x + " + a + ")^2"), spec: { kind: "expr", expr: "(x+" + a + ")^2", form: "expanded" }, sol: M("x^2 + 2 \\cdot " + a + "x + " + a + "^2 = " + poly([1, 2 * a, a * a])) };
     if (d === 2) {
       if (R.rand() < 0.5) return { q: "Développe : " + M("(x - " + a + ")^2"), spec: { kind: "expr", expr: "(x-" + a + ")^2", form: "expanded" }, sol: M(poly([1, -2 * a, a * a])) + " (n'oublie pas le double produit)." };
       return { q: "Développe : " + M("(x + " + a + ")(x - " + a + ")"), spec: { kind: "expr", expr: "x^2-" + a * a, form: "expanded" }, sol: M("x^2 - " + a * a) };
@@ -332,7 +332,7 @@ const GEN = {
     if (d === 1) {
       const g = R.int(2, 6), a = R.int(1, 5), b = R.nz(-7, 7);
       if (gcd(a, b) !== 1) return GEN.factor(1);
-      return { fig: FIG.tiles(170, 70, "?", "?"), q: "Factorise : " + M(poly([g * a, g * b, 0])), spec: { kind: "expr", expr: g + "x(" + a + "x+(" + b + "))", form: "product" }, sol: M(g + "x(" + poly([a, b]) + ")") + " : mise en évidence de " + M(g + "x") + "." };
+      return { q: "Factorise : " + M(poly([g * a, g * b, 0])), spec: { kind: "expr", expr: g + "x(" + a + "x+(" + b + "))", form: "product" }, sol: M(g + "x(" + poly([a, b]) + ")") + " : mise en évidence de " + M(g + "x") + "." };
     }
     if (d === 2) {
       const a = R.int(1, 9), k = R.pick([1, 1, 2, 3]);
@@ -350,7 +350,7 @@ const GEN = {
   eq1(d) {
     if (d === 1) {
       const a = R.nz(-6, 7), x = R.nz(-9, 9), b = R.nz(-12, 12);
-      return { fig: FIG.balance(poly([a, b]).replace(/\^2/g,"²"), String(a * x + b)), q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + "."),
+      return { q: "Résous : " + M(poly([a, b]) + " = " + (a * x + b)), spec: { kind: "value", value: x }, sol: "On " + (b > 0 ? "soustrait " + b : "ajoute " + -b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + (a === 1 ? "." : ", puis on divise par " + M(par(a)) + " : " + M("x = " + x) + "."),
         traps: [TRAP((a * x + 2 * b) / a, "Quand on fait passer " + M(b) + " de l'autre côté, il change de signe : on " + (b > 0 ? "soustrait" : "ajoute") + " " + M(Math.abs(b)) + " des deux côtés."), ...(a !== 1 ? [TRAP(a * x * a, "Pour isoler " + M("x") + ", on divise par " + M(a) + " (on ne multiplie pas).")] : [])],
         guide: [GS("On enlève " + M(b) + " des deux côtés : " + M((a === 1 ? "" : a === -1 ? "-" : a) + "x = \\ ?"), a * x, M((a === 1 ? "" : a === -1 ? "-" : a) + "x = " + (a * x + b) + (b > 0 ? " - " + b : " + " + -b) + " = " + a * x) + "."), ...(a !== 1 ? [GS("On divise par " + M(par(a)) + " : " + M("x") + " = ?", x, M("x = " + a * x + " : " + par(a) + " = " + x) + ".")] : [])] };
     }
@@ -358,7 +358,7 @@ const GEN = {
       let a, c; do { a = R.int(2, 6); c = R.int(1, 5); } while (a === c);
       const b = R.nz(-6, 6), e = R.nz(-9, 9);
       const x = (e - a * b) / (a - c);
-      return { fig: FIG.balance(a + "(x " + (b < 0 ? "− " + -b : "+ " + b) + ")", poly([c, e])), q: "Résous : " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + poly([c, e])), spec: { kind: "value", value: x }, sol: M(a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([c, e]) + " \\iff " + (a - c) + "x = " + (e - a * b) + " \\iff x = " + frac(e - a * b, a - c)),
+      return { q: "Résous : " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + poly([c, e])), spec: { kind: "value", value: x }, sol: M(a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b) + " = " + poly([c, e]) + " \\iff " + (a - c) + "x = " + (e - a * b) + " \\iff x = " + frac(e - a * b, a - c)),
         traps: [TRAP((e - b) / (a - c), "En développant, il faut multiplier les deux termes de la parenthèse : " + M(a + " \\cdot " + par(b)) + " aussi.")],
         guide: [GS("On développe " + M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ")") + " : quel est le nombre seul obtenu (" + M(a + " \\cdot " + par(b)) + ") ?", a * b, M(a + "(x " + (b < 0 ? "- " + -b : "+ " + b) + ") = " + a + "x " + (a * b < 0 ? "- " + -a * b : "+ " + a * b)) + "."), GS("On regroupe les " + M("x") + " à gauche et les nombres à droite : " + M((a - c) + "x = \\ ?"), e - a * b, M((a - c) + "x = " + (e - a * b)) + "."), GS("On divise par " + M(a - c) + " : " + M("x") + " = ? (fraction acceptée)", x, M("x = " + frac(e - a * b, a - c)) + ".")] };
     }
@@ -386,12 +386,12 @@ const GEN = {
   prop(d) {
     if (d === 1) {
       const k = R.int(2, 6), u = R.int(2, 9), n = R.int(2, 12);
-      return { fig: FIG.items(k, k + " cahiers → " + k * u + " CHF"), guide: [GS("Prix d'un cahier : " + M(k * u + " : " + k) + " = ? (en CHF)", u, M(u) + " CHF."), GS("Prix de " + n + " cahiers ?", n * u, M(n + " \\cdot " + u + " = " + n * u) + " CHF.")], q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u },
+      return { guide: [GS("Prix d'un cahier : " + M(k * u + " : " + k) + " = ? (en CHF)", u, M(u) + " CHF."), GS("Prix de " + n + " cahiers ?", n * u, M(n + " \\cdot " + u + " = " + n * u) + " CHF.")], q: M(k) + " cahiers coûtent " + M(k * u) + " CHF. Combien coûtent " + M(n) + " cahiers ?", spec: { kind: "value", value: n * u },
         traps: [TRAP(k * u * n, "Tu as multiplié le prix de " + k + " cahiers par " + n + ". Cherche d'abord le prix d'un seul cahier."), TRAP(k * u + n - k, "En proportionnalité, on ne rajoute pas la différence de quantité : on passe par le prix d'un cahier.")], sol: "Un cahier coûte " + M(u) + " CHF, donc " + M(n + " \\cdot " + u + " = " + n * u) + " CHF." };
     }
     if (d === 2) {
       const g = 25 * R.int(4, 16), p1 = R.pick([4, 6, 8]), p2 = R.pick([3, 5, 10, 12]);
-      return { fig: FIG.items(p1, p1 + " personnes → " + g + " g"), guide: [GS("Farine pour 1 personne : " + M(g + " : " + p1) + " = ? (en g)", g / p1, M(dec(g / p1)) + " g."), GS("Pour " + p2 + " personnes ?", (g * p2) / p1, M(dec(g / p1) + " \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g.")], q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, traps: [TRAP((g * p1) / p2, "Tu as inversé le rapport : " + (p2 > p1 ? "plus" : "moins") + " de personnes, donc " + (p2 > p1 ? "plus" : "moins") + " de farine."), TRAP(g * p2, "Tu as oublié de diviser par " + p1 + " : cherche d'abord la farine pour une personne.")], sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
+      return { guide: [GS("Farine pour 1 personne : " + M(g + " : " + p1) + " = ? (en g)", g / p1, M(dec(g / p1)) + " g."), GS("Pour " + p2 + " personnes ?", (g * p2) / p1, M(dec(g / p1) + " \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g.")], q: "Pour " + M(p1) + " personnes, une recette demande " + M(g) + " g de farine. Combien en faut-il pour " + M(p2) + " personnes ?", spec: { kind: "value", value: (g * p2) / p1 }, traps: [TRAP((g * p1) / p2, "Tu as inversé le rapport : " + (p2 > p1 ? "plus" : "moins") + " de personnes, donc " + (p2 > p1 ? "plus" : "moins") + " de farine."), TRAP(g * p2, "Tu as oublié de diviser par " + p1 + " : cherche d'abord la farine pour une personne.")], sol: M("\\frac{" + g + "}{" + p1 + "} \\cdot " + p2 + " = " + dec((g * p2) / p1)) + " g." };
     }
     const rate = R.pick([0.92, 0.94, 0.95, 1.05, 1.08]), e = 10 * R.int(2, 30);
     return { guide: [GS("1 € = " + dec(rate) + " CHF : pour avoir des euros, on multiplie ou on divise par " + dec(rate) + " ? Calcule " + M(dec(e * rate) + " : " + dec(rate)) + ".", e, M(e) + " euros.")], q: "1 euro vaut " + M(dec(rate)) + " CHF. Combien d'euros obtient-on pour " + M(dec(e * rate)) + " CHF ?", spec: { kind: "value", value: e }, traps: [TRAP(+(e * rate * rate).toFixed(4), "Tu as multiplié par " + dec(rate) + " : ça convertit des euros en francs. Pour passer des francs aux euros, on divise.")], sol: M(dec(e * rate) + " : " + dec(rate) + " = " + e) + " euros." };
@@ -400,11 +400,11 @@ const GEN = {
   vitesse(d) {
     if (d === 1) {
       const v = 10 * R.int(3, 12), t = R.int(2, 5);
-      return { fig: FIG.road(v * t + " km", t + " h"), q: "Une voiture parcourt " + M(v * t) + " km en " + M(t) + " h. Quelle est sa vitesse moyenne (en km/h) ?", spec: { kind: "value", value: v }, sol: M("v = \\frac{" + v * t + "}{" + t + "} = " + v) + " km/h." };
+      return { q: "Une voiture parcourt " + M(v * t) + " km en " + M(t) + " h. Quelle est sa vitesse moyenne (en km/h) ?", spec: { kind: "value", value: v }, sol: M("v = \\frac{" + v * t + "}{" + t + "} = " + v) + " km/h." };
     }
     if (d === 2) {
       const v = R.pick([60, 72, 80, 90, 120]), mins = R.pick([15, 20, 30, 40, 45]), dist = (v * mins) / 60;
-      return { fig: FIG.road(FIG.fmt(dist) + " km", v + " km/h"), q: "À " + M(v) + " km/h, combien de minutes faut-il pour parcourir " + M(dec(dist)) + " km ?", spec: { kind: "value", value: mins }, sol: M("t = \\frac{" + dec(dist) + "}{" + v + "} \\text{ h} = " + mins) + " min." };
+      return { q: "À " + M(v) + " km/h, combien de minutes faut-il pour parcourir " + M(dec(dist)) + " km ?", spec: { kind: "value", value: mins }, sol: M("t = \\frac{" + dec(dist) + "}{" + v + "} \\text{ h} = " + mins) + " min." };
     }
     const v = 18 * R.int(1, 7);
     return { q: "Convertis " + M(v) + " km/h en m/s.", spec: { kind: "value", value: v / 3.6 }, sol: M(v + " : 3{,}6 = " + dec(v / 3.6)) + " m/s." };
@@ -413,14 +413,14 @@ const GEN = {
   echelle(d) {
     if (d === 1) {
       const k = R.pick([50, 200, 250, 500, 1000]), c = R.int(2, 12);
-      return { fig: FIG.scaling(k, "1:" + k), guide: [GS("Longueur réelle en cm : " + M(c + " \\cdot " + k) + " = ?", c * k, M(c * k) + " cm."), GS("En mètres (: 100) ?", (c * k) / 100, M(dec((c * k) / 100)) + " m.")], q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, traps: [TRAP(c * k, "C'est la longueur réelle en centimètres ; convertis-la en mètres (1 m = 100 cm)."), TRAP((c * k) / 1000, "1 m = 100 cm (et non 1000) : divise par 100.")], sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
+      return { guide: [GS("Longueur réelle en cm : " + M(c + " \\cdot " + k) + " = ?", c * k, M(c * k) + " cm."), GS("En mètres (: 100) ?", (c * k) / 100, M(dec((c * k) / 100)) + " m.")], q: "Sur un plan à l'échelle " + M("1\\,:\\, " + k) + ", un mur mesure " + M(c) + " cm. Quelle est sa longueur réelle, en mètres ?", spec: { kind: "value", value: (c * k) / 100 }, traps: [TRAP(c * k, "C'est la longueur réelle en centimètres ; convertis-la en mètres (1 m = 100 cm)."), TRAP((c * k) / 1000, "1 m = 100 cm (et non 1000) : divise par 100.")], sol: M(c + " \\cdot " + k + " = " + c * k) + " cm, soit " + M(dec((c * k) / 100)) + " m." };
     }
     if (d === 2) {
       const k = R.int(2, 5), A = R.int(2, 12);
-      return { fig: FIG.scaling(k, ""), guide: [GS("Les longueurs sont multipliées par " + k + ". Les aires sont multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Nouvelle aire ?", A * k * k, M(A + " \\cdot " + k * k + " = " + A * k * k) + " cm².")], q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, traps: [TRAP(A * k, "Les longueurs sont multipliées par " + k + ", mais les aires par " + k + "² = " + k * k + ".")], sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
+      return { guide: [GS("Les longueurs sont multipliées par " + k + ". Les aires sont multipliées par " + M(k + "^2") + " = ?", k * k, M(k * k) + "."), GS("Nouvelle aire ?", A * k * k, M(A + " \\cdot " + k * k + " = " + A * k * k) + " cm².")], q: "On agrandit une figure de rapport " + M(k) + ". Son aire était de " + M(A) + " cm². Quelle est sa nouvelle aire (en cm²) ?", spec: { kind: "value", value: A * k * k }, traps: [TRAP(A * k, "Les longueurs sont multipliées par " + k + ", mais les aires par " + k + "² = " + k * k + ".")], sol: "Les aires sont multipliées par " + M(k + "^2 = " + k * k) + " : " + M(A * k * k) + " cm²." };
     }
     const k = R.int(2, 4), V = R.int(2, 9);
-    return { fig: FIG.scaling(k, ""), guide: [GS("Les volumes sont multipliés par " + M(k + "^3") + " = ?", k ** 3, M(k ** 3) + "."), GS("Volume réel ?", V * k ** 3, M(V + " \\cdot " + k ** 3 + " = " + V * k ** 3) + " dm³.")], q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, traps: [TRAP(V * k, "Les longueurs sont multipliées par " + k + ", mais les volumes par " + k + "³ = " + k ** 3 + "."), TRAP(V * k * k, k + "², c'est pour les aires. Les volumes sont multipliés par " + k + "³ = " + k ** 3 + ".")], sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
+    return { guide: [GS("Les volumes sont multipliés par " + M(k + "^3") + " = ?", k ** 3, M(k ** 3) + "."), GS("Volume réel ?", V * k ** 3, M(V + " \\cdot " + k ** 3 + " = " + V * k ** 3) + " dm³.")], q: "Une maquette est " + M(k) + " fois plus petite que l'objet réel. Son volume est de " + M(V) + " dm³. Quel est le volume de l'objet réel (en dm³) ?", spec: { kind: "value", value: V * k ** 3 }, traps: [TRAP(V * k, "Les longueurs sont multipliées par " + k + ", mais les volumes par " + k + "³ = " + k ** 3 + "."), TRAP(V * k * k, k + "², c'est pour les aires. Les volumes sont multipliés par " + k + "³ = " + k ** 3 + ".")], sol: "Les volumes sont multipliés par " + M(k + "^3 = " + k ** 3) + " : " + M(V * k ** 3) + " dm³." };
   },
 
   aires(d) {
@@ -475,7 +475,7 @@ const GEN = {
     const a = R.nz(-5, 5), b = R.nz(-9, 9);
     if (d === 1) {
       const x = R.nz(-6, 6);
-      return { fig: FIG.lineGraph(a, b, [[x, a * x + b, "?"]]), q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: a * x + b }, sol: M("f(" + x + ") = " + a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
+      return { q: "Soit " + M("f(x) = " + poly([a, b])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: a * x + b }, sol: M("f(" + x + ") = " + a + " \\cdot " + par(x) + (b < 0 ? " - " + -b : " + " + b) + " = " + (a * x + b)) };
     }
     if (d === 2) {
       const x1 = R.int(-4, 1), x2 = x1 + R.int(1, 4);
@@ -491,7 +491,7 @@ Object.assign(GEN, {
   eq3(d) {
     if (d === 1) {
       const k = R.int(1, 9);
-      return { fig: FIG.balance("x³ − " + k * k + "x", "0"), q: "Résous : " + M("x^3 - " + k * k + "x = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [0, k, -k] }, sol: M("x(x^2 - " + k * k + ") = x(x - " + k + ")(x + " + k + ") = 0") + " : " + M("S = \\{-" + k + " ; 0 ; " + k + "\\}") };
+      return { q: "Résous : " + M("x^3 - " + k * k + "x = 0") + ". Sépare les solutions par « ; ».", spec: { kind: "set", values: [0, k, -k] }, sol: M("x(x^2 - " + k * k + ") = x(x - " + k + ")(x + " + k + ") = 0") + " : " + M("S = \\{-" + k + " ; 0 ; " + k + "\\}") };
     }
     if (d === 2) {
       const b = R.nz(-9, 9);
@@ -505,12 +505,12 @@ Object.assign(GEN, {
   eq2disc(d) {
     if (d === 1) {
       const p = R.nz(-8, 8), q = R.nz(-8, 8), b = -(p + q), c = p * q;
-      return { fig: FIG.balance(poly([1, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + (p === q ? "discriminant nul, une seule solution : " : "") + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
+      return { q: "Résous : " + M(poly([1, b, c]) + " = 0") + ".", spec: { kind: "set", values: [...new Set([p, q])] }, sol: M("\\Delta = " + par(b) + "^2 - 4 \\cdot " + par(c) + " = " + (b * b - 4 * c)) + " ; " + M("x = \\frac{" + -b + " \\pm " + Math.abs(p - q) + "}{2}") + " : " + (p === q ? "discriminant nul, une seule solution : " : "") + M("S = \\{" + [...new Set([p, q])].sort((u, v) => u - v).join(" ; ") + "\\}") };
     }
     if (d === 2) {
       if (R.rand() < 0.3) {
         const a = R.int(1, 3), b = R.int(-3, 3), c = R.int(Math.ceil((b * b) / (4 * a)) + 1, 9);
-        return { fig: FIG.balance(poly([a, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([a, b, c]) + " = 0") + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: M("\\Delta = " + (b * b - 4 * a * c) + " < 0") + " : aucune solution réelle, la parabole ne coupe pas l'axe des x." };
+        return { q: "Résous : " + M(poly([a, b, c]) + " = 0") + ". (S'il n'y a pas de solution, écris « aucune ».)", spec: { kind: "set", values: [] }, sol: M("\\Delta = " + (b * b - 4 * a * c) + " < 0") + " : aucune solution réelle, la parabole ne coupe pas l'axe des x." };
       }
       const a = R.int(2, 4), p = R.nz(-5, 5), q = R.int(1, 5);
       // a(x - p)(x - q/a) = a x² - (a p + q) x + p q
@@ -519,7 +519,7 @@ Object.assign(GEN, {
     }
     let b, c, D;
     do { b = R.int(-6, 6); c = R.int(-6, 4); D = b * b - 4 * c; } while (D <= 0 || Number.isInteger(Math.sqrt(D)));
-    return { fig: FIG.balance(poly([1, b, c]).replace(/\^2/g, "²"), "0"), q: "Résous : " + M(poly([1, b, c]) + " = 0") + " (valeurs exactes, par exemple " + M("(3 + \\sqrt{5})/2") + ").", spec: { kind: "set", values: [(-b + Math.sqrt(D)) / 2, (-b - Math.sqrt(D)) / 2] }, sol: M("\\Delta = " + D) + " ; " + M("x = \\frac{" + -b + " \\pm \\sqrt{" + D + "}}{2}") };
+    return { q: "Résous : " + M(poly([1, b, c]) + " = 0") + " (valeurs exactes, par exemple " + M("(3 + \\sqrt{5})/2") + ").", spec: { kind: "set", values: [(-b + Math.sqrt(D)) / 2, (-b - Math.sqrt(D)) / 2] }, sol: M("\\Delta = " + D) + " ; " + M("x = \\frac{" + -b + " \\pm \\sqrt{" + D + "}}{2}") };
   },
 
   sys2(d) {
@@ -537,29 +537,29 @@ Object.assign(GEN, {
   fimg(d) {
     if (d === 1) {
       const b = R.nz(-5, 5), c = R.nz(-6, 6), x = R.nz(-4, 4);
-      return { fig: FIG.parabola((t) => (t * t + b * t + c) / 3, [[x, (x * x + b * x + c) / 3, "?"]]), q: "Soit " + M("f(x) = " + poly([1, b, c])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: x * x + b * x + c }, sol: M(par(x) + "^2 " + (b < 0 ? "- " + -b : "+ " + b) + " \\cdot " + par(x) + (c < 0 ? " - " + -c : " + " + c) + " = " + (x * x + b * x + c)) };
+      return { q: "Soit " + M("f(x) = " + poly([1, b, c])) + ". Calcule " + M("f(" + x + ")") + ".", spec: { kind: "value", value: x * x + b * x + c }, sol: M(par(x) + "^2 " + (b < 0 ? "- " + -b : "+ " + b) + " \\cdot " + par(x) + (c < 0 ? " - " + -c : " + " + c) + " = " + (x * x + b * x + c)) };
     }
     if (d === 2) {
       const k = R.int(-5, 5), r = R.int(1, 6);
       return { q: "Soit " + M("f(x) = \\sqrt{x " + (k < 0 ? "- " + -k : "+ " + k) + "}") + ". Calcule " + M("f(" + (r * r - k) + ")") + ".", spec: { kind: "value", value: r }, sol: M("\\sqrt{" + (r * r - k) + " " + (k < 0 ? "- " + -k : "+ " + k) + "} = \\sqrt{" + r * r + "} = " + r) };
     }
     const c = R.int(-6, 4), v = R.int(1, 7), y = v * v + c;
-    return { fig: FIG.parabola((t) => (t * t + c) / 3, [], null, false), q: "Soit " + M("f(x) = x^2 " + (c < 0 ? "- " + -c : c > 0 ? "+ " + c : "")) + ". Détermine les préimages de " + M(y) + ".", spec: { kind: "set", values: [v, -v] }, sol: M("x^2 = " + v * v) + " : " + M("x = " + v) + " ou " + M("x = -" + v) + "." };
+    return { q: "Soit " + M("f(x) = x^2 " + (c < 0 ? "- " + -c : c > 0 ? "+ " + c : "")) + ". Détermine les préimages de " + M(y) + ".", spec: { kind: "set", values: [v, -v] }, sol: M("x^2 = " + v * v) + " : " + M("x = " + v) + " ou " + M("x = -" + v) + "." };
   },
 
   f2(d) {
     if (d === 1) {
       const p = R.nz(-5, 5), q = R.nz(-5, 5);
-      return { fig: FIG.parabola((x) => (x - p) * (x - q) / 3, [], null, false), q: "Quels sont les zéros de " + M("f(x) = (x " + (p < 0 ? "+ " + -p : "- " + p) + ")(x " + (q < 0 ? "+ " + -q : "- " + q) + ")") + " ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Un produit est nul si un facteur est nul : " + M(p) + " et " + M(q) + "." };
+      return { q: "Quels sont les zéros de " + M("f(x) = (x " + (p < 0 ? "+ " + -p : "- " + p) + ")(x " + (q < 0 ? "+ " + -q : "- " + q) + ")") + " ?", spec: { kind: "set", values: [...new Set([p, q])] }, sol: "Un produit est nul si un facteur est nul : " + M(p) + " et " + M(q) + "." };
     }
     if (d === 2) {
       const h = R.nz(-4, 4), k = R.int(-6, 6);
       const b = -2 * h, c = h * h + k;
-      return { fig: FIG.parabola((x) => (x * x + b * x + c) / 3, [], null, false), q: "Détermine le sommet de " + M("f(x) = " + poly([1, b, c])) + ". Réponds « x ; y ».", spec: { kind: "pair", values: [h, k] }, sol: M("x_S = -\\frac{b}{2a} = " + h) + " ; " + M("f(" + h + ") = " + k) + " : " + M("S(" + h + " ; " + k + ")") };
+      return { q: "Détermine le sommet de " + M("f(x) = " + poly([1, b, c])) + ". Réponds « x ; y ».", spec: { kind: "pair", values: [h, k] }, sol: M("x_S = -\\frac{b}{2a} = " + h) + " ; " + M("f(" + h + ") = " + k) + " : " + M("S(" + h + " ; " + k + ")") };
     }
     const a = R.pick([-2, -1, 2, 3]), b = R.nz(-6, 6), c = R.int(-5, 5);
     const xs = -b / (2 * a), ys = a * xs * xs + b * xs + c;
-    return { fig: FIG.parabola((x) => (a * x * x + b * x + c) / 4, [], null, false), q: "Détermine le sommet de " + M("f(x) = " + poly([a, b, c])) + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [xs, ys] }, sol: M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + frac(-b, 2 * a)) + " ; " + M("y_S = f(x_S) = " + frac(Math.round(ys * 4 * a * a), 4 * a * a)) };
+    return { q: "Détermine le sommet de " + M("f(x) = " + poly([a, b, c])) + ". Réponds « x ; y » (fractions acceptées).", spec: { kind: "pair", values: [xs, ys] }, sol: M("x_S = -\\frac{" + b + "}{" + 2 * a + "} = " + frac(-b, 2 * a)) + " ; " + M("y_S = f(x_S) = " + frac(Math.round(ys * 4 * a * a), 4 * a * a)) };
   },
 
   inter(d) {
@@ -571,7 +571,7 @@ Object.assign(GEN, {
     // f(x) = x² + B x + c et g(x) = m x + k, choisis pour que f(x) - g(x) = (x - p)(x - q)
     const p = R.nz(-4, 3), q = p + R.int(1, 5), m = R.nz(-3, 3), c = R.int(-5, 5);
     const B = m - (p + q), k = c - p * q;
-    return { fig: FIG.parabola((x) => (x * x + B * x + c) / 4, [], (x) => (m * x + k) / 4, false), q: "Détermine les abscisses des points d'intersection de " + M("f(x) = " + poly([1, B, c])) + " et " + M("g(x) = " + poly([m, k])) + ".", spec: { kind: "set", values: [p, q] }, sol: M("f(x) = g(x) \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
+    return { q: "Détermine les abscisses des points d'intersection de " + M("f(x) = " + poly([1, B, c])) + " et " + M("g(x) = " + poly([m, k])) + ".", spec: { kind: "set", values: [p, q] }, sol: M("f(x) = g(x) \\iff " + poly([1, -(p + q), p * q]) + " = 0") + " : " + M("x = " + p) + " ou " + M("x = " + q) + "." };
   },
 
   angles(d) {
@@ -654,11 +654,11 @@ Object.assign(GEN, {
   expo(d) {
     if (d === 1) {
       // Solutions variées (commentaire testeur du 15.11 : « x tombe toujours entier ») : entière, demi-entière, négative, fractionnaire.
-      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 6 : 3), f = R.int(0, 3), fig = FIG.parabola((x) => Math.pow(b, x) / 3, [], null, false);
-      if (f === 1) return { fig, guide: [GS(M("\\sqrt{" + b + "}") + " = " + M(b + "^{?}") + " : exposant ?", 0.5, M(b + "^{1/2}") + "."), GS(M(b ** (n - 1)) + " = " + M(b + "^{?}") + " : exposant ?", n - 1, M(b + "^{" + (n - 1) + "}") + "."), GS("Donc x = somme des exposants ?", n - 0.5, M("x = " + frac(2 * n - 1, 2)) + ".")], q: "Résous : " + M(b + "^x = " + (n > 1 ? b ** (n - 1) : "") + "\\sqrt{" + b + "}") + ".", spec: { kind: "value", value: n - 0.5 }, traps: [TRAP(n - 1, "N'oublie pas la racine : " + M("\\sqrt{" + b + "} = " + b + "^{1/2}") + " ajoute " + M("\\frac{1}{2}") + " à l'exposant.")], sol: M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ", donc " + M(b + "^x = " + b + "^{" + (n - 1) + " + 1/2}") + " et " + M("x = " + frac(2 * n - 1, 2)) + "." };
-      if (f === 2) return { fig, guide: [GS("Le dénominateur " + M(b ** (n - 1) + "\\sqrt{" + b + "}") + " = " + M(b + "^{?}") + " : exposant ?", n - 0.5, M(b + "^{" + frac(2 * n - 1, 2) + "}") + "."), GS("Un inverse change le signe de l'exposant : x = ?", -(n - 0.5), M("x = " + frac(-(2 * n - 1), 2)) + ".")], q: "Résous : " + M(b + "^x = \\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}}") + ".", spec: { kind: "value", value: -(n - 0.5) }, traps: [TRAP(n - 0.5, "Le nombre est une fraction " + M("\\frac{1}{\\ldots}") + " : l'exposant est négatif."), TRAP(-(n - 1), "N'oublie pas la racine : " + M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ".")], sol: M("\\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}} = " + b + "^{-(" + (n - 1) + " + 1/2)}") + ", donc " + M("x = " + frac(-(2 * n - 1), 2)) + "." };
-      if (f === 3) { const k = 2 * R.int(1, 3) + 1; return { fig, guide: [GS(M(b ** k) + " = " + M(b + "^{?}") + " : exposant ?", k, M(b + "^{" + k + "}") + "."), GS("2x = " + k + " : x = ?", k / 2, M("x = " + frac(k, 2)) + ".")], q: "Résous : " + M(b + "^{2x} = " + b ** k) + ".", spec: { kind: "value", value: k / 2 }, traps: [TRAP(k, "C'est la valeur de " + M("2x") + ". Il reste à diviser par 2."), TRAP(2 * k, "De " + M("2x = " + k) + ", on tire x en divisant par 2, pas en multipliant.")], sol: M(b + "^{2x} = " + b + "^{" + k + "}") + ", donc " + M("2x = " + k) + " et " + M("x = " + frac(k, 2)) + "." }; }
-      return { fig, guide: [GS(M(b ** n) + " = " + M(b + "^{?}") + " : exposant ?", n, M(b + "^{" + n + "}") + "."), GS("Même base : x = ?", n, M("x = " + n) + ".")], q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, traps: [TRAP(b ** n / b, "On cherche l'exposant : combien de fois faut-il multiplier " + M(b) + " par lui-même pour obtenir " + M(b ** n) + " ?")], sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
+      const b = R.pick([2, 3, 5]), n = R.int(2, b === 2 ? 6 : 3), f = R.int(0, 3);
+      if (f === 1) return { guide: [GS(M("\\sqrt{" + b + "}") + " = " + M(b + "^{?}") + " : exposant ?", 0.5, M(b + "^{1/2}") + "."), GS(M(b ** (n - 1)) + " = " + M(b + "^{?}") + " : exposant ?", n - 1, M(b + "^{" + (n - 1) + "}") + "."), GS("Donc x = somme des exposants ?", n - 0.5, M("x = " + frac(2 * n - 1, 2)) + ".")], q: "Résous : " + M(b + "^x = " + (n > 1 ? b ** (n - 1) : "") + "\\sqrt{" + b + "}") + ".", spec: { kind: "value", value: n - 0.5 }, traps: [TRAP(n - 1, "N'oublie pas la racine : " + M("\\sqrt{" + b + "} = " + b + "^{1/2}") + " ajoute " + M("\\frac{1}{2}") + " à l'exposant.")], sol: M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ", donc " + M(b + "^x = " + b + "^{" + (n - 1) + " + 1/2}") + " et " + M("x = " + frac(2 * n - 1, 2)) + "." };
+      if (f === 2) return { guide: [GS("Le dénominateur " + M(b ** (n - 1) + "\\sqrt{" + b + "}") + " = " + M(b + "^{?}") + " : exposant ?", n - 0.5, M(b + "^{" + frac(2 * n - 1, 2) + "}") + "."), GS("Un inverse change le signe de l'exposant : x = ?", -(n - 0.5), M("x = " + frac(-(2 * n - 1), 2)) + ".")], q: "Résous : " + M(b + "^x = \\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}}") + ".", spec: { kind: "value", value: -(n - 0.5) }, traps: [TRAP(n - 0.5, "Le nombre est une fraction " + M("\\frac{1}{\\ldots}") + " : l'exposant est négatif."), TRAP(-(n - 1), "N'oublie pas la racine : " + M("\\sqrt{" + b + "} = " + b + "^{1/2}") + ".")], sol: M("\\frac{1}{" + b ** (n - 1) + "\\sqrt{" + b + "}} = " + b + "^{-(" + (n - 1) + " + 1/2)}") + ", donc " + M("x = " + frac(-(2 * n - 1), 2)) + "." };
+      if (f === 3) { const k = 2 * R.int(1, 3) + 1; return { guide: [GS(M(b ** k) + " = " + M(b + "^{?}") + " : exposant ?", k, M(b + "^{" + k + "}") + "."), GS("2x = " + k + " : x = ?", k / 2, M("x = " + frac(k, 2)) + ".")], q: "Résous : " + M(b + "^{2x} = " + b ** k) + ".", spec: { kind: "value", value: k / 2 }, traps: [TRAP(k, "C'est la valeur de " + M("2x") + ". Il reste à diviser par 2."), TRAP(2 * k, "De " + M("2x = " + k) + ", on tire x en divisant par 2, pas en multipliant.")], sol: M(b + "^{2x} = " + b + "^{" + k + "}") + ", donc " + M("2x = " + k) + " et " + M("x = " + frac(k, 2)) + "." }; }
+      return { guide: [GS(M(b ** n) + " = " + M(b + "^{?}") + " : exposant ?", n, M(b + "^{" + n + "}") + "."), GS("Même base : x = ?", n, M("x = " + n) + ".")], q: "Résous : " + M(b + "^x = " + b ** n) + ".", spec: { kind: "value", value: n }, traps: [TRAP(b ** n / b, "On cherche l'exposant : combien de fois faut-il multiplier " + M(b) + " par lui-même pour obtenir " + M(b ** n) + " ?")], sol: M(b ** n + " = " + b + "^" + n) + ", donc " + M("x = " + n) + "." };
     }
     if (d === 2) {
       const b = R.pick([2, 3]), k = R.nz(-3, 3); let n; do n = R.int(2, b === 2 ? 6 : 5); while (Math.abs(n - k) <= 1); // 24.11 : x = n − k jamais 0 ni ±1 (robot) ; boucle toujours finie (n jusqu'à 5 pour la base 3)
@@ -666,7 +666,7 @@ Object.assign(GEN, {
     }
     const C = 1000 * R.int(1, 9), t = R.pick([1, 1.5, 2, 2.5, 3]), n = R.int(3, 12);
     const v = C * Math.pow(1 + t / 100, n);
-    return { fig: FIG.parabola((x) => Math.pow(1.3, x)), guide: [GS("Coefficient multiplicateur par an " + M("1 + " + dec(t) + "\\,\\%") + " = ?", 1 + t / 100, M(dec(1 + t / 100)) + "."), GS("Après " + n + " ans : " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "}") + " (au centime) ?", v, M(dec(v.toFixed(2))) + " CHF.", 0.01)], q: "Un capital de " + M(C) + " CHF est placé à " + M(dec(t) + "\\,\\%") + " d'intérêt composé par an. Que vaut-il après " + M(n) + " ans (au centime) ?", spec: { kind: "value", value: v, round: 0.01 }, traps: [TRAP(C * (1 + (t * n) / 100), "Ça, ce sont des intérêts simples. Avec des intérêts composés, on multiplie " + n + " fois par " + M(dec(1 + t / 100)) + "."), TRAP(v - C, "C'est l'intérêt gagné. On demande la valeur du capital.")], sol: M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "} \\approx " + dec(v.toFixed(2))) + " CHF." };
+    return { guide: [GS("Coefficient multiplicateur par an " + M("1 + " + dec(t) + "\\,\\%") + " = ?", 1 + t / 100, M(dec(1 + t / 100)) + "."), GS("Après " + n + " ans : " + M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "}") + " (au centime) ?", v, M(dec(v.toFixed(2))) + " CHF.", 0.01)], q: "Un capital de " + M(C) + " CHF est placé à " + M(dec(t) + "\\,\\%") + " d'intérêt composé par an. Que vaut-il après " + M(n) + " ans (au centime) ?", spec: { kind: "value", value: v, round: 0.01 }, traps: [TRAP(C * (1 + (t * n) / 100), "Ça, ce sont des intérêts simples. Avec des intérêts composés, on multiplie " + n + " fois par " + M(dec(1 + t / 100)) + "."), TRAP(v - C, "C'est l'intérêt gagné. On demande la valeur du capital.")], sol: M(C + " \\cdot " + dec(1 + t / 100) + "^{" + n + "} \\approx " + dec(v.toFixed(2))) + " CHF." };
   },
 
   log(d) {
@@ -677,7 +677,7 @@ Object.assign(GEN, {
     }
     if (d === 2) {
       const b = R.pick([2, 3, 5]), c = R.pick([7, 10, 15, 20, 50].filter((v) => v !== b));
-      return { fig: FIG.parabola((x) => Math.pow(b, x) / 4, [], null, false), guide: [GS("On prend ln des deux côtés : " + M("x \\cdot \\ln " + b + " = \\ln " + c) + ". " + M("\\ln " + c) + " ≈ ? (au centième)", Math.log(c), M(dec(Math.log(c).toFixed(2))) + ".", 0.01), GS(M("\\ln " + b) + " ≈ ?", Math.log(b), M(dec(Math.log(b).toFixed(2))) + ".", 0.01), GS("x = quotient (au centième) ?", Math.log(c) / Math.log(b), M(dec((Math.log(c) / Math.log(b)).toFixed(2))) + ".", 0.01)], q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, traps: [TRAP(c / b, "On ne divise pas " + M(c) + " par " + M(b) + " : on prend le logarithme des deux membres, " + M("x = \\frac{\\ln " + c + "}{\\ln " + b + "}") + "."), TRAP(Math.log(b) / Math.log(c), "Tu as inversé le quotient : " + M("x = \\frac{\\ln " + c + "}{\\ln " + b + "}") + ".")], sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
+      return { guide: [GS("On prend ln des deux côtés : " + M("x \\cdot \\ln " + b + " = \\ln " + c) + ". " + M("\\ln " + c) + " ≈ ? (au centième)", Math.log(c), M(dec(Math.log(c).toFixed(2))) + ".", 0.01), GS(M("\\ln " + b) + " ≈ ?", Math.log(b), M(dec(Math.log(b).toFixed(2))) + ".", 0.01), GS("x = quotient (au centième) ?", Math.log(c) / Math.log(b), M(dec((Math.log(c) / Math.log(b)).toFixed(2))) + ".", 0.01)], q: "Résous " + M(b + "^x = " + c) + " (valeur exacte avec ln, ou au centième).", spec: { kind: "value", value: Math.log(c) / Math.log(b), round: 0.01, exactOk: true }, traps: [TRAP(c / b, "On ne divise pas " + M(c) + " par " + M(b) + " : on prend le logarithme des deux membres, " + M("x = \\frac{\\ln " + c + "}{\\ln " + b + "}") + "."), TRAP(Math.log(b) / Math.log(c), "Tu as inversé le quotient : " + M("x = \\frac{\\ln " + c + "}{\\ln " + b + "}") + ".")], sol: M("x = \\frac{\\ln " + c + "}{\\ln " + b + "} \\approx " + dec((Math.log(c) / Math.log(b)).toFixed(2))) };
     }
     const a = R.pick([2, 4, 5, 20, 25]), b2 = 100 / a * R.pick([1, 10]);
     return { guide: [GS("Somme de log = log du produit : " + M(a + " \\cdot " + b2) + " = ?", a * b2, M(a * b2) + "."), GS(M("\\log " + a * b2) + " = ? (puissance de 10)", Math.log10(a * b2), M(Math.round(Math.log10(a * b2))) + ".")], q: "Calcule sans calculatrice : " + M("\\log " + a + " + \\log " + b2) + ".", spec: { kind: "value", value: Math.log10(a * b2) }, traps: [TRAP(a * b2, "C'est le produit " + M(a + " \\cdot " + b2) + ". Il reste à prendre son logarithme."), TRAP(Math.log10(a + b2), "Attention : " + M("\\log a + \\log b = \\log(a \\cdot b)") + ", pas " + M("\\log(a + b)") + ".")], sol: M("\\log(" + a + " \\cdot " + b2 + ") = \\log " + a * b2 + " = " + Math.round(Math.log10(a * b2))) + "." };
@@ -685,7 +685,7 @@ Object.assign(GEN, {
 
   absval(d) {
     const a = R.nz(-6, 6), b = R.int(1, 8);
-    if (d === 1) return { fig: FIG.numberLine(a, [], { span: [a - b, a + b] }), q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
+    if (d === 1) return { q: "Résous : " + M("|x " + (a < 0 ? "+ " + -a : "- " + a) + "| = " + b) + ".", spec: { kind: "set", values: [a - b, a + b] }, sol: M("x " + (a < 0 ? "+ " + -a : "- " + a) + " = " + b) + " ou " + M("= -" + b) + " : " + M("x = " + (a + b)) + " ou " + M("x = " + (a - b)) + "." };
     if (d === 2) {
       const k = R.pick([2, 3]), c = R.nz(-6, 6);
       return { q: "Résous : " + M("|" + k + "x " + (c < 0 ? "- " + -c : "+ " + c) + "| = " + b) + ".", spec: { kind: "set", values: [(b - c) / k, (-b - c) / k] }, sol: M(k + "x " + (c < 0 ? "- " + -c : "+ " + c) + " = \\pm " + b) + " : " + M("x = " + frac(b - c, k)) + " ou " + M("x = " + frac(-b - c, k)) + "." };
@@ -716,7 +716,7 @@ Object.assign(GEN, {
     if (d === 1) {
       const dg = R.pick([30, 45, 60, 90, 120, 135, 150, 180, 210, 270, 300, 360]);
       const g = gcd(dg, 180);
-      return { fig: FIG.unitCircle(dg), q: "Convertis " + M(dg + "°") + " en radians (par exemple « π/4 »).", spec: { kind: "value", value: rad(dg) }, sol: M(dg + "° = " + dg + " \\cdot \\frac{\\pi}{180} = " + (dg / g === 1 ? "" : dg / g) + "\\pi" + (180 / g === 1 ? "" : "/" + 180 / g)) };
+      return { q: "Convertis " + M(dg + "°") + " en radians (par exemple « π/4 »).", spec: { kind: "value", value: rad(dg) }, sol: M(dg + "° = " + dg + " \\cdot \\frac{\\pi}{180} = " + (dg / g === 1 ? "" : dg / g) + "\\pi" + (180 / g === 1 ? "" : "/" + 180 / g)) };
     }
     const angles = [[30, "1/2", "√3/2"], [45, "√2/2", "√2/2"], [60, "√3/2", "1/2"], [120, "√3/2", "-1/2"], [135, "√2/2", "-√2/2"], [150, "1/2", "-√3/2"], [210, "-1/2", "-√3/2"], [225, "-√2/2", "-√2/2"], [240, "-√3/2", "-1/2"], [300, "-√3/2", "1/2"], [315, "-√2/2", "√2/2"], [330, "-1/2", "√3/2"]];
     const [dg, sn, cs] = R.pick(angles);
@@ -749,13 +749,13 @@ Object.assign(GEN, {
     const n = d === 2 ? 2 * R.int(3, 4) : R.int(5, 7);
     const xs = Array.from({ length: n }, () => R.int(2, 20));
     const sum = xs.reduce((a, b) => a + b, 0), mean = sum / n;
-    if (d === 1) return { fig: FIG.barChart(xs), q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + (Number.isInteger(mean * 100) ? "." : " (arrondie au centième)."), spec: Number.isInteger(mean * 100) ? { kind: "value", value: mean } : { kind: "value", value: mean, round: 0.01 }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
+    if (d === 1) return { q: "Calcule la moyenne de la série : " + M(xs.join(" ; ")) + (Number.isInteger(mean * 100) ? "." : " (arrondie au centième)."), spec: Number.isInteger(mean * 100) ? { kind: "value", value: mean } : { kind: "value", value: mean, round: 0.01 }, sol: M("\\frac{" + sum + "}{" + n + "} = " + frac(sum, n)) + (Number.isInteger(mean) ? "" : " " + M("\\approx " + dec(mean.toFixed(2)))) };
     if (d === 2) {
       const so = [...xs].sort((a, b) => a - b), med = (so[n / 2 - 1] + so[n / 2]) / 2;
-      return { fig: FIG.barChart(xs), q: "Donne la médiane de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: med }, sol: "Série triée : " + M(so.join(" ; ")) + " ; médiane " + M("\\frac{" + so[n / 2 - 1] + " + " + so[n / 2] + "}{2} = " + dec(med)) };
+      return { q: "Donne la médiane de la série : " + M(xs.join(" ; ")) + ".", spec: { kind: "value", value: med }, sol: "Série triée : " + M(so.join(" ; ")) + " ; médiane " + M("\\frac{" + so[n / 2 - 1] + " + " + so[n / 2] + "}{2} = " + dec(med)) };
     }
     const sd = Math.sqrt(xs.reduce((a, x) => a + (x - mean) ** 2, 0) / n);
-    return { fig: FIG.barChart(xs), q: "Calcule l'écart-type " + M("\\sigma") + " de la série " + M(xs.join(" ; ")) + ", au centième.", spec: { kind: "value", value: sd, round: 0.01 }, sol: "Moyenne " + M(dec(mean.toFixed(2))) + " ; " + M("\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{" + n + "}} \\approx " + dec(sd.toFixed(2))) };
+    return { q: "Calcule l'écart-type " + M("\\sigma") + " de la série " + M(xs.join(" ; ")) + ", au centième.", spec: { kind: "value", value: sd, round: 0.01 }, sol: "Moyenne " + M(dec(mean.toFixed(2))) + " ; " + M("\\sigma = \\sqrt{\\frac{\\sum (x_i - \\bar{x})^2}{" + n + "}} \\approx " + dec(sd.toFixed(2))) };
   },
 });
 
@@ -784,7 +784,7 @@ const PROB = {
   pct() {
     const P = 20 * R.int(3, 25), up = R.pick([10, 20, 25, 30, 50]), dn = R.pick([10, 20, 25, 40]);
     const p1 = P * (1 + up / 100), p2 = p1 * (1 - dn / 100), glob = (p2 / P - 1) * 100;
-    return { fig: FIG.percentBar(up, P, " CHF"), q: "Un vélo coûte " + M(P) + " CHF. Son prix augmente de " + M(up + "\\,\\%") + ", puis baisse de " + M(dn + "\\,\\%") + " pendant les soldes.",
+    return { q: "Un vélo coûte " + M(P) + " CHF. Son prix augmente de " + M(up + "\\,\\%") + ", puis baisse de " + M(dn + "\\,\\%") + " pendant les soldes.",
       parts: [{ label: "a) Prix après la hausse (CHF)", spec: { kind: "value", value: p1 } }, { label: "b) Prix soldé (CHF)", spec: { kind: "value", value: p2 } }, { label: "c) Variation globale en % (négative si baisse)", spec: { kind: "value", value: glob, round: 0.01 } }],
       hints: ["Les pourcentages successifs se multiplient : on ne les additionne pas.", "Multiplie par " + dec(1 + up / 100) + " puis par " + dec(1 - dn / 100) + " ; variation globale = (prix final / prix initial − 1) · 100."],
       sol: "a) " + M(P + " \\cdot " + dec(1 + up / 100) + " = " + dec(p1)) + ". b) " + M(dec(p1) + " \\cdot " + dec(1 - dn / 100) + " = " + dec(r2(p2))) + ". c) " + M(dec(r2(glob)) + "\\,\\%") + " (et non " + (up - dn) + " %)." };
@@ -816,7 +816,7 @@ const PROB = {
   log() {
     const C = 1000 * R.int(2, 9), t = R.pick([2, 3, 4, 5]), n0 = R.int(3, 8);
     const v = C * Math.pow(1 + t / 100, n0), years = Math.ceil(Math.log(2) / Math.log(1 + t / 100));
-    return { fig: FIG.parabola((x) => Math.pow(1 + t / 100, x * 3) * 2 - 2), q: "On place " + M(C / 1000 + "\\text{'}000") /* 26.11 (revue p6, n° 14 : « 5000 CHF ») */ + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
+    return { q: "On place " + M(C / 1000 + "\\text{'}000") /* 26.11 (revue p6, n° 14 : « 5000 CHF ») */ + " CHF à " + M(t + "\\,\\%") + " d'intérêt composé par an.",
       parts: [{ label: "a) Capital après " + n0 + " ans (CHF, au centime)", spec: { kind: "value", value: v, round: 0.01 } }, { label: "b) Nombre d'années pour que le capital double (années entières)", spec: { kind: "value", value: years } }],
       hints: ["Chaque année, le capital est multiplié par " + dec(1 + t / 100) + ". Doubler : résoudre " + dec(1 + t / 100) + "ⁿ = 2.", "n = ln 2 / ln " + dec(1 + t / 100) + ", puis arrondir à l'année supérieure."],
       sol: "a) " + M(C / 1000 + "\\text{'}000 \\cdot " + dec(1 + t / 100) + "^{" + n0 + "} \\approx " + dec(r2(v)).replace(/^(\d+)(\d{3})(?!\d)/, "$1\\text{'}$2")) + " CHF. b) " + M("n = \\frac{\\ln 2}{\\ln " + dec(1 + t / 100) + "} \\approx " + dec(r2(Math.log(2) / Math.log(1 + t / 100)))) + ", donc " + M(years) + " ans." };
@@ -839,7 +839,7 @@ const PROB = {
     const notes = Array.from({ length: 4 }, () => R.int(7, 11) / 2), target = R.pick([4.5, 5]);
     const s = notes.reduce((a, b) => a + b, 0), need = target * 5 - s;
     if (need > 6 || need < 1) return PROB.stats();
-    return { fig: FIG.barChart(notes), q: "Tes quatre premières notes sont " + M(notes.map(dec).join(" ; ")) + ". Il reste une épreuve, de même coefficient.",
+    return { q: "Tes quatre premières notes sont " + M(notes.map(dec).join(" ; ")) + ". Il reste une épreuve, de même coefficient.",
       parts: [{ label: "a) Moyenne actuelle", spec: { kind: "value", value: s / 4 } }, { label: "b) Note à obtenir pour finir avec " + decTxt(target) + " de moyenne", spec: { kind: "value", value: need } }],
       hints: ["La moyenne finale = (somme des 5 notes) / 5.", "Il faut une somme de " + decTxt(target) + " · 5 = " + decTxt(target * 5) + " : retire la somme actuelle."],
       sol: "a) " + M("\\frac{" + dec(s) + "}{4} = " + dec(s / 4)) + ". b) " + M(dec(target * 5) + " - " + dec(s) + " = " + dec(need)) + "." };
@@ -847,14 +847,14 @@ const PROB = {
   vitesse() {
     const d = 10 * R.int(6, 18), v1 = R.pick([60, 80, 90, 100, 120]), v2 = R.pick([40, 50, 60, 75].filter((v) => v !== v1));
     const t1 = d / v1, t2 = d / v2, vm = (2 * d) / (t1 + t2);
-    return { fig: FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), q: "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
+    return { q: "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
       parts: [{ label: "a) Durée de l'aller (min)", spec: { kind: "value", value: t1 * 60, round: 0.01 } }, { label: "b) Durée du retour (min)", spec: { kind: "value", value: t2 * 60, round: 0.01 } }, { label: "c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", spec: { kind: "value", value: vm, round: 0.01 } }],
       hints: ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
       sol: "a) " + M(dec(r2(t1 * 60))) + " min. b) " + M(dec(r2(t2 * 60))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + dec(r2(t1 + t2)) + "} \\approx " + dec(r2(vm))) + " km/h (et non " + dec((v1 + v2) / 2) + ")." };
   },
   echelle() {
     const k = R.pick([20, 25, 50, 100]), lm = R.int(4, 15), am = R.int(6, 40), vm = R.int(2, 9);
-    return { fig: FIG.scaling(3, "1 : " + k), q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
+    return { q: "Une maquette de bâtiment est à l'échelle " + M("1\\,:\\, " + k) + ".",
       parts: [{ label: "a) Un mur mesure " + lm + " cm sur la maquette : longueur réelle (m)", spec: { kind: "value", value: (lm * k) / 100 } }, { label: "b) Une pièce mesure " + am + " cm² sur la maquette : aire réelle (m²)", spec: { kind: "value", value: (am * k * k) / 10000 } }, { label: "c) Une cuve de " + vm + " cm³ sur la maquette : volume réel (m³)", spec: { kind: "value", value: (vm * k ** 3) / 1e6 } }],
       hints: ["Longueurs × " + decTxt(k) + ", aires × " + decTxt(k) + "², volumes × " + decTxt(k) + "³.", "Puis convertis : 1 m = 100 cm, 1 m² = 10'000 cm², 1 m³ = 1'000'000 cm³."],
       sol: "a) " + M(lm * k + " \\text{ cm} = " + dec((lm * k) / 100)) + " m. b) " + M(am + " \\cdot " + k * k + " = " + am * k * k + " \\text{ cm}^2 = " + dec((am * k * k) / 10000)) + " m². c) " + M(vm + " \\cdot " + k ** 3 + " = " + vm * k ** 3 + " \\text{ cm}^3 = " + dec((vm * k ** 3) / 1e6)) + " m³." };
@@ -872,7 +872,7 @@ const PROB_EXTRA = {
   }],
   inter: [() => {
     const a = R.nz(-3, 3), m = 2 * a, k = -a * a;
-    return { fig: FIG.parabola((x) => x * x / 3, [], null, false), q: "La droite " + M("g(x) = " + m + "x + k") + " et la parabole " + M("f(x) = x^2") + ".",
+    return { q: "La droite " + M("g(x) = " + m + "x + k") + " et la parabole " + M("f(x) = x^2") + ".",
       parts: [{ label: "a) Valeur de k pour que la droite soit tangente à la parabole (un seul point commun)", spec: { kind: "value", value: k } }, { label: "b) Abscisse du point de contact", spec: { kind: "value", value: a } }, { label: "c) Ordonnée du point de contact", spec: { kind: "value", value: a * a } }],
       hints: ["Les points communs vérifient x² = " + m + "x + k. Un seul point commun ⇔ cette équation a une seule solution.", "x² − " + m + "x − k = 0 : Δ = " + m * m + " + 4k = 0."],
       sol: M("x^2 - " + m + "x - k = 0") + ", " + M("\\Delta = " + m * m + " + 4k = 0") + " : a) " + M("k = " + k) + ". b) " + M("x = " + a) + ". c) " + M("y = " + a * a) + "." };

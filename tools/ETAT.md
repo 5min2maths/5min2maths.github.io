@@ -27,6 +27,14 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   repère de pythrec 2, rectangles cotés (sysprob, sys2, ineq2, ratden), simil, cylindre donné par son diamètre
   (airelat, volmanq 4), disque / secteur (10e), voldecomp ; puis 2e–4e Collège et MP. À décider : figures qui feraient
   la mise en équation (eq2 4, idrem 4) ou trancheraient la question (pythrec 1–2, paraboles).
+- **Élagage des figures superficielles** (demande du 28.11, `/contenu figures`, rapport `archive/contenu_elagage_28-11.md`,
+  branche `agent/contenu2`, à fusionner après contrôle des captures `tests/_shots/contenu/elagage/`) : 57 couples
+  notion × niveau × figure retirés (128 sites) — balances, objets alignés, barres de %, trajets, « ×k », bâtons et urnes
+  qui répètent l'énoncé, paraboles / hyperboles / tangentes / sinus qui donnaient la réponse, mise en équation
+  (probeq2), cercle trigo sur des conversions ; fonctions `balance`, `items`, `blocks`, `sciScale`, `road`, `barChart`
+  supprimées. 364 gardés (géométrie, graphiques à lire). À décider (11 points du rapport) : droite graduée sur
+  « Calcule (−1) + 7 », carré « aire → côté », faces du pavé, arbres de choix, polyreg 2, cercle trigo des valeurs
+  exactes, fref x² ≤ 9, tableau de signes, repère de sys3, plongeuse, figures des leçons.
 
 ## À faire
 

@@ -138,7 +138,7 @@
     2: [
       () => { const k = pk([1.5, 2, 2.5, 3, 4]), A = R.int(3, 20);
         return Qv("On agrandit une figure de rapport " + T(k) + ". Son aire était de " + M(A) + " cm². Quelle est la nouvelle aire (en cm²) ?", r6(A * k * k), "Les aires sont multipliées par " + M(N(k) + "^2 = " + N(k * k)) + " : " + M(A + " \\cdot " + N(k * k) + " = " + N(A * k * k)) + " cm².",
-          { ctx: "aire", fig: FIG.scaling(k, ""), guide: [GS("Les aires sont multipliées par " + M("k^2") + ". " + M(N(k) + "^2") + " = ?", r6(k * k), M(N(k * k)) + "."), GS("Nouvelle aire ?", r6(A * k * k), M(N(A * k * k)) + " cm².")], traps: [TR(r6(A * k), "Les aires ne sont pas multipliées par k, mais par k²."), TR(r6(A * k * k * k), "k³, c'est pour les volumes.")] }); },
+          { ctx: "aire", guide: [GS("Les aires sont multipliées par " + M("k^2") + ". " + M(N(k) + "^2") + " = ?", r6(k * k), M(N(k * k)) + "."), GS("Nouvelle aire ?", r6(A * k * k), M(N(A * k * k)) + " cm².")], traps: [TR(r6(A * k), "Les aires ne sont pas multipliées par k, mais par k²."), TR(r6(A * k * k * k), "k³, c'est pour les volumes.")] }); },
       () => { const k = pk([2, 3, 4, 5]), A = R.int(2, 12);
         return Qv("Deux figures semblables ont pour aires " + M(A) + " cm² et " + M(A * k * k) + " cm². Quel est le rapport d'agrandissement des longueurs ?", k, "Rapport des aires " + M(A * k * k + " : " + A + " = " + k * k) + " = " + M("k^2") + ", donc " + M("k = " + k) + ".",
           { ctx: "kdepuisaire", guide: [GS("Rapport des aires ?", k * k, M(k * k) + "."), GS("Les longueurs : racine carrée. " + M("k") + " = ?", k, M("\\sqrt{" + k * k + "} = " + k) + ".")], traps: [TR(k * k, "C'est le rapport des aires ; celui des longueurs est sa racine carrée.")] }); },
