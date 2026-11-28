@@ -133,7 +133,7 @@ function screenDecouvrir() {
 
   <section class="pz-s">
     <div class="eyebrow">🎯 À toi</div><h2>Une vraie question, maintenant</h2>
-    <p class="small muted">Choisis ta classe. Réponds, ou demande « On le fait ensemble ».</p>
+    <p class="small muted">Choisis ta classe. Réponds, ou demande « On le fait ensemble ».</p>
     ${pzGrades("pzg1")}
     <div id="pztry"></div>
   </section>
@@ -141,7 +141,7 @@ function screenDecouvrir() {
   <section class="pz-s">
     <div class="eyebrow">⚙️ Comment ça marche</div><h2>L'app s'adapte à toi</h2>
     <div class="pz-grid pz-anim">
-      <div class="card flat"><b>🎯 Question du jour</b><p class="small">Ni trop facile, ni impossible : ton <b>Mathélo</b> monte quand tu progresses, et les questions suivent.</p></div>
+      <div class="card flat"><b>🎯 Ta pépite du jour</b><p class="small">Ni trop facile, ni impossible : les questions suivent ton niveau. <b>Pépites</b> = ton travail de l'année, <b>Mathélo</b> = ton niveau.</p></div>
       <div class="card flat"><b>🪜 Pas à pas</b><p class="small">Une erreur ? L'app repère le piège (« tu as pris l'angle extérieur ? ») et te guide, une étape à la fois.</p></div>
       <div class="card flat"><b>✨ À polir</b><p class="small">Chaque question ratée devient une pépite brute qui attend sa revanche : réussis-la du premier coup, elle est polie (deux fois de suite si tu es à l'aise).</p></div>
       <div class="card flat"><b>📝 Jour J</b><p class="small">Prépare ton évaluation : donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
@@ -228,9 +228,10 @@ function screenParents() {
     <div class="card stack par-week pz-anim"><div class="eyebrow">📅 Exemple</div>
       <div class="par-days">${JR.map((d, i) => `<span class="${ON[i] ? "on" : ""}">${d}</span>`).join("")}</div>
       <p><b>4 jours de pratique sur 7.</b> Belle régularité !</p>
+      <p class="par-gems">🟡 Cette semaine, votre enfant a trouvé <b>38 pépites</b> et en a poli <b>2</b>.</p>
       <div><b>Ce qui a été travaillé</b><ul class="plain par-list small"><li>• Équations du 1er degré</li><li>• Théorème de Pythagore</li></ul></div>
       <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur enfin réussie : une pépite polie !</div></div></div></div>
-    <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni score, ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
+    <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni Mathélo (son niveau), ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
   </section>
 
   <section class="pz-s">
@@ -362,7 +363,7 @@ function screenEnseignants() {
 
   <section class="pz-s">
     <div class="eyebrow">🎯 Démonstration</div><h2>Essayez comme un élève</h2>
-    <p class="small muted">Choisissez une classe et répondez. Faites exprès une erreur classique pour voir le diagnostic, puis « On le fait ensemble ».</p>
+    <p class="small muted">Choisissez une classe et répondez. Faites exprès une erreur classique pour voir le diagnostic, puis « On le fait ensemble ».</p>
     ${pzGrades("pzg3")}
     <div id="pztry"></div>
   </section>
@@ -407,7 +408,7 @@ function screenEnseignants() {
     <div class="eyebrow">🧭 Honnêtement</div><h2>Ce que l'app ne fait pas</h2>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>Remplacer le cours</b><p class="small">Elle entraîne ce qui a été vu en classe ; elle n'introduit pas une notion à votre place.</p></div>
-      <div class="card flat"><b>Noter vos élèves</b><p class="small">Pas de note ni de classement. Le Mathélo est un repère pour l'élève, pas une évaluation.</p></div>
+      <div class="card flat"><b>Noter vos élèves</b><p class="small">Pas de note ni de classement. Pépites = le travail de l'année, Mathélo = le niveau : deux repères pour l'élève, pas une évaluation.</p></div>
       <div class="card flat"><b>Suivre une classe</b><p class="small">Il n'y a pas de tableau de bord enseignant : sans compte, aucune donnée nominative ne remonte.</p></div>
       <div class="card flat"><b>Tout évaluer</b><p class="small">Constructions, raisonnements rédigés et démonstrations restent l'affaire de la classe.</p></div>
     </div>
