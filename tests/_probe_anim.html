@@ -1,0 +1,51 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Aperçu : animations (28.11)</title>
+<!-- 28.11 (/app animations) : page de capture des 5 animations (pas un test : « _ », hors suite).
+     tests/_probe_anim.html#a=nug|count|shine|flame|chip|bar&t=MS&dark=1 : met l'écran en place, déclenche l'animation,
+     puis fige TOUTES les animations à l'instant t (document.getAnimations()) ; tools/_gif_animations.py en fait des GIF. -->
+<link rel="stylesheet" href="../src/style.css">
+<body><main id="app"></main>
+<script>
+const P = new URLSearchParams(location.hash.slice(1)), A = P.get("a") || "nug", T = +(P.get("t") || 0);
+if (P.get("dark") === "1") document.documentElement.setAttribute("data-theme", "dark");
+let seed = 7; Math.random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const _st = window.setTimeout; window.setTimeout = (f, ms, ...r) => (ms >= 500 && ms < 50000 ? 0 : _st(f, ms, ...r)); /* nettoyages différés (retrait des éléments) : pas pendant la capture */
+window.MathJax = { typesetPromise: () => Promise.resolve() }; Element.prototype.scrollIntoView = function () {};
+try { localStorage.clear(); } catch (e) {}
+window.fetch = () => Promise.resolve(new Response("{}")); if (navigator.sendBeacon) navigator.sendBeacon = () => true;
+</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script>
+const freeze = (t) => document.getAnimations().forEach((a) => { try { a.pause(); a.currentTime = t; } catch (e) {} });
+const newSt = () => { homeTab = "today"; session = null; state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.tourDone = true; state.placed = true; state.homeVisits = 9; save(); };
+const ids = () => Engine.catalog(state.profile).map((x) => x.id).filter((id) => GEN[id] && !isPrimId(id));
+const pickQ = () => { for (const id of ids()) { const q = Engine.make(state, id, 2); if (q && !q.parts && !q.choices && !q.opts && !q.fig && !/\\\(|\$/.test(q.q + (q.sol || "")) && q.spec && typeof q.spec.value === "number") return q; } };
+const good = (q) => { const v = q.spec.value; if (Math.abs(v * 1e6 - Math.round(v * 1e6)) < 1e-6) return String(+v.toFixed(6)); for (let d = 2; d <= 200; d++) { const n = Math.round(v * d); if (Math.abs(n / d - v) < 1e-9) return n + "/" + d; } return String(v); };
+const sessQ = (id, i, n) => { session = { fmt: "revision", plan: Array.from({ length: n }, () => id + "|2|rev"), i, score: i, answered: i, start: Date.now() - 120000, elo0: state.elo.r, ids: new Set([id]) }; };
+addEventListener("load", () => setTimeout(() => {
+  newSt();
+  if (A === "nug" || A === "bar") {
+    const q = pickQ(); sessQ(q.id, 1, 4);
+    nextQuestion = () => {}; /* rien après */
+    renderQuestion(q, { eyebrow: "Révision · 2 sur 4" + '<span class="pbar" aria-hidden="true" data-done="50"><i style="width:25%"></i></span>', onDone: (res) => { ypAdd(state, ypPoints(2, res)); return 0; }, onNext: () => {} });
+    for (const a of document.getAnimations()) a.finish(); /* le .pop de la carte est fini quand l'élève répond */
+    document.getElementById("ans").value = q.canon || good(q); document.getElementById("check").click();
+  } else if (A === "count") {
+    const id = ids()[0]; sessQ(id, 4, 4); session.ypg = ypAdd(state, 14); state.streak = { count: 3, best: 5, last: day() }; screenSummary();
+  } else if (A === "flame") {
+    const id = ids()[0]; sessQ(id, 4, 4); session.ypg = ypAdd(state, 14); state.streak = { count: 4, best: 5, last: day() }; session.filonUp = true; screenSummary();
+    const b = app.querySelector(".card.streak"); if (b) b.scrollIntoView = null, window.scrollTo(0, 0);
+  } else if (A === "chip") {
+    state.streak = { count: 4, best: 5, last: day() }; flameChip = true; screenHome();
+  } else if (A === "home") {
+    ypSync(); state.yp.pts = 1700; state.streak = { count: 4, best: 5, last: day() }; screenHome();
+  } else if (A === "grades") {
+    ypSync(); state.yp.pts = 1700; screenGrades();
+  } else if (A === "shine") {
+    const q = pickQ(); sessQ(q.id, 1, 3); renderQuestion(q, { eyebrow: "À polir · 2 sur 3", onDone: () => 0, onNext: () => {} });
+    for (const a of document.getAnimations()) a.finish();
+    toast("✨ Polie ! Une pépite de plus ✓", 60000, "shine");
+  }
+  requestAnimationFrame(() => freeze(T));
+}, 300));
+</script>

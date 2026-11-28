@@ -201,7 +201,7 @@ async function screenParentView(id, opt = {}) {
   <div class="card stack par-week"><div class="eyebrow">📅 Sa semaine</div>
     <div class="par-days" aria-label="${W.n} jours de pratique sur 7">${W.days.map((d) => `<span class="${d.on ? "on" : ""}" title="${Parents.fmt(d.d)}">${JR[new Date(d.d + "T12:00:00").getDay()]}</span>`).join("")}</div>
     <p><b>${W.n} jour${W.n > 1 ? "s" : ""} de pratique sur 7.</b> ${reg}</p>
-    ${W.gems ? `<p class="par-gems">🟡 Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
+    ${W.gems ? `<p class="par-gems">${typeof NUG_IC === "string" ? NUG_IC : ""} Cette semaine, ${N} a trouvé <b>${W.gems} pépite${W.gems > 1 ? "s" : ""}</b>${W.polished ? ` et en a poli <b>${W.polished}</b>` : ""}.</p>` : ""}
     ${W.ids.length ? `<div><b>Ce qui a été travaillé</b><ul class="plain par-list small">${W.ids.map((x) => `<li>• ${esc(Parents.label(x))}</li>`).join("")}${W.more ? `<li class="muted">et ${W.more} autre${W.more > 1 ? "s" : ""}</li>` : ""}</ul></div>` : ""}
     ${W.now.length ? `<p class="small">📚 En classe en ce moment : ${W.now.map((x) => esc(Parents.label(x))).join(" · ")}</p>` : ""}
     ${W.fete ? `<div class="par-fete"><span>${W.fete.ic}</span><div><b>À fêter</b><div class="small">${W.fete.txt}</div></div></div>` : ""}

@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="../src/style.css">
 <!-- Interface : accueil (exemple selon la classe), mode auteur, navigation, améliorations élèves du 21.11 (positionnement, série, bilan, visite guidée, paliers…), choix de la voie, positionnement par type, signaux et erreurs envoyés.
      Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
-     (mécanisme : tests/lot.js). Sections : accueil_demo, auteur, home_nav, ux_2111, ux_2111b, voie, placement_type, signaux, erreurs.
+     (mécanisme : tests/lot.js). Sections : accueil_demo, auteur, home_nav, ux_2111, ux_2111b, voie, placement_type, signaux, erreurs, animations.
      Une seule section : interface.html#section=accueil_demo -->
 <body><main id="app"></main>
 <script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
@@ -158,7 +158,7 @@ ok(/Demain : /.test(app.textContent)&&state.tomorrow&&state.tomorrow.date===addD
 const other=Object.keys(FORMATS).find(f=>f!==state.today.f);state.tomorrow={date:day(),f:other};delete state.today;ok(Engine.todayFormat(state)===other,"5 promesse tenue le lendemain");
 // 3. paliers
 /* 25.11 (grades de l'année, voulu) : le grade suit les points de l'année et non plus le Mathélo ; tests/grades_annee.html */
-ypSync();state.yp.pts=1700;homeTab="today";screenHome();ok(/Enquêteur\u00a0· 11e/.test(app.textContent)&&/Chercheur dans 100 🟡/.test(app.textContent) /* 27.11 : pts → 🟡 (pépites) */,"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
+ypSync();state.yp.pts=1700;homeTab="today";screenHome();ok(/Enquêteur\u00a0· 11e/.test(app.textContent)&&/Chercheur dans 100/.test(app.textContent)&&!!app.querySelector(".eb-next .nug-ic") /* 27.11 : pts → 🟡 (pépites) ; 28.11 : 🟡 → mini-pépite dessinée (NUG_IC) */,"3 grade : "+(app.querySelector(".eb-grade")||{}).textContent);
 ok(gradeOf(0).name==="Pousse"&&gradeOf(1100).name==="Explorateur"&&gradeOf(3000).name==="Expert"&&gradeOf(9000).next===null,"3 paliers en points de l'année");
 // 4. bilan de la semaine (simulé un lundi)
 const dd=new Date(day()+"T12:00:00"),dow=(dd.getDay()+6)%7,mon=addDays(day(),-dow);
@@ -365,6 +365,61 @@ setTimeout(() => {
   } catch (e) { fails.push("exception 10 " + e.message); }
   document.getElementById("out").textContent = (fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK " + posts.length + " envois simulés") + "\n" + JSON.stringify(posts[0]);
 }, 300);
+});
+/* ======== animations (28.11, /app animations : décision de l'enseignant, n° 1 à 5) ======== */
+Lot.section("animations", { html: `<main id="app"></main><pre id="out"></pre>` }, function () {
+// Des retours, pas un décor : rien ne bloque l'élève, éléments décoratifs aria-hidden, texte réel inchangé, rien si mouvement réduit.
+const fails = [], ok = (c, m) => { if (!c) fails.push(m); };
+const mm = window.matchMedia;
+try {
+  state = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }); Engine.autoInit(state); state.placed = true; state.tourDone = true; save();
+  const ids = Engine.catalog(state.profile).map((x) => x.id).filter((id) => GEN[id]);
+  const pickQ = () => { for (const id of ids) for (let k = 0; k < 5; k++) { const q = Engine.make(state, id, 2); if (q && !q.parts && !q.choices && q.spec && Number.isInteger(q.spec.value)) return q; } };
+  const run = (reduce) => {
+    window.matchMedia = (m) => (/reduced-motion/.test(m) ? { matches: reduce, addEventListener() {}, addListener() {} } : mm.call(window, m));
+    document.querySelectorAll(".nugfly").forEach((e) => e.remove());
+    const q = pickQ(); session = { fmt: "revision", plan: [q.id + "|2|rev", q.id + "|2|rev", q.id + "|2|rev", q.id + "|2|rev"], i: 1, score: 1, answered: 1, start: Date.now(), elo0: state.elo.r, ids: new Set([q.id]) };
+    let gain = 0;
+    renderQuestion(q, { eyebrow: 'Révision · 2 sur 4<span class="pbar" aria-hidden="true" data-done="50"><i style="width:25%"></i></span>', onDone: (res) => { gain = ypAdd(state, ypPoints(2, res)); return 0; }, onNext: () => {} });
+    document.getElementById("ans").value = q.canon || String(q.spec.value); document.getElementById("check").click();
+    return { q, gain, f: document.querySelector(".nugfly") };
+  };
+  // 1. bonne réponse : pépite + « +N » (N = pépites gagnées), décorative, ne bloque rien
+  const r = run(false);
+  ok(app.querySelector(".fb.ok"), "1 réponse juste reconnue");
+  ok(r.gain > 0 && r.f && r.f.getAttribute("aria-hidden") === "true" && r.f.textContent.trim() === "+" + r.gain, "1 pépite qui s'envole « +" + r.gain + " » : " + (r.f && r.f.textContent));
+  ok(r.f && getComputedStyle(r.f).pointerEvents === "none", "1 pépite : pointer-events none");
+  const nx = document.getElementById("nx"); ok(nx && !nx.disabled, "1 « Continuer » utilisable tout de suite");
+  // 5. barre de séance : glisse jusqu'à la largeur « après la réponse »
+  const bar = app.querySelector(".eyebrow .pbar > i"); ok(bar && bar.style.width === "50%" && /width/.test(getComputedStyle(bar).transitionProperty), "5 barre : 50 % avec transition (" + (bar && bar.style.width) + ")");
+  // écran suivant de la même séance : part de 50 % (pas de saut en arrière, même pour « Refaire »)
+  h('<div class="eyebrow">x<span class="pbar"><i style="width:25%"></i></span></div>'); ok(app.querySelector(".pbar > i").style.width === "50%", "5 « Refaire » : la barre ne recule pas");
+  // mouvement réduit : rien ne s'envole
+  const r2 = run(true); ok(!r2.f, "1 mouvement réduit : pas de pépite qui s'envole");
+  window.matchMedia = mm;
+  // 3. pépite polie : éclat doré sur le message
+  toast("✨ Polie ! Une pépite de plus ✓", 2200, "shine"); const t = [...document.querySelectorAll(".toast")].pop();
+  ok(t && t.classList.contains("shine") && t.textContent === "✨ Polie ! Une pépite de plus ✓", "3 message « Polie » avec éclat");
+  // 2. bilan : le texte réel reste « +N pépites » ; défilement par compteur CSS
+  session = { fmt: "revision", plan: [ids[0] + "|1|rev", ids[0] + "|1|rev", ids[0] + "|1|rev"], i: 3, score: 2, answered: 3, start: Date.now() - 300000, elo0: state.elo.r, ids: new Set([ids[0]]), ypg: ypAdd(state, 9), filonUp: true };
+  state.streak = { count: 4, best: 5, last: day() }; screenSummary();
+  const c = app.querySelector(".yp-row .yp-cnt");
+  ok(c && /^\+\d+ pépites?$/.test(c.parentNode.textContent.trim()) && c.textContent === String(session.ypg), "2 bilan : « +" + session.ypg + " pépites » dans le texte : " + (c && c.parentNode.textContent));
+  ok(!(window.CSS && CSS.registerProperty) || c.classList.contains("cnt"), "2 bilan : défilement lancé");
+  // 4. filon qui augmente : flamme du bilan, puis une fois dans l'en-tête de l'accueil
+  ok(app.querySelector(".card.streak .flame.flame-up[aria-hidden=true]"), "4 bilan : flamme qui grossit");
+  flameChip = true; homeTab = "today"; screenHome();
+  const ch = app.querySelector(".streak-chip"); ok(ch && ch.classList.contains("flame-up") && ch.querySelector(".chip-fl") && /4\s*j/.test(ch.textContent), "4 en-tête : flamme qui grossit, « 4 j » inchangé");
+  screenHome(); ok(!app.querySelector(".streak-chip.flame-up"), "4 en-tête : une seule fois");
+  // 28.11 : mini-pépite dessinée (NUG_IC) à la place de l'emoji 🟡, sans id (répétable), décorative ; même icône pour l'envol
+  ok(typeof NUG_IC === "string" && !/\bid=/.test(NUG_IC) && /aria-hidden="true"/.test(NUG_IC), "NUG_IC sans id, aria-hidden");
+  screenGrades(); ok(app.querySelector(".yp-gems .nug-ic") && !/🟡/.test(app.innerHTML), "Mes grades : mini-pépite, plus de 🟡");
+  ok(NUG_MINI() === NUG_IC, "pépite qui s'envole = même icône");
+  // pas de tremblement sur une erreur (refusé, vécu comme une sanction)
+  ok(![...document.styleSheets].some((sh) => { try { return [...sh.cssRules].some((r) => /\.fb\.bad|\.bad\b/.test(r.selectorText || "") && /animation/.test(r.cssText) && !/pop/.test(r.cssText)); } catch (e) { return false; } }), "pas d'animation sur une erreur");
+} catch (e) { fails.push("exception " + e.message + " " + e.stack); }
+window.matchMedia = mm;
+document.getElementById("out").textContent = fails.length ? "ÉCHEC\n" + fails.join("\n") : "OK animations";
 });
 Lot.lance();
 </script>

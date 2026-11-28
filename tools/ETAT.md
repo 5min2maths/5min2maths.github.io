@@ -53,10 +53,14 @@ puis `/app animations` et `/contenu curieux et histoire` (le grand problème de 
   (55 : événements, anecdotes, portraits), là où il en manque : inventaire par classe et chapitre (notions `uses` / `need`),
   11e et 1re Collège d'abord, puis France ; vraisemblance, « À toi » au niveau de la classe, faits historiques exacts et
   vérifiables, séparation France / romand, familles variées.
-- **`/app animations`** (validé 28.11, n° 1 à 5) : bonne réponse → petite pépite qui s'envole vers le compteur (« +2 ») ;
-  bilan → nombre de pépites qui défile ; pépite polie → éclat doré sur la carte ; filon qui augmente → flamme qui grossit ;
-  barre de séance qui se remplit en glissant. Règles : < 0,5 s, un retour (pas un décor), jamais d'attente, rien si
-  mouvement réduit. Pas de tremblement sur une erreur (vécu comme une sanction). GIF de chaque avant publication.
+- **`/app animations`** (validé 28.11, n° 1 à 5) : FAIT sur `agent/app2`, **GIF à valider** par l'enseignant
+  (`tests/_shots/app/animations/*.gif`, régénérer : `tests/_gif_animations.py`), puis fusion. Pépite « +N » qui s'envole
+  de la réponse (0,45 s), pépites qui défilent au bilan (0,6 s), éclat doré sur « Polie » (0,45 s), flamme du filon qui
+  grossit (bilan + en-tête, 0,45 s), barre de séance qui glisse (0,45 s) ; rien en mouvement réduit, rien ne bloque.
+  Avec : emoji 🟡 remplacé partout par une mini-pépite dessinée (`NUG_IC`, src/curriculum.js ; captures
+  `icone_avant_apres_*.png`). Question ouverte : garder la gerbe de symboles (burst) à chaque bonne réponse en plus de
+  la pépite ? Rapport :
+  `tools/archive/app_animations_28-11.md`.
 
 0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
    (tout : sources, tests, tools, historique complet) ; dépôt public `5min2maths.github.io` réduit à l'app publiée
