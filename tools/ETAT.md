@@ -101,6 +101,11 @@ puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11
 
 ## Décisions de l'enseignant
 
+- **28.11 : MP en suspens** (« pas public cible ») : plus de travail ciblé MP (contenu, grands problèmes, curieux,
+  histoires, audits) ; l'existant reste. Grand problème : 4 essais pour les faibles (gardé) ; chapitre en classe sans grand
+  problème → problème riche du chapitre (gardé) ; grands problèmes à écrire : 11e et 1re Collège d'abord (4e partie
+  ajoutée aux problèmes riches existants), puis 10e, 9e, 2e–4e Collège.
+
 - **28.11 : figures** — lot de /contenu figures validé (105 formes, 17 notions). Pas de figure là où elle ferait le travail
   de l'élève (mise en équation eq2 4 / idrem 4, réciproque de Pythagore pythrec 1–2, paraboles) : « parfois c'est à l'élève de la faire » ; piste : indice ou étape « Fais un croquis à main levée ».
   Diagonales du cube : d (face) rouge, D (cube) verte en pointillés. Petits chevauchements à reprendre : « r = 3 » du cube
