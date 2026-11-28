@@ -659,7 +659,7 @@ saisissable (construction, démonstration, programmation). « avant » = catalog
   niveau 1 relevé en 4e (`UPFR`).
 - **Notes sur 20** : pour un profil français, `FR_NOTES` (lu par `Engine.finalize`) remplace les questions à notes suisses
   (1 à 6) de `statfreq`, `stats`, `diagr`, `probeq` par des questions de même niveau et de même graine, notes sur 20.
-- Contrôle : `tests/frfin.html` (générateurs, défis, classes, progcalc en 5e, notes), `tests/act_frfin.html` (leçons actives).
+- Contrôle : `tests/france.html#section=frfin` (générateurs, défis, classes, progcalc en 5e, notes), `tests/france.html#section=act_frfin` (leçons actives).
 
 ## Ce qui a été fait (25.11, branche agent/trous)
 

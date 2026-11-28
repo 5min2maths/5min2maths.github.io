@@ -1,16 +1,23 @@
-<meta charset="utf-8">
-<!-- Contrôle des guides pas à pas (lots, 14.11) : chaque étape a une valeur finie, la dernière étape donne la réponse ;
+<!doctype html><meta charset="utf-8"><meta name="budget" content="60000">
+<title>Tests : guides</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Pas à pas : chaque étape accepte sa réponse (121 950 questions guidées), découpage des étapes, questions triviales ; aperçu des figures des leçons.
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : guides, solsteps, trivial, figs_lecons.
+     Une seule section : guides.html#section=guides -->
+<!-- [guides]  Contrôle des guides pas à pas (lots, 14.11) : chaque étape a une valeur finie, la dernière étape donne la réponse ;
      couverture par notion et niveau. tests/guides.html#arith,rel (notions à contrôler) ou sans # (toutes). -->
-<pre id="out">en cours</pre>
-<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script>
-<script src="../src/expr.js"></script>
-<script src="../src/figures.js"></script><script src="../src/geo.js"></script>
-<script src="../src/generators.js"></script>
-<script src="../src/gen2.js"></script>
-<script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script>
-<script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script>
-<script src="../src/engine.js"></script>
+<!-- [solsteps]  Étape 0 de l'aide pas à pas (14.11) : part des questions dont le corrigé se découpe en étapes (splitSol), par niveau, et exemples. -->
+<!-- [trivial]  Audit de trivialité (règle du 14.11 : une question triviale fait décrocher) : tirages par notion × niveau,
+     questions telles que l'élève les voit (Engine.build, filtre trivialQ compris), pourcentage de cas suspects (réponse 0 ou ±1, réponse lisible dans l'énoncé, coefficient 1, +0 / ×1, solutions doublées).
+     chromium --headless --dump-dom "file://…/tests/trivial.html#n=300&seuil=3" -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/engine.js"></script>
+<script src="lot.js"></script>
 <script>
+/* ======== guides (ancienne page tests/guides.html) ======== */
+Lot.section("guides", { html: `<pre id="out">en cours</pre>` }, function () {
 const out = [], ids = location.hash ? location.hash.slice(1).split(",") : Object.keys(GEN); let bad = 0, n = 0;
 for (const id of ids) { const cov = [];
   for (const d of [1, 2, 3]) { let g = 0;
@@ -35,4 +42,53 @@ for (const id of ids) { const cov = [];
 }
 out.unshift((bad ? bad + " échec(s)" : "OK") + " — " + n + " questions guidées contrôlées");
 document.getElementById("out").textContent = out.join("\n");
+});
+/* ======== solsteps (ancienne page tests/solsteps.html) ======== */
+Lot.section("solsteps", { html: `<pre id="out">en cours</pre>` }, function () {
+const out = [], per = { 1: [0, 0], 2: [0, 0], 3: [0, 0] }, sans = {};
+for (const id of (location.hash ? location.hash.slice(1).split(",") : Object.keys(GEN))) for (const d of [1, 2, 3]) for (let i = 1; i <= 40; i++) {
+  let q; try { q = Engine.build(id, d, i); } catch (e) { continue; }
+  if (q.guide) continue;
+  const p = splitSol(q.sol); per[d][1]++; if (p) per[d][0]++; else sans[id + "-" + d] = (sans[id + "-" + d] || 0) + 1;
+  if (p && i === 1 && out.length < (location.hash ? 40 : 12)) out.push(id + "-" + d + " : " + p.map((x) => x.replace(/<[^>]+>/g, "")).join("  ‖  "));
+}
+out.unshift("Découpés : " + [1, 2, 3].map((d) => "niveau " + d + " " + Math.round(100 * per[d][0] / per[d][1]) + " %").join(", "),
+  "Jamais découpés : " + Object.keys(sans).filter((k) => sans[k] === 40).length + " générateurs-niveaux", "");
+document.getElementById("out").textContent = out.join("\n");
+});
+/* ======== trivial (ancienne page tests/trivial.html) ======== */
+Lot.section("trivial", { html: `<pre id="out">en cours</pre>` }, function () {
+const P = new URLSearchParams(location.hash.slice(1)), N = +(P.get("n") || 300), SEUIL = +(P.get("seuil") || 3), out = [];
+const strip = (s) => String(s || "").replace(/<[^>]+>/g, " ").replace(/\\[a-zA-Z]+/g, " ").replace(/[{}\\$]/g, " ");
+const res = [];
+for (const id of Object.keys(GEN)) for (const d of [1, 2, 3]) {
+  const flags = {}; let n = 0; const ex = {};
+  for (let i = 0; i < N; i++) {
+    let q; try { q = Engine.build(id, d, i + 1); } catch (e) { continue; } if (!q) continue; n++;
+    const txt = strip(q.q), raw = String(q.q || ""), sp = q.spec || {};
+    const add = (k) => { flags[k] = (flags[k] || 0) + 1; if (!ex[k]) ex[k] = txt.replace(/\s+/g, " ").slice(0, 140) + "  → " + JSON.stringify(sp.value ?? sp.values ?? sp.expr); };
+    if (sp.kind === "value" && typeof sp.value === "number") {
+      if (sp.value === 0) add("réponse 0");
+      if (Math.abs(sp.value) === 1) add("réponse ±1");
+      const nums = (txt.match(/-?\d+(?:[.,]\d+)?/g) || []).map((s) => +s.replace(",", "."));
+      if (!q.shownOk && Number.isInteger(sp.value) && Math.abs(sp.value) > 1 && nums.includes(sp.value) && !/ces nombres|parmi|lequel|laquelle/i.test(raw)) add("réponse dans l'énoncé"); // questions à choix : la réponse est forcément dans la liste
+    }
+    if (sp.kind === "set" && Array.isArray(sp.values) && new Set(sp.values).size < sp.values.length) add("solutions doublées");
+    if (/(^|[^\d.,{\w])-?\s*1[a-z](?![a-z{])/.test(raw.replace(/\\[a-zA-Z]+/g, " "))) add("écriture 1x"); // « 1 h 26 » (unité) n'est pas « 1x »
+    if (/(^|[^\d.,])[+-]\s*0(?![\d.,])/.test(raw)) add("terme + 0");
+    if (/\\cdot\s*1(?![\d.,])|×\s*1(?![\d.,])|\^\{?1\}?(?![\d.,])/.test(raw)) add("×1 ou ^1");
+  }
+  for (const k in flags) res.push({ id, d, k, pct: Math.round(100 * flags[k] / n), ex: ex[k] });
+}
+res.sort((a, b) => b.pct - a.pct);
+for (const r of res) if (r.pct >= SEUIL) out.push(`${String(r.pct).padStart(3)} %  ${r.id}-${r.d}  [${r.k}]  ${r.ex}`);
+out.push("\n" + Object.keys(GEN).length + " générateurs, " + N + " tirages par niveau");
+
+document.getElementById("out").textContent = out.join("\n");
+});
+/* ======== figs_lecons (ancienne page tests/figs_lecons.html) ======== */
+Lot.section("figs_lecons", { html: `<div id="out"></div>`, body: "width:420px;padding:8px", apercu: true }, function () {
+for (const id of (location.hash.slice(1) || "prio,multdiv").split(",")) document.getElementById("out").insertAdjacentHTML("beforeend", "<h3>" + id + "</h3><div class='figwrap'>" + (LESSON_FIGS[id] ? LESSON_FIGS[id]() : "(pas de figure)") + "</div>");
+});
+Lot.lance();
 </script>

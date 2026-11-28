@@ -1,0 +1,143 @@
+<!doctype html><meta charset="utf-8"><meta name="budget" content="90000">
+<title>Tests : questions</title>
+<link rel="stylesheet" href="../src/style.css">
+<!-- Questions : réponses finales acceptées, touche π, pièges (erreurs typiques), QCM de préparation, nombres et noms des figures.
+     Page de thème (28.11, /entretien tests) : chaque section est une ancienne page de test, recopiée telle quelle
+     (mécanisme : tests/lot.js). Sections : final, pi_keys, pieges, qcm, figs_nombres, figs_noms.
+     Une seule section : questions.html#section=final -->
+<body><main id="app"></main>
+<script>window.MathJax={typesetPromise:()=>Promise.resolve()};try{localStorage.clear()}catch(e){}</script>
+<script src="../src/curriculum.js"></script><script src="../src/ordre.js"></script><script src="../src/expr.js"></script><script src="../src/figures.js"></script><script src="../src/geo.js"></script><script src="../src/generators.js"></script><script src="../src/gen2.js"></script><script src="../src/gen3.js"></script><script src="../src/variantes.js"></script><script src="../src/competences.js"></script><script src="../src/ch11_prop.js"></script><script src="../src/ch11_litt.js"></script><script src="../src/ch1c_eq.js"></script><script src="../src/ch1c_sys.js"></script><script src="../src/ch11_no.js"></script><script src="../src/ch11_gm.js"></script><script src="../src/ch11_ang.js"></script><script src="../src/ch11_thales.js"></script><script src="../src/ch11_proba.js"></script><script src="../src/ch1c_no.js"></script><script src="../src/ch1c_fct.js"></script><script src="../src/ch1c_alg.js"></script><script src="../src/ch1c_f2b.js"></script><script src="../src/ch11_no2.js"></script><script src="../src/ch1c_geo.js"></script><script src="../src/ch1c_trig.js"></script><script src="../src/ch_mp1.js"></script><script src="../src/ch11_fct.js"></script><script src="../src/ch10_no.js"></script><script src="../src/ch_mp2.js"></script><script src="../src/ch_mp3.js"></script><script src="../src/ch_mp4.js"></script><script src="../src/fr_2nde.js"></script><script src="../src/ch3c_ana.js"></script><script src="../src/ch3c_geo.js"></script><script src="../src/ch4c_ana.js"></script><script src="../src/ch2c.js"></script><script src="../src/ch1c_arg.js"></script><script src="../src/riche.js"></script><script src="../src/riche_11b.js"></script><script src="../src/riche_11c.js"></script><script src="../src/riche_1c.js"></script><script src="../src/riche_sys1c.js"></script><script src="../src/badges.js"></script><script src="../src/backup.js"></script><script src="../src/qr.js"></script><script src="../src/lessons.js"></script><script src="../src/lessons2.js"></script><script src="../src/dyn.js"></script><script src="../src/active.js"></script><script src="../src/act_prop11.js"></script><script src="../src/act_litt11.js"></script><script src="../src/act_eq1c.js"></script><script src="../src/act_sys1c.js"></script><script src="../src/act_ch11b.js"></script><script src="../src/act_ch11c.js"></script><script src="../src/act_1c.js"></script><script src="../src/act_mp2.js"></script><script src="../src/act_mp34.js"></script><script src="../src/act_manip.js"></script><script src="../src/sujet.js"></script><script src="../src/qcm.js"></script><script src="../src/engine.js"></script><script src="../src/app.js"></script>
+<script src="lot.js"></script>
+<script>
+/* ======== final (ancienne page tests/final.html) ======== */
+Lot.section("final", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+let renderQ;try{const out=[];{const r=checkAnswer({kind:"value",value:7.2,final:true},'7,2'); out.push((r.status==='correct'?"ok  ":"KO  ")+'7,2'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:7.2,final:true},'2,4*3'); out.push((r.status==='form'?"ok  ":"KO  ")+'2,4*3'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:7.2,final:true},'2,4 · 3'); out.push((r.status==='form'?"ok  ":"KO  ")+'2,4 · 3'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:-0.75,final:true},'-3/4'); out.push((r.status==='correct'?"ok  ":"KO  ")+'-3/4'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:4,final:true},'x = 4'); out.push((r.status==='correct'?"ok  ":"KO  ")+'x = 4'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:1200,final:true},"1'200"); out.push((r.status==='correct'?"ok  ":"KO  ")+"1'200"+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:4.242640687119286,final:true},'3√2'); out.push((r.status==='correct'?"ok  ":"KO  ")+'3√2'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:5,final:true},'(2+3)'); out.push((r.status==='form'?"ok  ":"KO  ")+'(2+3)'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:8,final:true},'2^3'); out.push((r.status==='form'?"ok  ":"KO  ")+'2^3'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:7.2,final:true},'7,3'); out.push((r.status==='wrong'?"ok  ":"KO  ")+'7,3'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:-5,final:true},'−5'); out.push((r.status==='correct'?"ok  ":"KO  ")+'−5'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:3,final:true},'12:4'); out.push((r.status==='form'?"ok  ":"KO  ")+'12:4'+" -> "+r.status);}{const r=checkAnswer({kind:"value",value:0.75,final:true},'3/4'); out.push((r.status==='correct'?"ok  ":"KO  ")+'3/4'+" -> "+r.status);}
+const st=Engine.newState({system:"CH",grade:9,track:"college",minutes:5}); Engine.autoInit(st);
+const q=Engine.make(st,"decmul",1); out.push("decmul 9e final: "+q.spec.final);
+const st2=Engine.newState({system:"CH",grade:12,track:"college",minutes:5}); Engine.autoInit(st2);
+const q2=Engine.make(st2,"rel",1); out.push("rel 1re final: "+!!q2.spec.final);
+const q3=Engine.make(st,"pow9",1); out.push("pow9 9e final: "+!!(q3.spec&&q3.spec.final));
+state=st; renderQ=q; document.getElementById("log").textContent=out.join("\n");}catch(e){document.getElementById("log").textContent="ERR "+e.stack}
+});
+/* ======== pi_keys (ancienne page tests/pi_keys.html) ======== */
+Lot.section("pi_keys", { html: `<main id="app"></main><pre id="log"></pre>` }, function () {
+const L=[];try{let n=0,pis=0,bad=[],nokey=[];
+for(const id of Object.keys(GEN)) for(const d of [1,2,3]) for(let k=0;k<60;k++){ let q; try{q=Engine.build(id,d);}catch(e){continue;} if(!q||!q.spec) continue;
+ const sp=q.spec, vals=sp.kind==="value"?[sp.value]:[]; for(const v of vals){ if(!isFinite(v)||isTerm(v)) continue; const r=v/Math.PI; if(!niceQ(r)) continue; pis++;
+   const kp=keypadHtml({...sp,final:true}); if(!/data-k="π"/.test(kp)) nokey.push(q.code);
+   let num=r, den=1; for(let dd=1;dd<=12;dd++) if(Math.abs(r*dd-Math.round(r*dd))<1e-6){num=Math.round(r*dd);den=dd;break;}
+   const txt=(den>1?"("+num+"/"+den+")":num)+"π"; const res=checkAnswer(sp,txt); if(res.status!=="correct") bad.push(q.code+" "+txt+" → "+res.status); } }
+L.push("questions π : "+pis+" ; sans touche π : "+[...new Set(nokey)].slice(0,10).join(", ")+" ; refusées : "+[...new Set(bad)].slice(0,10).join(" | "));
+}catch(e){L.push("ERR "+e.stack)} document.body.innerHTML="<pre id=\"log\">"+L.join("\n")+"</pre>";
+});
+/* ======== pieges (ancienne page tests/pieges.html) ======== */
+Lot.section("pieges", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// Erreurs typiques (21.11) : pour chaque notion et chaque niveau, les pièges sont finis, distincts de la réponse,
+// ont un message, et ne sont jamais acceptés comme justes. Rapport : couverture par notion (≥ 2 pièges).
+const fails=[], cov=[], only=(location.hash||"").slice(1).split(",").filter(Boolean);
+for(const N of NOTIONS){ if(only.length&&!only.includes(N.id)) continue; let val=0,two=0;
+  for(const lv of [1,2,3]) for(let k=1;k<=40;k++){ let q; try{q=Engine.build(N.id,lv,k*277+lv);}catch(e){continue} if(!q||q.parts||!q.spec||q.spec.kind!=="value") continue; val++;
+    const T=q.traps||[]; if(T.length>=2) two++;
+    for(const t of T){ if(!isFinite(t.v)) fails.push(q.code+" piège non fini"); if(!t.m||!String(t.m).trim()) fails.push(q.code+" piège sans message");
+      if(/undefined|NaN/.test(String(t.m))) fails.push(q.code+" message : "+t.m);
+      const s=String(+(+t.v).toFixed(10)).replace(".",","); const r=checkAnswer(q.spec,s); if(r.status==="correct") fails.push(q.code+" piège accepté comme juste : "+s+" (réponse "+q.spec.value+")"); } }
+  if(val) cov.push(N.id+" "+Math.round(100*two/val)+"%"); }
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC "+fails.length+"\n"+[...new Set(fails)].slice(0,30).join("\n"):"OK")+"\n"+cov.join(" · ")+"</pre>");
+});
+/* ======== qcm (ancienne page tests/qcm.html) ======== */
+Lot.section("qcm", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+// QCM de préparation (21.11) : sur toutes les notions, la bonne réponse écrite est acceptée par le correcteur, les choix sont distincts, aucun NaN.
+const goodOf=(it)=>it.choices.find(c=>c.ok).f;
+const fails=[], ok=(c,m)=>{if(!c)fails.push(m)}, log=[];
+const back=(f)=>f.replace(/\\approx\s*/,"").replace(/\\frac\{(\d*)\\sqrt\{(\d+)\}\}\{(\d+)\}/g,"$1√$2/$3").replace(/\\frac\{(\d+)\}\{(\d+)\}/g,"$1/$2").replace(/\\sqrt\{(\d+)\}/g,"√$1").replace(/\\pi/g,"π").replace(/ \\cdot 10\^\{(-?\d+)\}/g,"*10^($1)").replace(/\{,\}/g,",").replace(/'/g,"");
+try{
+let tot=0,usable=0,notUsable=[];
+for(const [g,tr] of [[9,"college"],[10,"college"],[11,"college"],[12,"college"],[12,"mp"],[13,"college"]]){
+  state=Engine.newState({system:"CH",grade:g,track:tr,minutes:5});Engine.autoInit(state);
+  const ids=[...new Set(NOTIONS.filter(n=>placeOf(n,state.profile)&&placeOf(n,state.profile)[0]===g).map(n=>n.id))];
+  for(const id of ids){ tot++; let okN=0;
+    for(const d of [1,2,3]) for(let r=0;r<8;r++){ const it=qcmMake(id,d); if(!it) continue; okN++;
+      const fs=it.choices.map(c=>c.f); ok(new Set(fs).size===fs.length,id+" choix en double "+fs.join(" | "));
+      ok(it.choices.filter(c=>c.ok).length===1,id+" une seule bonne");
+      ok(it.choices.length===4,id+" 4 choix ("+it.choices.length+")");
+      { const ap=it.choices.filter(c=>/approx/.test(c.f)).length; ok(ap===0||ap===4,id+"-"+d+" « ≈ » sur une partie des choix seulement : "+it.choices.map(c=>c.f).join(" | ")); }
+      { const fr=it.choices.filter(c=>/\frac/.test(c.f)&&!/sqrt|pi/.test(c.f)).length, gf=/\frac/.test(goodOf(it))&&!/sqrt|pi/.test(goodOf(it)); if(gf) ok(fr>=3,id+"-"+d+" seule fraction parmi des décimaux : "+it.choices.map(c=>c.f).join(" | ")); }
+      { const gv=it.q.spec.value; for(const c of it.choices.filter(c=>!c.ok)){ if(/approx/.test(c.f)) continue; const s=back(c.f); let v; try{v=Expr.evaluate(Expr.parse(s.replace(/,/g,".").replace(/\*10\^\((-?\d+)\)/,"*10^($1)")))}catch(e){continue} ok(qcmPlausible(v,gv,it.q.spec),id+"-"+d+" valeur délirante : "+c.f+" pour "+goodOf(it)); if(gv>=0&&v<0&&!qcmNegOk(it.q,gv)) fails.push(id+"-"+d+" négatif sans nombre négatif dans l'énoncé : "+c.f); } }
+      ok(!/NaN|undefined|Infinity/.test(fs.join()+it.q.q),id+" NaN "+fs.join(" | "));
+      const g0=it.choices.find(c=>c.ok).f;
+      if(!/approx/.test(g0)){ const st=checkAnswer(it.q.spec,back(g0)).status; ok(st==="correct",id+"-"+d+" bonne réponse refusée : "+g0+" → "+back(g0)+" ("+st+") attendu "+it.q.spec.value); }
+      for(const c of it.choices.filter(c=>!c.ok)){ if(/approx/.test(c.f)) continue; const st=checkAnswer(it.q.spec,back(c.f)).status; ok(st!=="correct",id+"-"+d+" un piège est accepté comme juste : "+c.f); }
+    }
+    if(okN) usable++; else notUsable.push(id);
+  }
+}
+log.push("notions avec QCM : "+usable+" sur "+tot+" ; sans : "+notUsable.slice(0,40).join(" "));
+// parcours : grille Avant → test rapide → grille ; puis 2e passage → colonne Après
+state=Engine.newState({system:"CH",grade:11,track:"college",minutes:5});Engine.autoInit(state);state.placed=true;
+state.prep={ids:["prio","fracadd","puiss","rel","pyth","eq1"],date:addDays(day(),4)};
+homeTab="test";screenHome();ok(/Autoévaluation/.test(app.textContent)&&!!document.getElementById("prepauto"),"bouton");document.getElementById("prepauto").click();
+const rows=state.autotest.rows;ok(rows.length>=4&&rows.length<=8,"lignes 4 à 8 : "+rows.length);
+ok(new Set(rows.map(r=>r.id)).size>=4,"plusieurs notions dans la grille");
+ok(/Je sais…/.test(app.textContent)&&/Respecter les priorités/.test(app.textContent),"libellé « Je sais… »");
+document.getElementById("atgo").click();ok(/Il te reste/.test(app.textContent),"il faut tout cocher");
+const segs=[...document.querySelectorAll(".at-seg")];segs.forEach((g,k)=>g.querySelector('button[data-v="'+(k%2?2:1)+'"]').click());
+document.getElementById("atgo").click();
+let k=0;while(document.querySelector(".qcm-c")&&k<20){const bs=[...document.querySelectorAll(".qcm-c")];(k%3?bs.find(b=>!state.autotest.rows):null);const it=bs[0];it.click();ok(!!document.querySelector(".qcm-good"),"bonne réponse montrée");document.getElementById("nx").click();k++;}
+ok(k===rows.length,"une question par ligne ("+k+"/"+rows.length+")");
+ok(state.autotest.runs.length===1&&/Avant/.test(app.textContent)&&!/Après/.test(app.textContent.replace(/colonne « Après »/,"")),"grille finale, une colonne test");
+const r0=state.autotest.runs[0].r, wrongBelieved=rows.filter(r=>r0[r.cid]===0&&state.autotest.avant[r.cid]===2).length;
+ok((app.textContent.match(/Tu pensais savoir/g)||[]).length===wrongBelieved,"messages « tu pensais savoir » : "+wrongBelieved);
+homeTab="test";screenHome();ok(/Ma grille/.test(app.textContent)&&/justes? sur/.test(app.textContent),"accueil Test : grille gardée");
+document.getElementById("prepauto").click();ok(!!document.getElementById("again")&&!document.getElementById("atgo"),"retour direct à la grille");
+document.getElementById("again").click();k=0;while(document.querySelector(".qcm-c")&&k<20){[...document.querySelectorAll(".qcm-c")][1].click();document.getElementById("nx").click();k++;}
+ok(state.autotest.runs.length===2&&/Après/.test(app.textContent)&&/1er test/.test(app.textContent),"2e passage : colonne Après");
+if(document.getElementById("rev")){document.getElementById("rev").click();ok(session&&session.plan.length>=2,"révision des compétences à revoir");}
+state.prep={ids:["fracadd","rel"],date:addDays(day(),3)};screenQcm();ok(state.autotest.runs.length===0&&!!document.getElementById("atgo"),"autre test : nouvelle grille");
+// lignes : une par notion au moins (même au-delà de 8 notions), niveau 3 avant les doublons de base, réponse tapée si pas de QCM
+for(const ids of [["prio","fracadd","puiss","rel","pyth","eq1"],["reduire","distrib","pctvar"],["reduire","distrib","eq1","valnum","rac","carres","fracops","pctvar","rel"]]){
+  const R=atRows(ids);ok(ids.every(id=>R.some(r=>r.id===id)),"chaque notion a sa ligne : "+ids.join());ok(R.length<=Math.max(8,ids.length),"plafond "+R.length);
+  if(ids.length<=4)ok(ids.every(id=>R.filter(r=>r.id===id).some(r=>r.lv>=2)||compsOf(id).length===1),"niveau exigeant présent "+ids.join());}
+ok(atRows(["prio","fracadd","puiss"]).filter(r=>r.lv===3).length>=2,"niveau 3 avant les doublons de base");
+// parcours mixte : QCM et réponses tapées
+state.prep={ids:["reduire","distrib","pctvar"],date:addDays(day(),3)};state.autotest=null;screenQcm();
+[...document.querySelectorAll(".at-seg")].forEach(g=>g.querySelector('button[data-v="1"]').click());document.getElementById("atgo").click();
+let typed=0,mc=0;for(let j=0;j<20;j++){if(document.querySelector(".qcm-c")){document.querySelector(".qcm-c").click();mc++;document.getElementById("nx").click();}else if(document.getElementById("idk")){document.getElementById("idk").click();typed++;document.getElementById("nx").click();}else break;}
+ok(typed>=1&&mc>=1,"parcours mixte : "+typed+" tapées, "+mc+" à choix");
+ok(Object.keys(state.autotest.runs[0].r).length===state.autotest.rows.length,"toutes les lignes ont un résultat");
+}catch(e){fails.push("EXC "+e.message+" "+e.stack)}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+(fails.length?"ÉCHEC "+fails.length+"\n"+[...new Set(fails)].slice(0,40).join("\n"):"OK")+"\n"+log.join("\n")+"</pre>");
+});
+/* ======== figs_nombres (ancienne page tests/figs_nombres.html) ======== */
+Lot.section("figs_nombres", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+const out=[], seen={}; let n=0;
+const norm=(x)=>x.replace(/\{,\}/g,",").replace(/\\,|\\ |'|’/g,"").replace(/\./g,",");
+for(const N of NOTIONS){ for(const lv of [1,2,3,4]){ for(let k=1;k<=25;k++){ let q; try{q=Engine.build(N.id,lv,k*389+lv);}catch(e){continue} if(!q||!q.fig) continue; n++;
+  const txt=norm(String(q.q)+" "+(q.parts||[]).map(p=>p.label).join(" ")), refFig=/figure|ci-contre|schéma|dessin|plan|graphique|illustr/i.test(q.q);
+  const nums=[...String(q.fig).matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map(m=>m[1]).filter(t=>/\d/.test(t)&&/cm|mm|dm|km|\bm\b|°/.test(t)).map(t=>norm(t).match(/-?\d+(?:,\d+)?/)[0]);
+  const absent=nums.filter(x=>!new RegExp("(^|[^0-9,])"+x.replace(",","\\,")+"([^0-9,]|$)").test(txt));
+  if(absent.length&&!refFig){const key=N.id+"-"+lv; if(seen[key])continue; seen[key]=1; out.push(q.code+"  figure : "+absent.join(", ")+"  | "+String(q.q).replace(/<[^>]+>/g,"").slice(0,120));}
+}}}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+n+" questions avec figure ; "+out.length+" formes avec un nombre de la figure absent de l'énoncé\n"+out.join("\n")+"</pre>");
+});
+/* ======== figs_noms (ancienne page tests/figs_noms.html) ======== */
+Lot.section("figs_noms", { html: `<div id="app"></div><pre id="out"></pre>` }, function () {
+const out=[], seen={};
+const figLabels=(svg)=>{const L=new Set();for(const m of String(svg).matchAll(/<text[^>]*>([^<]{1,3})<\/text>/g)){const t=m[1].trim();if(/^[A-Z][′']?$/.test(t))L.add(t[0]);}return L;};
+const textLetters=(q)=>{const L=new Set();const s=String(q).replace(/\\text\{[^}]*\}/g,"").replace(/\\(frac|sqrt|cdot|mathbf|left|right|widehat|overline|hat|vec|angle|parallel|perp|in|times|div|approx|pi|Delta|alpha|beta|gamma|circ|mathrm|quad|text)/g," ");
+  for(const m of s.matchAll(/\\\((.*?)\\\)/g)) for(const c of m[1].matchAll(/[A-Z]/g)) L.add(c[0]);
+  for(const m of s.replace(/\\\(.*?\\\)/g," ").matchAll(/(?:^|[^A-Za-zÀ-ÿ])([A-Z]{2,4})(?=[^A-Za-zÀ-ÿ]|$)/g)) for(const c of m[1]) L.add(c);
+  for(const m of s.replace(/\\\(.*?\\\)/g," ").matchAll(/(?:point|sommet|angle|en|centre|côté|segment|droite)\s+([A-Z])(?![A-Za-zÀ-ÿ])/g)) L.add(m[1]);
+  return L;};
+let n=0;
+for(const N of NOTIONS){ for(const lv of [1,2,3,4]){ for(let k=1;k<=25;k++){ let q; try{q=Engine.build(N.id,lv,k*389+lv);}catch(e){continue} if(!q||!q.fig) continue; n++;
+  const F=figLabels(q.fig); if(F.size<2) continue; const T=textLetters(q.q+" "+(q.parts||[]).map(p=>p.label).join(" "));
+  const extra=[...F].filter(x=>!T.has(x)), missing=[...T].filter(x=>!F.has(x));
+  if(T.size&&extra.length){ const key=N.id+"-"+lv+":"+[...F].sort().join("")+"/"+[...T].sort().join(""); if(seen[key])continue; seen[key]=1;
+    out.push(q.code+"  figure "+[...F].sort().join("")+"  énoncé "+[...T].sort().join("")+"  | "+String(q.q).replace(/<[^>]+>/g,"").slice(0,110)); }
+  else if(!T.size&&F.size>=3){ const key=N.id+"-"+lv+":nonames"; if(seen[key])continue; seen[key]=1; out.push("(noms sur la figure, aucun dans l'énoncé) "+q.code+" figure "+[...F].sort().join("")+" | "+String(q.q).replace(/<[^>]+>/g,"").slice(0,100)); }
+}}}
+document.body.insertAdjacentHTML("beforeend","<pre id=out>"+n+" questions avec figure\n"+out.join("\n")+"</pre>");
+});
+Lot.lance();
+</script>

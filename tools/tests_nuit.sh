@@ -5,8 +5,9 @@
 # Travaille dans une copie jetable (worktree « nuit », remise sur master chaque nuit, comme
 # tools/eleves_claude_quotidien.sh) : construit, lance tools/run_tests.sh (toutes les pages + tools/poids.py ordre
 # complet) avec nice. Ne publie JAMAIS rien, ne commite rien.
-# Résultat : suivi/tests_nuit/AAAA-MM-JJ.log (journal complet) et suivi/tests_nuit/dernier.txt, une ligne :
-#   « OK 178 pages (27.11, 26 min) » ou « 2 ÉCHEC(S) : kp_stable, recalcul3 (27.11, 27 min) »
+# Résultat : suivi/tests_nuit/AAAA-MM-JJ.log (journal complet), suivi/tests_nuit/pages.txt (chaque page, sa durée) et
+# suivi/tests_nuit/dernier.txt, une ligne :
+#   « OK 98 pages (28.11, 12 min) » ou « 2 ÉCHEC(S) : kp_stable, recalcul3 (27.11, 27 min) »
 # lue par le point du matin (Calendrier/point.py) et par tools/tests_rapides.py (pages en échec ajoutées au niveau
 # rapide de la publication suivante).
 set -u
@@ -29,17 +30,18 @@ flock -n 8 || { echo "$(date '+%F %T') suite de nuit déjà en cours : abandon" 
   python3 build.py | tail -1
 } >> "$LOG" 2>&1
 T0=$(date +%s)
-RES=$(nice -n 15 tools/run_tests.sh 2>&1 8>&-)
+# 28.11 : résultat de chaque page avec sa durée dans suivi/tests_nuit/pages.txt (dernière nuit), pour repérer les pages lentes
+RES=$(M2M_JOURNAL=$O/pages.txt nice -n 15 tools/run_tests.sh 2>&1 8>&-)
 MIN=$(( ($(date +%s) - T0 + 30) / 60 ))
 { echo "$RES"; echo "== fin $(date '+%F %T') ($MIN min)"; } >> "$LOG"
 N=$(echo "$RES" | sed -n 's/^pages testées : //p')
-if echo "$RES" | grep -q "^aucun échec"; then
+if echo "$RES" | grep -aq "^aucun échec"; then
   L="OK ${N:-?} pages ($J, $MIN min)"
-elif echo "$RES" | grep -q "verrou des tests occupé"; then
+elif echo "$RES" | grep -aq "verrou des tests occupé"; then
   L="NON LANCÉE : verrou des tests occupé ($J) — voir $D.log"
 else
   # noms des pages en échec (tests/x.html → x ; outils : tools/poids.py ordre → poids_ordre, syntaxe → syntaxe)
-  P=$(echo "$RES" | grep "ÉCHEC" | sed -n 's#^tests/\([^.:]*\)\.html[^:]*:.*#\1#p; s#^tools/poids.py ordre:.*#poids_ordre#p; s#^tools/test_nom.py:.*#test_nom#p; s#^syntaxe : .*#syntaxe#p' | sort -u)
+  P=$(echo "$RES" | grep -a "ÉCHEC" | sed -n 's#^tests/\([^.:]*\)\.html[^:]*:.*#\1#p; s#^tools/poids.py ordre:.*#poids_ordre#p; s#^tools/test_nom.py:.*#test_nom#p; s#^syntaxe : .*#syntaxe#p' | sort -u)
   L="$(echo "$P" | grep -c .) ÉCHEC(S) : $(echo "$P" | paste -sd, - | sed 's/,/, /g') ($J, $MIN min)"
 fi
 echo "$L" > "$O/dernier.txt"

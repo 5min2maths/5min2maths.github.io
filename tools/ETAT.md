@@ -18,8 +18,11 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 
 - **Univers Pépite²** : accueil fait (27.11, `pepite_accueil.md`) ; écrans et présentations / PDF en cours (agents du
   28.11, branches `agent/pepite-ecrans` et `agent/pepite-presentations`) ; captures à montrer avant publication.
-- **Ménage** (28.11) : rapports archivés ✓, ce fichier ✓ ; reste à regrouper les tests par thème (180 pages → 80–100, `/entretien tests`) après la
-  fusion des branches Pépite² (pour éviter les conflits).
+- **Ménage** (28.11) : rapports archivés ✓, ce fichier ✓ ; tests regroupés par thème ✓ (branche `agent/entretien`, à fusionner :
+  180 → 95 pages, sections dans `tests/lot.js`, doc `tests.md`, bilan `archive/entretien_tests_28-11.md`). Aperçus et
+  contrôles déjà cassés AVANT la fusion, jamais vus (« ERR » n'était pas lu comme un échec) : `home_nav` (clic sur un
+  bouton absent), fin de `free` (bouton de séance absent), aperçus `act_ch11b_vue`, `act_ch11c_vue`, `act_manip_vue`,
+  `free_vue`, `eq1c_vue`, `no11_vue`, `code`, `cmt`, `lesson`, `domaine` : à réparer ou à supprimer (`/entretien`).
 - **Audit des figures** (demande du 28.11, `/contenu figures`, rapport `archive/contenu_figures_28-11.md`) : 105 formes
   reçoivent une figure dans 17 notions (11e : airepyr, volmanq, volcomp, volcone, thales, thalesrec, cercthales, angles,
   pythrec, probeq2 ; 1re : euclide, exactes, geocomb, droitesrem, trigo, trigexact ; 9e : volpave), branche
@@ -48,12 +51,7 @@ puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux d�
 4. `ref_formes.js` (décision n° 22 du 26.11, faite en partie) : il reste les tables de formes pour Collège 2e–4e, France
    6e–5e et lycée, et les notions sans étiquette ctx (`diagr`, `airelat`, `agrand`, `premiers`, `prop`, `symetries`,
    `rotation`, `optim` n. 1, `eqverif`).
-5. `tools/run_tests.sh` : « verrou des tests occupé … série annulée » sort avec le code 0 → un commit enchaîné passe sans
-   test (28.11). Le verrou occupé doit être un échec (code ≠ 0). (`/entretien`)
-6. `tools/publier.sh` : il teste l'arbre de travail puis fait `git add -A src …` À LA FIN → des modifications faites pendant
-   les tests partent sans avoir été testées (28.11, écran d'ouverture publié avant son recadrage). Figer l'état (commit ou
-   copie) AVANT les tests. (`/entretien`)
-6. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
+5. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
 
 ## Décisions de l'enseignant
 
@@ -83,6 +81,10 @@ consolidation jusqu'à fin 2026 (pas de diffusion large) ; page légale plus tar
 déménagement.
 
 ## Fait le 28.11 (à publier)
+
+- Tests (`/entretien tests`, branche `agent/entretien`) : 180 → 95 pages par thème, aucune vérification perdue ;
+  `run_tests.sh` : codes de retour 0 / 1 / 2 (verrou occupé = échec), `grep -a` (un résultat vu comme binaire masquait
+  un échec), durée de chaque page ; `publier.sh` : commit AVANT les tests, push seulement si vert ET arbre inchangé.
 
 - Commentaires : figures pour polyreg 2 (somme des angles, découpage en triangles) et racprop 4 (cube : diagonales d et D) ;
   la batte et la balle à des prix réalistes ; la douche « débite … litres d'eau par minute » ; problème de la semaine
