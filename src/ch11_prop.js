@@ -160,7 +160,7 @@
         const v = c[3] + R.int(-2, 2) * (c[3] >= 50 ? 5 : 1), t = c[4] + R.int(0, 2), d = v * t;
         return Qv(c[0] + " " + Q(d, c[1]) + " en " + Q(t, c[2]) + ". Quelle est sa vitesse moyenne (en " + c[6] + ") ?", v,
           M("v = \\frac{d}{t} = \\frac{" + N(d) + "}{" + t + "} = " + N(v)) + " " + c[6] + ".",
-          { ctx: c[5], fig: c[1] === "km" ? FIG.road(N(d).replace("\\text{'}", "'") + " km", t + " h", c[5]) : undefined,
+          { ctx: c[5], 
             guide: [GS("La vitesse est la distance parcourue en une unité de temps : " + M("v = \\frac{d}{t}") + ". Calcule " + M(N(d) + " : " + t) + ".", v, M(N(d) + " : " + t + " = " + N(v)) + " " + c[6] + ".")],
             traps: [TRAP(d * t, "On ne multiplie pas : la vitesse, c'est la distance divisée par la durée."), TRAP(r6(t / d), "C'est l'inverse : distance divisée par durée.")] }); },
       () => { const c = pickBy([["Pendant un orage, on entend le tonnerre", "s", "après avoir vu l'éclair. Le son va à 340 m/s. À quelle distance (en m) la foudre est-elle tombée ?", 340, [3, 4, 5, 6, 7, 9], "m", "orage"], ["Un train roule à 120 km/h pendant", "h", ". Quelle distance parcourt-il (en km) ?", 120, [1.5, 2.5, 3.5, 0.75], "km", "train"], ["Une hirondelle vole à 15 m/s pendant", "s", ". Quelle distance parcourt-elle (en m) ?", 15, [12, 25, 40, 75], "m", "oiseau"]]);
@@ -202,7 +202,7 @@
         const V1 = c[1] === "velo" ? v1 / 4 : v1, V2 = c[1] === "velo" ? v2 / 4 : v2, D = c[1] === "velo" ? dd / 4 : dd;
         return Qv(c[0] + " de " + Q(D, "km") + " à " + Q(V1, "km/h") + " et le retour à " + Q(V2, "km/h") + ". Quelle est sa vitesse moyenne sur l'aller-retour (en km/h) ?", (2 * D) / (D / V1 + D / V2),
           "Durées : " + M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h et " + M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h. Total " + M(N(r6(D / V1 + D / V2))) + " h pour " + M(N(2 * D)) + " km : " + M("v = " + N(r6(vm * D / dd))) + " km/h (et non la moyenne des deux vitesses).",
-          { ctx: c[1], fig: FIG.road(N(D) + " km", "aller-retour", c[1]),
+          { ctx: c[1], 
             guide: [GSd("Durée de l'aller (en h) ?", D / V1, M(N(D) + " : " + N(V1) + " = " + N(r6(D / V1))) + " h."), GSd("Durée du retour (en h) ?", D / V2, M(N(D) + " : " + N(V2) + " = " + N(r6(D / V2))) + " h."), GS("Vitesse moyenne = distance totale ÷ durée totale. Combien ?", (2 * D) / (D / V1 + D / V2), M(N(2 * D) + " : " + N(r6(D / V1 + D / V2)) + " = " + N(r6(vm * D / dd))) + " km/h.")],
             traps: [TRAP((V1 + V2) / 2, "On ne fait jamais la moyenne des vitesses : on roule plus longtemps à la vitesse la plus lente. Divise la distance totale par la durée totale.")] }); },
       () => { const [m1, v1, m2, v2] = pickBy([[30, 60, 90, 100], [20, 90, 40, 60], [45, 80, 15, 120], [40, 45, 80, 90], [30, 50, 90, 110]]), d1 = v1 * m1 / 60, d2 = v2 * m2 / 60, vm = (d1 + d2) / ((m1 + m2) / 60), c = pickBy([["Un car roule", "car"], ["Une voiture roule", "voiture"], ["Un train régional roule", "train"]]);
@@ -231,7 +231,7 @@
       () => { const m = pickBy(MET), V = R.int(12, 80), mass = r6(m[1] * V);
         return Qv("Un cube " + m[0] + " a un volume de " + Q(V, "cm^3") + " et une masse de " + Q(mass, "g") + ". Calcule sa masse volumique (en " + M("\\text{g/cm}^3") + ").", m[1],
           M("\\rho = \\frac{m}{V} = \\frac{" + N(mass) + "}{" + V + "} = " + N(m[1])) + " g/cm³ : chaque cm³ pèse " + N(m[1]).replace("{,}", ",") + " g.",
-          { ctx: m[2], fig: FIG.cube(""), guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
+          { ctx: m[2], guide: [GS("La masse volumique est la masse d'un cm³ : " + M("\\rho = \\frac{m}{V}") + ". Calcule " + M(N(mass) + " : " + V) + ".", m[1], M(N(mass) + " : " + V + " = " + N(m[1])) + " g/cm³.")],
             traps: [TRAP(r6(V / mass), "C'est l'inverse : masse divisée par volume."), TRAP(r6(mass * V), "On divise la masse par le volume.")] }); },
       () => { const c = pickBy([["L'huile d'olive", 0.92, "L", "kg", "Quelle est la masse de", "huile"], ["Le lait", 1.03, "L", "kg", "Quelle est la masse de", "lait"], ["L'essence", 0.75, "L", "kg", "Quelle est la masse de", "essence"], ["Le miel", 1.4, "L", "kg", "Quelle est la masse de", "miel"]]), V = pickBy([5, 12, 20, 25, 8]), mass = r6(c[1] * V);
         return Qv(c[0] + " a une masse volumique de " + M(N(c[1]) + u("kg/L")) + ". " + c[4] + " " + Q(V, "L") + " (en kg) ?", mass, M("m = \\rho \\cdot V = " + N(c[1]) + " \\cdot " + V + " = " + N(mass)) + " kg.",
@@ -351,7 +351,7 @@
     ],
     vitesse: [
       () => { const d = 10 * R.int(6, 18), v1 = pickBy([60, 80, 90, 100, 120]), v2 = pickBy([40, 50, 60, 75].filter((v) => v !== v1)), t1 = d / v1, t2 = d / v2, vm = (2 * d) / (t1 + t2);
-        return P(FIG.road(d + " km", v1 + " km/h → " + v2 + " km/h"), "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
+        return P(undefined, "Une voiture fait l'aller de " + M(d) + " km à " + M(v1) + " km/h et le retour à " + M(v2) + " km/h.",
           [["a) Durée de l'aller (min)", t1 * 60, 0.01], ["b) Durée du retour (min)", t2 * 60, 0.01], ["c) Vitesse moyenne sur l'aller-retour (km/h, au centième)", vm, 0.01]],
           ["La vitesse moyenne n'est pas la moyenne des vitesses : c'est la distance totale divisée par la durée totale.", "t = d / v pour chaque trajet ; v moyenne = " + 2 * d + " km / (durée aller + durée retour)."],
           "a) " + M(N(+(t1 * 60).toFixed(2))) + " min. b) " + M(N(+(t2 * 60).toFixed(2))) + " min. c) " + M("\\frac{" + 2 * d + "}{" + N(+(t1 + t2).toFixed(4)) + "} \\approx " + N(+vm.toFixed(2))) + " km/h (et non " + String((v1 + v2) / 2).replace(".", ",") + ")."); },

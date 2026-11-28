@@ -35,7 +35,7 @@
           a = R.int(2, 5), b = R.int(3, 6), c = R.int(2, 4), n = a * b * c;
         return Qv(x[0] + " " + M(a) + " " + x[1] + ", " + M(b) + " " + x[2] + " et " + M(c) + " " + x[3] + ". Combien de " + x[4] + " peut-on composer ?", n,
           "Arbre : " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + n) + ".",
-          { ctx: x[5], fig: tree(a, b, x[1], x[2]), guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
+          { ctx: x[5], guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
             traps: [TR(a + b + c, "On ne les additionne pas : chaque choix se combine avec tous les autres (arbre), on multiplie."), TR(a * b, "N'oublie pas le 3e choix (" + x[3] + ").")] }); },
       () => { const n = pk([4, 5, 6, 10]), k = pk([3, 4]), v = n ** k, x = pk([["Un cadenas a " + M(k) + " molettes portant chacune les chiffres de " + M(1) + " à " + M(n), "cadenas"], ["Un code secret est formé de " + M(k) + " symboles, chacun choisi parmi " + M(n) + " (on peut répéter)", "code"]]);
         if (n === 10 && k === 4) return null;
@@ -44,7 +44,7 @@
             traps: [TR(n * k, "On ne multiplie pas par le nombre de molettes : chaque molette multiplie les possibilités par " + n + "."), TR(k ** n, "C'est " + n + "^" + k + " : " + k + " positions, " + n + " choix chacune.")] }); },
       () => { const a = R.int(2, 4), b = R.int(3, 5), x = pk([["Pour aller de A à B, il y a " + M(a) + " chemins ; de B à C, il y a " + M(b) + " chemins. Combien de trajets différents de A à C passant par B ?", "chemins", "A → B", "B → C", "trajet"], ["Une glace : on choisit un cornet parmi " + M(a) + " et un parfum parmi " + M(b) + ". Combien de glaces différentes ?", "glaces", "cornet", "parfum", "glace"]]);
         return Qv(x[0], a * b, M(a + " \\cdot " + b + " = " + a * b) + " " + x[1] + ".",
-          { ctx: x[4], fig: tree(a, b, x[2], x[3]), guide: [GS("Compte les branches au bout de l'arbre : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
+          { ctx: x[4], guide: [GS("Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie. " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
     ],
     2: [ // sans répétition
       () => { const n = R.int(6, 12), v = n * (n - 1) * (n - 2);
@@ -92,7 +92,7 @@
       () => { const c = { rouges: R.int(2, 6), bleues: R.int(2, 6), vertes: R.int(1, 4) }, n = c.rouges + c.bleues + c.vertes, col = pk(["rouges", "bleues", "vertes"]), f = c[col];
         return Qv("Une urne contient " + M(c.rouges) + " boules rouges, " + M(c.bleues) + " bleues et " + M(c.vertes) + " vertes. On tire une boule au hasard. Quelle est la probabilité qu'elle soit " + col.slice(0, -1) + " ?" + FA, f / n,
           "Cas favorables sur cas possibles : " + M(FS(f, n)) + ".",
-          { ctx: "urne", fig: FIG.urn(c), guide: [GS("Nombre de boules en tout (cas possibles) ?", n, M(n) + "."), GS("Probabilité" + FA + " ?", f / n, M(FS(f, n)) + ".")],
+          { ctx: "urne", guide: [GS("Nombre de boules en tout (cas possibles) ?", n, M(n) + "."), GS("Probabilité" + FA + " ?", f / n, M(FS(f, n)) + ".")],
             traps: [TR(f / (n - f), "On divise par le nombre TOTAL de boules, pas par les autres."), TR(1 / 3, "Les couleurs n'ont pas la même chance : il y a plus de boules de certaines couleurs.")] }); },
       () => { const fc = pk([6, 8, 12, 20]), ev = pk([["un nombre pair", (k) => k % 2 === 0, "pair"], ["un multiple de 3", (k) => k % 3 === 0, "mult3"], ["un nombre premier", (k) => [2, 3, 5, 7, 11, 13, 17, 19].includes(k), "premier"], ["un nombre supérieur à 4", (k) => k > 4, "sup4"]]);
         const fav = Array.from({ length: fc }, (_, i) => i + 1).filter(ev[1]), f = fav.length;
@@ -130,25 +130,25 @@
       () => { const r = R.int(2, 5), b = R.int(2, 6), n = r + b;
         return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " bleues. On tire une boule, on la remet, puis on en tire une deuxième. Quelle est la probabilité d'obtenir deux rouges ?" + FA, (r * r) / (n * n),
           "Avec remise : " + M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + r + "}{" + n + "} = " + FS(r * r, n * n)) + ".",
-          { ctx: "remise", fig: FIG.urn({ rouges: r, bleues: b }), guide: [GS("Probabilité d'une rouge au 1er tirage" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("Deux rouges (on multiplie sur l'arbre)" + FA + " ?", (r * r) / (n * n), M(FS(r * r, n * n)) + ".")],
+          { ctx: "remise", guide: [GS("Probabilité d'une rouge au 1er tirage" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("Deux rouges (on multiplie sur l'arbre)" + FA + " ?", (r * r) / (n * n), M(FS(r * r, n * n)) + ".")],
             traps: [TR((2 * r) / n, "Sur un arbre, on multiplie les probabilités le long d'un chemin."), TR((r * (r - 1)) / (n * (n - 1)), "La boule est remise : le 2e tirage se fait avec la même urne.")] }); },
     ],
     3: [
       () => { const r = R.int(3, 6), b = R.int(2, 5), n = r + b;
         return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules rouges ?" + FA, (r * (r - 1)) / (n * (n - 1)),
           M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + (r - 1) + "}{" + (n - 1) + "} = " + FS(r * (r - 1), n * (n - 1))) + ".",
-          { ctx: "sans-remise-rr", fig: FIG.urn({ rouges: r, vertes: b }), guide: [GS("1re rouge" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("2e rouge sachant la 1re rouge (il reste " + (n - 1) + " boules)" + FA + " ?", (r - 1) / (n - 1), M(FS(r - 1, n - 1)) + "."), GS("Deux rouges" + FA + " ?", (r * (r - 1)) / (n * (n - 1)), M(FS(r * (r - 1), n * (n - 1))) + ".")],
+          { ctx: "sans-remise-rr", guide: [GS("1re rouge" + FA + " ?", r / n, M(FS(r, n)) + "."), GS("2e rouge sachant la 1re rouge (il reste " + (n - 1) + " boules)" + FA + " ?", (r - 1) / (n - 1), M(FS(r - 1, n - 1)) + "."), GS("Deux rouges" + FA + " ?", (r * (r - 1)) / (n * (n - 1)), M(FS(r * (r - 1), n * (n - 1))) + ".")],
             traps: [TR((r * r) / (n * n), "Sans remise : au 2e tirage, il reste une rouge et une boule de moins."), TR((r / n) + ((r - 1) / (n - 1)), "Le long d'un chemin de l'arbre, on multiplie.")] }); },
       () => { const r = R.int(2, 6), b = R.int(2, 5), n = r + b, v = (2 * r * b) / (n * (n - 1));
         return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " vertes. On tire deux boules sans remise. Quelle est la probabilité d'obtenir une boule de chaque couleur ?" + FA, v,
           "Rouge puis verte ou verte puis rouge : " + M("2 \\cdot \\frac{" + r + " \\cdot " + b + "}{" + n + " \\cdot " + (n - 1) + "} = " + FS(2 * r * b, n * (n - 1))) + ".",
-          { ctx: "sans-remise-rv", fig: FIG.urn({ rouges: r, vertes: b }), guide: [GS("Rouge puis verte" + FA + " ?", (r * b) / (n * (n - 1)), M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + FS(r * b, n * (n - 1))) + "."), GS("Verte puis rouge : même valeur. Total" + FA + " ?", v, M(FS(2 * r * b, n * (n - 1))) + ".")],
+          { ctx: "sans-remise-rv", guide: [GS("Rouge puis verte" + FA + " ?", (r * b) / (n * (n - 1)), M("\\frac{" + r + "}{" + n + "} \\cdot \\frac{" + b + "}{" + (n - 1) + "} = " + FS(r * b, n * (n - 1))) + "."), GS("Verte puis rouge : même valeur. Total" + FA + " ?", v, M(FS(2 * r * b, n * (n - 1))) + ".")],
             traps: [TR((r * b) / (n * (n - 1)), "Il y a deux chemins : rouge-verte ET verte-rouge."), TR((2 * r * b) / (n * n), "Sans remise : le 2e tirage se fait parmi " + (n - 1) + " boules.")] }); },
       () => { const r = R.int(3, 6), b = R.int(2, 5), n = r + b, num = r * (r - 1) + b * (b - 1), den = n * (n - 1);
         if (r === b) return null;
         return Qv("Une urne contient " + M(r) + " boules rouges et " + M(b) + " bleues. On tire deux boules sans remise. Quelle est la probabilité d'obtenir deux boules de la même couleur ?" + FA, num / den,
           "Deux rouges ou deux bleues : " + M("\\frac{" + r * (r - 1) + " + " + b * (b - 1) + "}{" + den + "} = " + FS(num, den)) + ".",
-          { ctx: "meme-couleur", fig: FIG.urn({ rouges: r, bleues: b }), guide: [GS("Deux rouges" + FA + " ?", (r * (r - 1)) / den, M(FS(r * (r - 1), den)) + "."), GS("Deux bleues" + FA + " ?", (b * (b - 1)) / den, M(FS(b * (b - 1), den)) + "."), GS("Total" + FA + " ?", num / den, M(FS(num, den)) + ".")],
+          { ctx: "meme-couleur", guide: [GS("Deux rouges" + FA + " ?", (r * (r - 1)) / den, M(FS(r * (r - 1), den)) + "."), GS("Deux bleues" + FA + " ?", (b * (b - 1)) / den, M(FS(b * (b - 1), den)) + "."), GS("Total" + FA + " ?", num / den, M(FS(num, den)) + ".")],
             traps: [TR((r * (r - 1)) / den, "N'oublie pas le cas « deux bleues »."), TR((r * r + b * b) / (n * n), "Sans remise : le dénominateur est " + n + " · " + (n - 1) + ".")] }); },
       () => { const x = pk([["On lance deux dés équilibrés. Quelle est la probabilité d'obtenir au moins un 6 ?", 25, 36, "aucun 6 : " + M("\\frac{5}{6} \\cdot \\frac{5}{6} = \\frac{25}{36}"), "de2"], ["On lance trois pièces équilibrées. Quelle est la probabilité d'obtenir au moins une fois pile ?", 1, 8, "aucun pile : " + M("\\left(\\frac{1}{2}\\right)^3 = \\frac{1}{8}"), "pieces3"], ["On lance trois dés équilibrés. Quelle est la probabilité d'obtenir au moins un 6 ?", 125, 216, "aucun 6 : " + M("\\left(\\frac{5}{6}\\right)^3 = \\frac{125}{216}"), "de3"]]);
         const v = 1 - x[1] / x[2];

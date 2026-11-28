@@ -32,7 +32,7 @@
     1: [
       () => { let a, b; do { a = nz(-12, 12); b = nz(-12, 12); } while (a > 0 && b > 0); const A = Math.abs(a), B = Math.abs(b), same = a * b > 0; // au moins un négatif (21.11)
         return Qv("Calcule : " + M(par(a) + " + " + par(b)), a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".",
-          { ctx: "addition", fig: FIG.numberLine(a, [], { span: [a + b] }), guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
+          { ctx: "addition", guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + B) + ".") : GS("Signes contraires : la plus grande distance moins la plus petite. " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.abs(A - B)) + "."), GS("Résultat (avec son signe) ?", a + b, M(a + b) + ".")],
             traps: [TR(-(a + b), "Signe du résultat : celui du nombre le plus loin de zéro."), TR(A + B === Math.abs(a + b) ? a - b : (a < 0 ? -1 : 1) * (A + B), "Signes contraires : on soustrait les distances.")] }); },
       () => { const a = nz(-12, 12), b = -R.int(2, 12);
         return Qv("Calcule : " + M(par(a) + " - " + par(b)), a - b, "Soustraire un nombre négatif, c'est ajouter son opposé : " + M(par(a) + " + " + -b + " = " + (a - b)) + ".",
@@ -132,7 +132,7 @@
     1: [
       () => { const k = R.int(2, 20);
         return Qv("Calcule " + M("\\sqrt{" + k * k + "}") + ".", k, M("\\sqrt{" + k * k + "} = " + k) + " car " + M(k + "^2 = " + k * k) + ".",
-          { ctx: "carre-parfait", fig: FIG.areaSquare("aire " + k * k), guide: [GS("Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) ** 2) + " : un peu moins que " + M(k * k) + "."), GS("Donc " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")], traps: [TR((k * k) / 2, "La racine n'est pas la moitié."), TR(k * k, "Il faut le nombre qui, au carré, donne " + k * k + ".")] }); },
+          { ctx: "carre-parfait", guide: [GS("Essaie " + M(k - 1) + " : " + M((k - 1) + "^2") + " = ?", (k - 1) ** 2, M((k - 1) ** 2) + " : un peu moins que " + M(k * k) + "."), GS("Donc " + M("\\sqrt{" + k * k + "}") + " = ?", k, M(k) + ".")], traps: [TR((k * k) / 2, "La racine n'est pas la moitié."), TR(k * k, "Il faut le nombre qui, au carré, donne " + k * k + ".")] }); },
       () => { const [k, kind] = pk([[pk([3, 4, 5, 6, 7, 8, 9]) / 10, "dec"], [pk([1, 2, 3]) / 10, "dec"], [0, "frac"]]); if (kind === "frac") { const n = R.int(1, 6), d = n + R.int(1, 6); return Qv("Calcule " + M("\\sqrt{\\frac{" + n * n + "}{" + d * d + "}}") + FA + ".", n / d, M("\\frac{\\sqrt{" + n * n + "}}{\\sqrt{" + d * d + "}} = \\frac{" + n + "}{" + d + "}") + ".", { ctx: "racine-fraction", guide: [GS(M("\\sqrt{" + n * n + "}") + " ?", n, M(n) + "."), GS(M("\\sqrt{" + d * d + "}") + " ?", d, M(d) + "."), GS("Résultat" + FA + " ?", n / d, M("\\frac{" + n + "}{" + d + "}") + ".")], traps: [TR((n * n) / (d * d) / 2, "On prend la racine du numérateur et du dénominateur."), TR(n * n / d, "Racine du dénominateur aussi.")] }); }
         const sq = r6(k * k);
         return Qv("Calcule " + M("\\sqrt{" + N(sq) + "}") + ".", k, M(N(k) + "^2 = " + N(sq)) + ", donc " + M("\\sqrt{" + N(sq) + "} = " + N(k)) + ".",

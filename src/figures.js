@@ -94,15 +94,6 @@ const FIG = (() => {
     return svg(W, 62, b, "pourcentage");
   }
 
-  // Balance : équation a·x + b = c.
-  function balance(left, right) {
-    let b = L(170, 30, 170, 108) + P([[150, 108], [190, 108], [170, 92]], "f-soft") + L(50, 40, 290, 40, "f-line", 'stroke-width="3"');
-    b += L(70, 40, 70, 58) + L(270, 40, 270, 58);
-    b += '<rect x="20" y="58" width="100" height="30" rx="6" class="f-fill"/>' + t(70, 78, left, "f-on", "middle", 13);
-    b += '<rect x="220" y="58" width="100" height="30" rx="6" class="f-soft"/>' + t(270, 78, right, "f-txt", "middle", 13);
-    return svg(340, 116, b, "balance");
-  }
-
   // Triangle rectangle coté (Pythagore) ; labels : [cathète horizontale, cathète verticale, hypoténuse].
   function rightTriangle(lab) {
     const A = [80, 130], B = [290, 130], C = [80, 30];
@@ -184,17 +175,6 @@ const FIG = (() => {
     }
     return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
   }
-  /* 28.11 (commentaire de l'auteur sur polyreg 2 : « il faudrait une figure ici ») : polygone à n côtés (pas forcément
-     régulier) découpé en n − 2 triangles par les diagonales issues d'un sommet. */
-  function polyTri(n) {
-    const cx = 150, cy = 92, pts = Array.from({ length: n }, (_, i) => { const a = (2 * Math.PI * i) / n - Math.PI / 2, r = 74 * (1 + 0.1 * Math.sin(3 * i + 1)); return [+(cx + r * Math.cos(a)).toFixed(1), +(cy + r * Math.sin(a) * 0.95).toFixed(1)]; });
-    let g = "";
-    for (let i = 1; i < n - 1; i++) g += '<polygon points="' + [pts[0], pts[i], pts[i + 1]].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="' + (i % 2 ? 0.08 : 0.25) + '" stroke="none"/>';
-    g += P(pts, "f-shape");
-    for (let i = 2; i < n - 1; i++) g += L(pts[0][0], pts[0][1], pts[i][0], pts[i][1], "f-line", 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"');
-    g += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="var(--margin)"/>';
-    return svg(300, 185, g, "polygone à " + n + " côtés découpé en triangles depuis un sommet");
-  }
   /* 28.11 (audit des figures) : o.apo = apothème (hauteur de la face avant, du sommet au milieu de l'arête de base),
      o.edge = arête latérale (avant droite) ; lh vide ou absent : pas de hauteur dessinée. */
   function pyramid(lc, lh, o = {}) {
@@ -224,32 +204,6 @@ const FIG = (() => {
     const lhT = (thin || wide) && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
     return svg(300, Math.round(by + ry + (isD || flat || thin ? 24 : 12)), b + lhT + (forced ? noScale(296, Math.round(by + ry + 8)) : ""), "cône");
   }
-  // Route et chronomètre (vitesse).
-  // Véhicule dessiné selon le contexte (commentaire testeur du 16.11 : « mettre un vélo » quand c'est une cycliste).
-  function vehicle(who) {
-    const k = 'stroke="var(--ink)" stroke-width="2" fill="none" stroke-linecap="round"';
-    if (who === "velo") return '<circle cx="26" cy="48" r="8" ' + k + '/><circle cx="52" cy="48" r="8" ' + k + '/><polyline points="26,48 35,36 47,36 52,48 39,48 35,36" ' + k + '/><line x1="47" y1="36" x2="45" y2="30" ' + k + '/><line x1="35" y1="36" x2="34" y2="32" ' + k + '/><circle cx="38" cy="22" r="4" class="f-fill"/><line x1="37" y1="26" x2="35" y2="34" ' + k + '/>';
-    if (who === "moto") return '<circle cx="26" cy="49" r="7" class="f-dot"/><circle cx="54" cy="49" r="7" class="f-dot"/><path d="M26,49 L36,38 L50,38 L54,49 Z" class="f-fill"/><circle cx="42" cy="28" r="5" class="f-fill"/>';
-    if (["tgv", "train", "tram"].includes(who)) return '<path d="M18,40 L66,40 Q78,40 80,54 L18,54 Z" class="f-fill"/><rect x="24" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="38" y="43" width="8" height="5" rx="1" class="f-soft"/><rect x="52" y="43" width="8" height="5" rx="1" class="f-soft"/><circle cx="28" cy="57" r="3" class="f-dot"/><circle cx="66" cy="57" r="3" class="f-dot"/>';
-    if (who === "bateau" || who === "aviron") return '<path d="M18,46 L70,46 L62,56 L26,56 Z" class="f-fill"/>' + (who === "bateau" ? '<line x1="44" y1="46" x2="44" y2="24" ' + k + '/><path d="M46,26 L62,44 L46,44 Z" class="f-soft" stroke="var(--ink)" stroke-width="1"/>' : '<line x1="30" y1="40" x2="58" y2="62" ' + k + '/>');
-    if (who === "course") return '<circle cx="38" cy="20" r="5" class="f-fill"/><polyline points="37,25 35,40 28,54" ' + k + '/><polyline points="35,40 44,47 42,56" ' + k + '/><polyline points="28,32 37,29 46,34" ' + k + '/>';
-    return '<rect x="20" y="40" width="34" height="16" rx="4" class="f-fill"/><circle cx="28" cy="58" r="4" class="f-dot"/><circle cx="46" cy="58" r="4" class="f-dot"/>';
-  }
-  function road(ld, lt, who) {
-    let b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="14 10" stroke-width="2"');
-    if (who === "bateau" || who === "aviron") b = '<rect x="16" y="56" width="300" height="26" rx="4" class="f-soft"/>' + L(24, 69, 308, 69, "f-on", 'stroke-dasharray="3 9" stroke-width="2"');
-    b += vehicle(who);
-    b += L(312, 30, 312, 56, "f-line") + P([[312, 30], [330, 36], [312, 42]], "f-fill");
-    return svg(340, 104, b + t(166, 100, ld) + t(166, 28, lt, "f-accent f-txt"), "trajet");
-  }
-  // Rangée d'objets (proportionnalité).
-  function items(n, label, maxShow = 12) {
-    let b = "";
-    const k = Math.min(n, maxShow);
-    for (let i = 0; i < k; i++) b += '<rect x="' + (16 + i * 26) + '" y="20" width="20" height="28" rx="3" class="' + (i % 2 ? "f-fill" : "f-fill2") + '"/>';
-    if (n > maxShow) b += t(16 + k * 26 + 14, 40, "…");
-    return svg(340, 74, b + t(16, 68, label, "f-txt", "start", 12), "objets");
-  }
   // Agrandissement : petite et grande figure.
   // kind : "" ou "rect" (forme, jamais affichée : « (rect) » apparaissait dans la figure, galerie 24.11), « 1:200 »
   // (échelle, affichée seule) ou « ? » (facteur demandé : la figure ne le donne pas, taille indicative).
@@ -269,21 +223,6 @@ const FIG = (() => {
     if (y1 - y0 < 6) { const e = (6 - (y1 - y0)) / 2; y0 = Math.floor(y0 - e); y1 = Math.ceil(y1 + e); }
     const ratio = (y1 - y0) / (x1 - x0), big = Math.max(x1 - x0, y1 - y0) > 16;
     return FIG.plot(a === null ? [] : [{ f: (x) => a * x + b }], pts, { xr: [x0, x1], yr: [y0, y1], numbers: true, step: big ? 2 : 1, squash: ratio > 1.4 ? 1.4 / ratio : 1, polys: o.poly ? [pts.map((p) => [p[0], p[1]])] : [], label: o.label || "repère" });
-  }
-  // Puissances : blocs (base^exposant).
-  function blocks(label) {
-    let b = "";
-    for (let i = 0; i < 3; i++) for (let j = 0; j <= i; j++) b += '<rect x="' + (30 + i * 70 + j * 10) + '" y="' + (80 - j * 18) + '" width="44" height="16" rx="2" class="' + (j % 2 ? "f-fill2" : "f-fill") + '"/>';
-    return svg(300, 110, b + t(150, 108, label, "f-txt", "middle", 12), "puissances");
-  }
-  // Échelle de puissances de 10.
-  function sciScale(exp) {
-    let b = L(16, 50, 324, 50);
-    for (let e = -6; e <= 8; e++) {
-      const x = 16 + (e + 6) * 22;
-      b += L(x, 44, x, 56, e === exp ? "f-accent" : "f-line") + (e % 2 === 0 ? t(x, 74, "10^" + e, e === exp ? "f-accent f-txt f-tick" : "f-txt f-tick", "middle", 10) : "");
-    }
-    return svg(340, 84, b + '<circle cx="' + (16 + (exp + 6) * 22) + '" cy="50" r="6" class="f-dot"/>', "ordres de grandeur");
   }
   // Carré d'aire n (racines).
   function areaSquare(label) {
@@ -443,15 +382,6 @@ const FIG = (() => {
     }
     return svg(320, 168, gg, "triangle quelconque");
   }
-  // Diagramme en bâtons d'une petite série.
-  // labels (24.11, galerie : sous les barres, les effectifs au lieu des notes) : valeurs de la série sous les barres,
-  // effectifs (hauteurs) écrits au-dessus des barres. Sans labels : la valeur sous chaque barre (série brute).
-  function barChart(values, labels) {
-    const max = Math.max(...values), w = 280 / values.length, top = labels ? 16 : 0;
-    let g = L(20, 140, 300, 140);
-    values.forEach((v, i) => { const hh = (v / max) * (110 - top), cx = 24 + i * w + (w - 8) / 2; g += '<rect x="' + (24 + i * w) + '" y="' + (140 - hh) + '" width="' + (w - 8) + '" height="' + hh + '" rx="3" class="' + (i % 2 ? "f-fill2" : "f-fill") + '"/>' + t(cx, 156, String(labels ? labels[i] : v).replace(".", ","), "f-txt", "middle", 11) + (labels ? t(cx, 136 - hh, String(v).replace(".", ","), "f-accent f-txt", "middle", 11) : ""); });
-    return svg(320, 164, g, "série statistique");
-  }
 
   // Cylindre (13.11, retour testeur) : base arrière en pointillés, rayon sur la face du haut avec son étiquette
   // au-dessus du bord (sans chevauchement), hauteur en cote à droite.
@@ -544,5 +474,5 @@ const FIG = (() => {
     return svg(300, 180, g, "boule coupée par un plan");
   }
 
-  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, scaling, lineGraph, fractionOf, prioSteps, areaSquare, tiles, fmt };
 })();

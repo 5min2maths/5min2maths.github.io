@@ -161,7 +161,7 @@
     1: [
       () => { const p = nz(-6, 6), q = nz(-6, 6), a0 = pk([1, -1, 2, -2, 3]); if (p === q) return null;
         return QSet("Détermine les zéros de " + M("f(x) = " + P2([a0, -a0 * (p + q), a0 * p * q])) + ".", [p, q], M("f(x) = " + fx(a0, p, q)) + " : zéros " + M(p) + " et " + M(q) + ".",
-          { ctx: "zeros", fig: FIG.parabola((x) => a0 * (x - p) * (x - q) / 3, [], null, false), guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
+          { ctx: "zeros", guide: [GS("Somme des zéros (" + M("-\\frac{b}{a}") + ") ?", p + q, M(p + q) + "."), GSet("Zéros ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes : (x − p) s'annule en p.")] }); },
       () => { const h = nz(-5, 5), k = nz(-6, 6), a = pk([1, -1, 2, -3]);
         return QP("Quel est le sommet de la parabole " + M("f(x) = " + co(a) + "(" + xm(h) + ")^2" + sg(k)) + " ? Réponds « x ; y ».", [h, k], "Forme canonique " + M("a(x - h)^2 + k") + " : sommet " + M("(" + h + " ; " + k + ")") + ".",
           /* 26.11 (revue élèves, f2-1-b9d : après « −3 ; 5 », l'indice général parlait des zéros et du discriminant) : indice
@@ -175,7 +175,7 @@
     2: [
       () => { const h = nz(-4, 4), k = R.int(-6, 6), a = pk([1, -1, 2, -2, 3]);
         return QP("Détermine le sommet de la parabole " + M("f(x) = " + P2([a, -2 * a * h, a * h * h + k])) + ". Réponds « x ; y ».", [h, k], M("x_S = -\\frac{b}{2a} = -\\frac{" + -2 * a * h + "}{" + 2 * a + "} = " + h) + " ; " + M("y_S = f(" + h + ") = " + k) + ".",
-          { ctx: "sommet-dev", fig: FIG.parabola((x) => (a * (x - h) ** 2 + k) / 3, [], null, false), guide: [GS(M("x_S = -\\frac{b}{2a}") + " ?", h, M(h) + "."), GS(M("y_S = f(x_S)") + " ?", k, M(k) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "x_S = −b ÷ (2a) : attention au signe."), TP([h, a * h * h + k], "y_S = f(" + h + "), pas le terme constant.")] }); },
+          { ctx: "sommet-dev", guide: [GS(M("x_S = -\\frac{b}{2a}") + " ?", h, M(h) + "."), GS(M("y_S = f(x_S)") + " ?", k, M(k) + "."), GP("Sommet ?", [h, k], M("(" + h + " ; " + k + ")") + ".")], traps: [TP([-h, k], "x_S = −b ÷ (2a) : attention au signe."), TP([h, a * h * h + k], "y_S = f(" + h + "), pas le terme constant.")] }); },
       () => { let p, q, a; do { a = pk([2, 3, -2]); p = nz(-5, 5); q = nz(-5, 5); } while (p === q);
         return QSet("Résous " + M(P2([a, -a * (p + q), a * p * q]) + " = 0") + ".", [p, q], "On divise par " + M(a) + " : " + M(P2([1, -(p + q), p * q]) + " = 0") + ", soit " + M("(" + xm(p) + ")(" + xm(q) + ") = 0") + " : " + M(p) + " et " + M(q) + ".",
           { ctx: "equation-a", guide: [GX("Après division par " + M(a), P2([1, -(p + q), p * q]), M(P2([1, -(p + q), p * q])) + "."), GSet("Solutions ?", [p, q], M(p) + " et " + M(q) + ".")], traps: [TSet([-p, -q], "Attention aux signes.")] }); },
