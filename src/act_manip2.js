@@ -113,13 +113,26 @@
     const D1 = [{ top: ["x", "1", "1"], left: ["1", "1", "1"], txt: "3(x + 2)", msg: "Le 3 multiplie le x ET le 2 : 3 barres x et 6 unités." },
       { top: ["x", "1", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)(x + 3)", msg: "Quatre morceaux : x², 3x, 2x et 6, qu'on réduit en x² + 5x + 6." },
       { top: ["x", "1", "1", "1"], left: ["x", "x"], txt: "2x(x + 3)", msg: "2x · x = 2x² et 2x · 3 = 6x." }];
-    set("distrib", {
+    /* 28.11 (nickel 10e, ch. 7 ; plan de cheminement 10e : « pas de double distributivité ») : en 10e, la leçon montre trois
+       rectangles à SIMPLE distributivité (un facteur sur une parenthèse), et son Retiens s'y limite (règle du 15.11). La
+       version ci-dessous (avec (x + 2)(x + 3)) reste celle des autres classes. */
+    const D10 = [D1[0], { top: ["x", "x", "1"], left: ["1", "1"], txt: "2(2x + 1)", msg: "Le 2 multiplie 2x ET 1 : 4 barres x et 2 unités, 4x + 2." }, D1[2]];
+    const o10 = {
+      retiens: { regle: "Le facteur devant la parenthèse multiplie chaque terme de la parenthèse : \\(k(a + b) = ka + kb\\). Dans le rectangle, chaque case est un produit : l'aire totale est la somme des cases.",
+        exemple: ["\\(3(x + 2) = 3x + 6\\).", "\\(2(2x + 1) = 4x + 2\\).", "\\(2x(x + 3) = 2x^2 + 6x\\)."], piege: "\\(3(x + 2)\\) n'est pas \\(3x + 2\\) : le 3 multiplie aussi le 2 (six unités dans le rectangle)." },
+      predict: { q: "3(2x + 5) = ?", choices: ["6x + 5", "6x + 15", "5x + 8"], good: 1, why: "Le 3 multiplie les deux termes : 3 · 2x = 6x et 3 · 5 = 15. Comme l'aire d'un rectangle coupé en deux." },
+      defis: ["Remplis le rectangle 3 sur (x + 2) avec des tuiles : quelle est son aire ?", "Remplis le rectangle 2 sur (2x + 1).", "Remplis le rectangle 2x sur (x + 3)."],
+      play: mk(D10, [null, { q: "Sans la figure : −2(4x − 3) = −8x + … Tape le nombre qui manque.", ans: 6, ok: "−2 · (−3) = +6 : moins par moins donne plus, −2(4x − 3) = −8x + 6.", no: "Le −2 multiplie aussi le −3 : −2 · (−3) = ?" }, null]),
+    };
+    const o11 = {
       /* Retiens limité à ce que présentent les défis (24.11, règle du 15.11) */
       retiens: { exemple: ["\\(3(x + 2) = 3x + 6\\).", "\\((x + 2)(x + 3) = x^2 + 3x + 2x + 6 = x^2 + 5x + 6\\).", "\\(2x(x + 3) = 2x^2 + 6x\\)."], piege: "Dans \\((x + 2)(x + 3)\\), il y a 4 produits (4 morceaux du rectangle) : n'oublie pas les produits « croisés »." },
       predict: { q: "3(2x + 5) = ?", choices: ["6x + 5", "6x + 15", "5x + 8"], good: 1, why: "Le 3 multiplie les deux termes : 3 · 2x = 6x et 3 · 5 = 15. Comme l'aire d'un rectangle coupé en deux." },
       defis: ["Remplis le rectangle 3 sur (x + 2) avec des tuiles : quelle est son aire ?", "Remplis le rectangle (x + 2) sur (x + 3).", "Remplis le rectangle 2x sur (x + 3)."],
       play: mk(D1, [null, { q: "Développe (x + 4)(x + 1) et réduis : tape le coefficient de x.", ans: 5, ok: "(x + 4)(x + 1) = x² + x + 4x + 4 = x² + 5x + 4.", no: "Quatre produits : x · x, x · 1, 4 · x et 4 · 1 ; puis regroupe les x." }, null]),
-    });
+    };
+    const co10 = () => typeof state !== "undefined" && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10;
+    Object.defineProperty(ACTIVE, "distrib", { get: () => (co10() ? o10 : o11), set: () => {}, enumerable: true, configurable: true });
     const D2 = [{ top: ["x", "1"], left: ["x", "1"], txt: "(x + 1)²", msg: "Un carré x², deux barres x et une unité : x² + 2x + 1." },
       { top: ["x", "1", "1"], left: ["x", "1", "1"], txt: "(x + 2)²", msg: "Deux rectangles de 2x (le double produit 4x), plus 2² = 4 : x² + 4x + 4." },
       { top: ["x", "1", "1", "1"], left: ["x", "1", "1", "1"], txt: "(x + 3)²", msg: "x² + 6x + 9 : sans les deux rectangles 3x, il manquerait le double produit." }];

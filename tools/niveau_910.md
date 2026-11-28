@@ -216,3 +216,16 @@ la 10e : vérifié en 11e (prio, valnum, distrib, eq1, fracadd, litelab : aucune
 9. (28.11) **dec10, proptab retirés de l'année de 10e** (pas d'objectif de 10e) : d'accord ? Ils restent en remobilisation.
 10. (28.11) **UP10 : decadd, reladd, prop au niveau 3 dès le niveau 1** (révision au plan) : les trois niveaux se ressemblent ;
    autre choix : retirer ces trois notions de l'année de 10e (rel, fracops, pctvar couvrent l'année).
+
+## 6. « Nickel » 10e (chapitre par chapitre, liste de contrôle de `chantier_11e.md`)
+
+| Ch. | Notions | État | Rapport |
+|---|---|---|---|
+| 7 Calcul littéral | litelab, valnum, reduire, monomes, distrib, litconv | cases 1–9, 11, 12 ✓ ; test de préparation `RICH.litt10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch7_28-11.md` |
+| 6 Puissances et racines | carres, rac, racenc, sci, scicalc, puiss, ensco | attend les décisions § 5 n° 5 | — |
+
+Ch. 7 (28.11, branche `agent/contenu7`) : + 8 formes de 10e (`q.co = [10]`, `variantes.js`) et 2 défis (programme de
+calcul, allée autour d'un jardin) ; HORS_CO[10] : valnum « trapeze », litelab « nombre entier qui suit » ; textes de 10e
+pour « Développer » (TXT_CO, `engine.js` : exemple, indice, rappel sans double distributivité ; leçon active à simple
+distributivité, `act_manip2.js`) ; sujet de préparation de 10e = `RICH.litt10` (avant : banque de 11e). Contrôle :
+`tests/parcours.html#section=nickel10_ch7`. Reste : 9e (9C10) tire encore la banque de 11e ; monomes N3 quotient à valider.

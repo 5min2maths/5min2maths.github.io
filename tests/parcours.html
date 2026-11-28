@@ -463,5 +463,80 @@ try {
 } catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
 document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
 });
+Lot.section("nickel10_ch7", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* 28.11 (/contenu nickel 10e, chapitre 7 Calcul littéral, tools/archive/contenu_nickel10_ch7_28-11.md) : liste de contrôle
+   « nickel » (tools/chantier_11e.md) appliquée aux 6 notions du chapitre 7 de 10e. Chaque contrôle échoue sans la
+   correction : HORS_CO[10] (valnum trapèze, litelab « le nombre entier qui suit n »), formes et défis de 10e (q.co = [10]),
+   textes de la 10e (TXT_CO : « Développer » sans double distributivité : exemple du catalogue, indice, rappel de cours),
+   Retiens de la leçon active distrib (ce que montrent les défis), banque du sujet de préparation RICH.litt10 (avant : la
+   banque de 11e, avec double distributivité, identités et factorisation). */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const st = (g) => { const x = Engine.newState({ system: "CH", grade: g, track: "co", minutes: 5 }); Engine.autoInit(x); return x; };
+const txt = (q) => String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").replace(/\{,\}/g, ",");
+const cnt = (S, id, d, n = 80) => { const c = {}; for (let k = 0; k < n; k++) { const q = Engine.make(S, id, d); c[q.ctx || "-"] = (c[q.ctx || "-"] || 0) + 1; } return c; };
+const keep = typeof state !== "undefined" ? state : null;
+try {
+  const S10 = st(10), S9 = st(9), S11 = st(11);
+  /* HORS_CO[10] et formes de 10e : tirées en 10e, jamais en 9e ni en 11e */
+  const F = [["litelab", 2, ["solde", "pairs", "ages-futur"]], ["valnum", 2, ["moins-carre", "quot-deux"]], ["reduire", 2, ["decimaux"]], ["distrib", 3, ["dec-deux", "deuxlettres"]], ["litelab", 4, ["programme"]], ["distrib", 4, ["allee"]]];
+  for (const [id, d, cs] of F) { const c = cnt(S10, id, d), c9 = cnt(S9, id, d, 40), c11 = cnt(S11, id, d, 40);
+    ok(cs.every((k) => c[k] >= 4) && cs.every((k) => !c9[k] && !c11[k]), id + " " + d + " : formes de 10e tirées en 10e (≥ 4 sur 80 chacune), jamais en 9e ni en 11e " + JSON.stringify(c)); }
+  const v2 = cnt(S10, "valnum", 2, 120), v2b = cnt(S11, "valnum", 2, 80), q2 = []; for (let k = 0; k < 150; k++) { const q = Engine.make(S10, "litelab", 2); if (/nombre entier qui suit/.test(txt(q))) q2.push(q.code); }
+  ok(!v2.trapeze && v2b.trapeze >= 3, "valnum 2 : trapèze à entiers positifs écarté en 10e, gardé en 11e " + JSON.stringify(v2));
+  ok(!q2.length, "litelab 2 : « le nombre entier qui suit n » (n + 1, trivial) écarté en 10e " + q2.slice(0, 3).join(" "));
+  /* recalcul indépendant (nombres relus dans l'énoncé ; expressions : évaluées en trois points) */
+  const bad = [], near = (a, b) => Math.abs(a - b) < 1e-6;
+  const eqE = (e, f) => { try { return Expr.equivalent(Expr.parse(e), Expr.parse(f)); } catch (er) { return false; } };
+  for (let s = 1; s <= 150; s++) {
+    const a = Engine.build("valnum", 2, s), t = txt(a);
+    if (a.ctx === "moins-carre") { const m = /-x\^2 \+ (\d+)x - (\d+) pour x = -(\d+)/.exec(t); if (!m || a.spec.value !== -((+m[3]) ** 2) - +m[1] * +m[3] - +m[2]) bad.push(a.code); }
+    if (a.ctx === "quot-deux") { const m = /pour a = (-?\d+) et b = (-?\d+)/.exec(t); if (!m || !near(a.spec.value, (+m[1] - 2 * +m[2]) / (+m[1] + +m[2]))) bad.push(a.code); }
+    const b = Engine.build("reduire", 2, s);
+    if (b.ctx === "decimaux") { const m = /Réduis\s*:\s*([\d,]+)x - (\d+) \+ ([\d,]*)x \+ ([\d,]+) - ([\d,]+)x/.exec(txt(b)), n = (z) => (z === "" ? 1 : +z.replace(",", "."));
+      const r6 = (v) => Math.round(v * 1e6) / 1e6;
+      if (!m || !eqE(b.spec.expr, r6(n(m[1]) + n(m[3]) - n(m[5])) + "*x+(" + r6(-n(m[2]) + n(m[4])) + ")")) bad.push(b.code); }
+    const c = Engine.build("distrib", 3, s), tc = txt(c);
+    if (c.ctx === "dec-deux") { const m = /: ([\d,]+)\((\d+)x - (\d+)\) - ([\d,]+)\((\d+)x - (\d+)\)/.exec(tc), n = (z) => +z.replace(",", ".");
+      if (!m || !eqE(c.spec.expr, n(m[1]) + "*(" + m[2] + "*x-" + m[3] + ")-" + n(m[4]) + "*(" + m[5] + "*x-" + m[6] + ")")) bad.push(c.code); }
+    if (c.ctx === "deuxlettres") { const m = /: (\d+)a\((\d+)a - b\) - (\d+)b\(a - (\d+)b\)/.exec(tc); if (!m || !eqE(c.spec.expr, m[1] + "*a*(" + m[2] + "*a-b)-" + m[3] + "*b*(a-" + m[4] + "*b)")) bad.push(c.code); }
+    for (const q of [b, c].concat([Engine.build("litelab", 2, s)])) if (q.co && (q.traps || []).some((tr) => tr.e && eqE(tr.e, q.spec.expr))) bad.push(q.code + " piège = réponse");
+    const l = Engine.build("litelab", 2, s), tl = txt(l);
+    if (l.ctx === "solde") { const m = /baisse de (\d+) %, puis on paie ([\d,]+) CHF/.exec(tl); if (!m || !eqE(l.spec.expr, (1 - +m[1] / 100) + "*x+" + m[2].replace(",", "."))) bad.push(l.code); }
+    if (l.ctx === "ages-futur") { const m = /a (\d+) ans de moins, et leur grand-mère a (\d+) fois .* dans (\d+) ans/.exec(tl); if (!m || !eqE(l.spec.expr, "(x+" + m[3] + ")+(x-" + m[1] + "+" + m[3] + ")+(" + m[2] + "*x+" + m[3] + ")")) bad.push(l.code); }
+  }
+  /* défis de 10e : parties recalculées depuis l'énoncé */
+  for (let s = 1; s <= 200; s++) {
+    const p = Engine.build("litelab", 4, s);
+    if (p.ctx === "programme") { const m = /par (\d+)\. Ajoute (\d+)\. Multiplie le résultat par (\d+)\. Retranche (\d+) fois/.exec(txt(p)), f = (x) => +m[3] * (+m[1] * x + +m[2]) - +m[4] * x;
+      const want = m && [f(5), f(-4)], r = m && +((/obtenir (-?\d+)/.exec(txt({ q: p.parts[3].label })) || [])[1]);
+      if (!m || p.parts[0].spec.value !== want[0] || p.parts[1].spec.value !== want[1] || !eqE(p.parts[2].spec.expr, m[3] + "*(" + m[1] + "*x+" + m[2] + ")-" + m[4] + "*x") || f(p.parts[3].spec.value) !== r) bad.push(p.code); }
+    const q = Engine.build("distrib", 4, s);
+    if (q.ctx === "allee") { const m = /et (\d+) m de large\. On l'entoure d'une allée de (\d+) m/.exec(txt(q)), L = m && +m[1], w = m && +m[2], X0 = +((/jardin de (\d+) m/.exec(txt({ q: q.parts[2].label })) || [])[1]), A0 = +((/couvre (\d+) m/.exec(txt({ q: q.parts[3].label })) || [])[1]);
+      const al = (x) => (L + 2 * w) * (x + 2 * w) - L * x;
+      if (!m || !eqE(q.parts[0].spec.expr, (L + 2 * w) + "*(x+" + 2 * w + ")") || !eqE(q.parts[1].spec.expr, "(" + (L + 2 * w) + ")*(x+" + 2 * w + ")-" + L + "*x") || q.parts[2].spec.value !== al(X0) || al(q.parts[3].spec.value) !== A0) bad.push(q.code); }
+  }
+  ok(!bad.length, "recalcul des formes et défis de 10e (150–200 graines) : " + (bad.length ? bad.slice(0, 8).join(" ") : "tout juste"));
+  /* textes de la 10e : Développer sans double distributivité */
+  const cat = (g) => Engine.catalog(st(g).profile).find((n) => n.id === "distrib");
+  ok(!/\)\(/.test(cat(10).ex) && /\)\(/.test(cat(11).ex), "exemple du catalogue « Développer » : simple distributivité en 10e (" + cat(10).ex + "), inchangé en 11e");
+  state = S10; const h10 = HINTS.distrib, r10 = LESSONS.distrib.regle, e10 = LESSONS.distrib.exemple.join(" ");
+  state = S11; const h11 = HINTS.distrib, r11 = LESSONS.distrib.regle;
+  ok(!/première parenthèse|seconde|deuxième/.test(h10) && /Double distributivité/.test(r11) && !/Double|\)\(/.test(r10 + e10) && /première parenthèse/.test(h11), "indice et rappel de « Développer » : simple distributivité en 10e, double distributivité gardée en 11e");
+  state = S10; const q10 = Engine.make(S10, "distrib", 2); ok(!/première parenthèse/.test(q10.hint || ""), "indice d'une question de 10e (finalize) : celui de la 10e");
+  state = S10; const A = ACTIVE.distrib, a10 = A && JSON.stringify([A.retiens, A.defis]); state = S11; const a11 = JSON.stringify([ACTIVE.distrib.retiens, ACTIVE.distrib.defis]); state = S10;
+  ok(A && !/Double|\)\(|\) sur \(/.test(a10) && /\(x \+ 2\)\(x \+ 3\)/.test(a11), "leçon active distrib : en 10e, trois rectangles à simple distributivité et Retiens limité à ce qu'ils montrent ; (x + 2)(x + 3) gardé en 11e");
+  /* sujet de préparation : banque de 10e */
+  const ids = ["litelab", "valnum", "reduire", "monomes", "distrib", "litconv"], pr = (g) => st(g).profile;
+  ok(richChapter(ids, pr(10)) === "litt10" && richChapter(["distrib", "reduire"], pr(10)) === "litt10" && richChapter(ids, pr(11)) === "litt11" && richChapter(["litelab", "valnum"], pr(9)) === "litt11" && richChapter(["litelab", "valnum", "reduire", "distrib", "parenth", "idrem", "factor"], pr(11)) === "litt11",
+    "sujet de préparation : RICH.litt10 en 10e, RICH.litt11 en 11e (et en 9e, inchangé)");
+  state = S10; let hors = []; for (const lev of ["facile", "standard", "exigeant"]) for (let k = 0; k < 6; k++) { const it = mockPlan(ids, lev); for (const x of it) if (x.rich && x.rich !== "litt10") hors.push(x.rich); }
+  const T = []; for (const kind of ["ex", "raison"]) RICH.litt10[kind].forEach((f, k) => { for (let s = 1; s <= 40; s++) { R.seed(s * 31 + k); const x = f(); T.push(x.q + x.sol + x.parts.map((p) => p.label).join(" ")); } });
+  /* produit de deux parenthèses à deux termes (double distributivité), factorisation, identités : 11e */
+  const t11 = T.filter((t) => /\([^()]*\w\s[+-]\s[^()]*\)\s*(\\cdot\s*)?\([^()]*\w\s[+-]\s[^()]*\)|factoris|identit/.test(t.replace(/<svg[\s\S]*?<\/svg>/g, "").replace(/\\\(|\\\)/g, " ")));
+  ok(!hors.length && !t11.length && RICH.litt10.ex.length >= 5 && RICH.litt10.raison.length >= 4, "sujets de 10e : exercices de RICH.litt10 seulement, sans double distributivité, identité ni factorisation " + (hors[0] || "") + " " + (t11[0] || "").slice(0, 120));
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+state = keep;
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+});
 Lot.lance();
 </script>

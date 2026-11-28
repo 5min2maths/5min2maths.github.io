@@ -19,11 +19,13 @@ for(const ch of NEW){const C=RICH[ch];let n=0;
  for(const lev of ["facile","standard","exigeant"]){const it=mockPlan(C.ids,lev),nb=it.filter(i=>i.part==="B").length;if(nb<3)bad(ch+" "+lev+" : "+nb+" exercices B");}
 }
 // Chapitres : les 9e/10e vont à leur banque, les autres ne changent pas.
-const EXP={"9C01":"dec9","9C02":"unit9","9C03":"geo9","9C04":"arith9","9C05":"aire9","9C06":"rel9","9C07":"sol9","9C08":"frac9","9C09":"prop9","9C11":"transf9","9C12":"diagr","10C01":"rel10","10C02":"aire10","10C03":"frac10","10C04":"sol10","10C10":"prop10","10C12":"poly10","10C13":"transf10","10C14":"diagr"};
+const EXP={"9C01":"dec9","9C02":"unit9","9C03":"geo9","9C04":"arith9","9C05":"aire9","9C06":"rel9","9C07":"sol9","9C08":"frac9","9C09":"prop9","9C11":"transf9","9C12":"diagr","10C01":"rel10","10C02":"aire10","10C03":"frac10","10C04":"sol10","10C07":"litt10","10C10":"prop10","10C12":"poly10","10C13":"transf10","10C14":"diagr"};
 const chaps={};for(const [id,m] of Object.entries(ORDRE_THEME.CO_BY))for(const c of Object.values(m))(chaps["CO:"+c]=chaps["CO:"+c]||[]).push(id);
 for(const sys of ["MATU","MP"])for(const [id,c] of Object.entries(ORDRE_THEME[sys]))(chaps[sys+":"+c]=chaps[sys+":"+c]||[]).push(id);
-const saved={};NEW.forEach(k=>{saved[k]=RICH[k];delete RICH[k];});const before={};for(const k in chaps)before[k]=richChapter(chaps[k]);Object.assign(RICH,saved);
-let nc=0;for(const k in chaps){const c=k.split(":")[1],now=richChapter(chaps[k]);if(k.startsWith("CO:")&&EXP[c]){nc++;if(now!==EXP[c])bad(k+" → "+now+" au lieu de "+EXP[c]);}else if(now!==before[k])bad(k+" changé : "+before[k]+" → "+now);}
+/* 28.11 (nickel 10e, ch. 7) : banque réservée à une classe (RICH.litt10, grades) : chapitres du CO jugés avec le profil de leur classe */
+const prof=(k)=>{const m=/^CO:(\d+)C/.exec(k);return m?{system:"CH",grade:+m[1],track:"co"}:undefined;};
+const saved={};NEW.forEach(k=>{saved[k]=RICH[k];delete RICH[k];});const before={};for(const k in chaps)before[k]=richChapter(chaps[k],prof(k));Object.assign(RICH,saved);
+let nc=0;for(const k in chaps){const c=k.split(":")[1],now=richChapter(chaps[k],prof(k));if(k.startsWith("CO:")&&EXP[c]){nc++;if(now!==EXP[c])bad(k+" → "+now+" au lieu de "+EXP[c]);}else if(now!==before[k])bad(k+" changé : "+before[k]+" → "+now);}
 if(richChapter(["dec10"])!=="dec9"||richChapter(["proptab"])!=="prop9")bad("révisions 9e dans 10e");
 L.unshift((fails?"ÉCHEC ":"OK ")+NEW.length+" banques, "+nc+" chapitres 9e/10e branchés, "+fails+" défaut(s)");
 }catch(e){L.push("EXC "+e.stack)} document.body.innerHTML="<pre id=\"log\">"+L.join("\n")+"</pre>";</script>

@@ -79,8 +79,19 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
   Contrôle `tests/parcours.html#section=niv10`. Ordre proposé pour le « nickel » 10e : ch. 6 Puissances et racines, 7 Calcul
   littéral, 9 Équations, 8 Pythagore, 10 Proportionnalité, 11 Fonctions, 4 3D, puis reprises 3, 1, 2 et courts 5, 12–14.
 
+- **« Nickel » 10e, ch. 7 Calcul littéral** (28.11, `/contenu`, rapport `archive/contenu_nickel10_ch7_28-11.md`, branche
+  `agent/contenu7`, à fusionner) : liste de contrôle de `chantier_11e.md` sur litelab, valnum, reduire, monomes, distrib,
+  litconv : + 8 formes de 10e et 2 défis (programme de calcul, allée), trapèze et « n + 1 » écartés, « Développer » sans
+  double distributivité en 10e (exemple, indice, rappel, leçon active), **sujet de préparation de 10e = `RICH.litt10`**
+  (5 exercices modelés sur le MER 10e, 5 raisonnements ; avant, la 10e recevait la banque de 11e). `riche.js` (fin,
+  `richChapter`) touché : à fusionner avec la branche de l'autre agent /contenu. Contrôle à faire : un sujet de 10e imprimé
+  et relu ; la 9e (9C10) tire encore la banque de 11e (à traiter au « nickel » 9e). Prochain : ch. 9 Équations (ou ch. 6
+  après décisions).
+
 ## À décider
 
+- **10e ch. 7 (28.11)** : défis de calcul littéral qui font résoudre une équation simple (« x pour un périmètre de 38 cm ») avant le
+  chapitre 9 : gardés ? ; monomes N3 « quotient » en 10e LS ?
 - **10e (28.11)** : arith, premiers (« CT » au plan, travaillés dans les MER 10e) gardés ou retirés de l'année ? ; dec10 et
   proptab retirés de l'année : d'accord ? ; decadd, reladd, prop au niveau 3 dès le niveau 1 (révision) ou retirés de
   l'année ? ; restent du 25.11 : vitesse moyenne sur deux trajets écartée, affine 2 (pente par deux points, parallèle),

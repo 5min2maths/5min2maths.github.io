@@ -306,7 +306,12 @@ function richChapter(ids, profile) {
   let best = null, n = 0;
   for (const [k, c] of Object.entries(RICH)) {
     if ((c.track === "mp" && tr !== "mp") || (c.track === "col" && tr === "mp")) continue;
-    const m = ids.filter((id) => c.ids.includes(id)).length + (c.track && c.track === tr ? 0.5 : 0);
+    /* 28.11 (nickel 10e, ch. 7) : banque réservée à certaines classes du CO (c.grades, ex. RICH.litt10) : écartée pour un autre
+       profil, préférée (+0,5) pour sa classe ; sans profil (tests), elle concourt normalement. Avant, une 10e qui révisait le
+       calcul littéral recevait RICH.litt11 (double distributivité, identités, factorisation : 11e). */
+    const gOk = c.grades && profile ? profile.system === "CH" && profile.track !== "mp" && c.grades.includes(profile.grade) : null;
+    if (gOk === false) continue;
+    const m = ids.filter((id) => c.ids.includes(id)).length + (c.track && c.track === tr ? 0.5 : 0) + (gOk ? 0.5 : 0);
     if (m > n) { best = k; n = m; }
   }
   return best && Math.floor(n) * 2 >= ids.length ? best : null;
