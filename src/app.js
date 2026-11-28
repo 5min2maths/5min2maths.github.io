@@ -330,9 +330,12 @@ function glueDots(el) {
   if (!el || !el.querySelectorAll) return;
   for (const c of el.querySelectorAll("mjx-container:not([display=true])")) {
     const t = c.nextSibling;
-    if (!t || t.nodeType !== 3 || !/^[.,;]/.test(t.nodeValue) || (c.parentNode && c.parentNode.classList && c.parentNode.classList.contains("nobr"))) continue;
+    /* 28.11 (commentaire de l'auteur, histoire du signe « = » : « Que vaut x » puis « ? » seul à la ligne) : aussi « ? ! : ) »,
+       avec l'espace (insécable fine) qui les précède en français. */
+    const m = t && t.nodeType === 3 ? /^(?:[.,;)]|[\s\u00a0\u202f]?[?!:])/.exec(t.nodeValue) : null;
+    if (!m || (c.parentNode && c.parentNode.classList && c.parentNode.classList.contains("nobr"))) continue;
     const w = document.createElement("span"); w.className = "nobr"; w.style.whiteSpace = "nowrap";
-    c.parentNode.insertBefore(w, c); w.appendChild(c); w.appendChild(document.createTextNode(t.nodeValue[0])); t.nodeValue = t.nodeValue.slice(1);
+    c.parentNode.insertBefore(w, c); w.appendChild(c); w.appendChild(document.createTextNode(m[0].replace(/^[\s\u00a0]/, "\u202f"))); t.nodeValue = t.nodeValue.slice(m[0].length);
   }
 }
 const hash = (s) => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x.toString(36).slice(-4); };
@@ -1648,7 +1651,7 @@ function screenPrep() {
      chapitre est présentée par son contenu (« Les bases : f(x) = ax + b »). */
   /* 28.11 (commentaires de l'auteur, Thalès et trigonométrie) : la formule est composée par \( … \), elle s'affichait en TeX brut. */
   const prepLab = (c, thL) => { const bare = (s) => String(s).replace(/^.*·\s*/, "").replace(/^\d+\.\s*/, "").trim().toLowerCase(); return bare(c.label) === bare(thL) ? "Les bases" + (c.ex ? " : \\(" + esc(c.ex) + "\\)" : " du chapitre") : c.label; };
-  const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><h3>${thL}</h3><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
+  const grp = ([th, list]) => { const thL = Engine.themeLabel(th, state.profile); return `<div class="card flat"><div class="spread"><h3>${thL}</h3>${list.length > 1 ? '<button type="button" class="btn-ghost small all-ch">Tout le chapitre</button>' : ""}</div><div class="checks">${list.map((c) => `<label class="check"><input type="checkbox" value="${c.id}" ${chosen.has(c.id) ? "checked" : ""}> <span>${prepLab(c, thL)}</span></label>`).join("")}</div></div>`; };
   h(`${brand}<h2>Je prépare <span class="mark">une évaluation</span></h2>
   <p class="muted">Choisis les notions de ton évaluation et sa date. Jusqu'à ce jour-là, tes séances porteront surtout sur elles.</p>
   <div class="card flat stack"><label for="pdate"><h3>Date de l'évaluation</h3></label><input type="date" id="pdate" value="${date}" min="${day()}" class="datein"></div>
@@ -1657,6 +1660,9 @@ function screenPrep() {
   <p class="small muted" id="perr"></p>
   <button class="btn-primary btn-big save-sticky" id="save">Enregistrer mon évaluation</button>
   <div class="row"><button class="btn-ghost" id="back">Annuler</button>${chosen.size ? '<button class="btn-ghost" id="del">Supprimer cette évaluation</button>' : ""}</div>`);
+  /* 28.11 (commentaire de l'auteur : « le choix se fait par liste à cocher ? ») : un geste pour tout un chapitre
+     (une évaluation porte souvent sur un chapitre entier) ; second appui = tout décocher. */
+  for (const bt of app.querySelectorAll(".all-ch")) bt.onclick = () => { const bx = [...bt.closest(".card").querySelectorAll(".check input")], on = !bx.every((x) => x.checked); bx.forEach((x) => (x.checked = on)); bt.textContent = on ? "Tout décocher" : "Tout le chapitre"; };
   document.getElementById("save").onclick = () => {
     const ids = [...app.querySelectorAll(".check input:checked")].map((i) => i.value), dt = document.getElementById("pdate").value;
     if (!ids.length) { document.getElementById("perr").textContent = "Coche au moins une notion."; return; }
@@ -3306,3 +3312,15 @@ ping("open");
 if (window.__reprise && typeof window.packsOk === "function" && window.packsOk(window.__reprise)) { const rp = window.__reprise; window.__reprise = null; setProfile(rp); }
 else if (state && state.profile && typeof window.packsOk === "function" && !window.packsOk(state.profile)) window.ensurePacks(null).catch(() => { app.innerHTML = '<section class="card"><h2>Pas de connexion</h2><p>Reconnecte-toi, puis rouvre l\'app.</p></section>'; });
 else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
+/* 28.11 (commentaires de l'auteur : « au lancement, l'icône de pépite en gros, comme pour les grades, encerclée et pas dans un
+   carré bleu, avec en dessous Deviens une pépite en maths ») : écran d'ouverture, app installée seulement (lancement depuis
+   l'écran d'accueil du téléphone), 1,2 s au plus, un appui le ferme ; décoratif (aria-hidden), jamais pendant une séance. */
+(() => {
+  const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
+  if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
+  const d = document.createElement("div"); d.className = "splash"; d.setAttribute("aria-hidden", "true");
+  d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE}</div>`;
+  document.body.appendChild(d);
+  const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
+  d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 700 : 1200);
+})();

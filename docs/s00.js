@@ -988,8 +988,9 @@ function disk(lr) {
 if (/^\s*d\b/.test(String(lr || ""))) return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(88, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + t(150, 68, lr, "f-accent f-txt"), "disque et son diamètre");
 return svg(300, 150, '<circle cx="150" cy="75" r="62" class="f-shape"/>' + L(150, 75, 212, 75, "f-accent", 'stroke-width="2"') + '<circle cx="150" cy="75" r="3" class="f-dot"/>' + (String(lr).length * 7.5 > 56 ? t(219, 80, lr, "f-accent f-txt", "start") : t(181, 68, lr, "f-accent f-txt")), "disque");
 }
-function square(ls) {
-return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls) + t(158, 74, "?", "f-accent f-txt", "start", 16), "carré");
+
+function square(ls, ld) {
+return svg(300, 160, '<rect x="80" y="14" width="130" height="130" class="f-shape"/>' + L(80, 144, 210, 14, "f-accent", 'stroke-dasharray="6 4"') + t(145, 158, ls, /\?/.test(ls) ? "f-accent f-txt" : "f-txt") + (ld ? t(139, 73, ld, "f-accent f-txt", "end", 14) : t(158, 74, "?", "f-accent f-txt", "start", 16)), "carré");
 }
 
 
@@ -1026,8 +1027,8 @@ g += '<circle cx="' + S[0] + '" cy="' + S[1] + '" r="3" fill="var(--margin)"/>';
 
 if (withPyr === "diag") {
 const A = 'style="stroke:var(--margin);stroke-width:2.2"';
-g += L(F[3][0], F[3][1], F[1][0], F[1][1], "f-line", A) + L(F[0][0], F[0][1], B[2][0], B[2][1], "f-line", A + ' stroke-dasharray="7 4"');
-g += t(x + s * 0.72 + 6, y + s * 0.72 + 12, "d", "f-accent f-txt", "start") + t(F[0][0] + (B[2][0] - F[0][0]) * 0.75 + 8, F[0][1] + (B[2][1] - F[0][1]) * 0.75 + 4, "D", "f-accent f-txt", "start");
+g += L(F[3][0], F[3][1], F[1][0], F[1][1], "f-line", A) + L(F[0][0], F[0][1], B[2][0], B[2][1], "f-line", 'style="stroke:var(--ok);stroke-width:2.4" stroke-dasharray="7 4"');
+g += t(x + s * 0.72 + 6, y + s * 0.72 + 12, "d", "f-accent f-txt", "start") + t(F[0][0] + (B[2][0] - F[0][0]) * 0.75 + 8, F[0][1] + (B[2][1] - F[0][1]) * 0.75 + 4, "D", "f-txt", "start").replace("<text ", '<text style="fill:var(--ok);font-weight:700" ');
 return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start"), "cube : diagonale d'une face d et diagonale du cube D");
 }
 return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
@@ -1043,10 +1044,15 @@ for (let i = 2; i < n - 1; i++) g += L(pts[0][0], pts[0][1], pts[i][0], pts[i][1
 g += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="var(--margin)"/>';
 return svg(300, 185, g, "polygone à " + n + " côtés découpé en triangles depuis un sommet");
 }
-function pyramid(lc, lh) {
-const b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2") + L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
 
-return svg(300, 162, b + t(130, 158, lc) + t(147, 112, lh, "f-accent f-txt", "end"), "pyramide");
+
+function pyramid(lc, lh, o = {}) {
+let b = P([[60, 140], [200, 140], [250, 110], [110, 110]], "f-shape2") + P([[60, 140], [200, 140], [150, 20]], "f-shape") + P([[200, 140], [250, 110], [150, 20]], "f-shape2");
+if (lh) b += L(155, 125, 150, 20, "f-accent", 'stroke-dasharray="5 4"');
+if (o.apo) b += L(150, 20, 130, 140, "f-line", 'style="stroke:var(--blue);stroke-width:2"') + '<path d="M121,140 L121,131.5 L129,131" class="f-line" fill="none"/>' + t(103, 124, o.apo, "f-blue f-txt", "middle", 13);
+if (o.edge) b += t(187, 104, o.edge, "f-txt", "start", 13);
+
+return svg(300, 162, b + t(130, 158, lc) + (lh ? (o.apo ? t(157, 134, lh, "f-accent f-txt", "start", 12) : t(147, 112, lh, "f-accent f-txt", "end")) : ""), o.apo ? "pyramide et apothème" : "pyramide");
 }
 
 
@@ -1055,12 +1061,16 @@ const isD = /^\s*d\b/.test(String(lr || "")), v = num(lr), r0 = v == null ? null
 let hv = /^\s*g\b/.test(String(lh || "")) ? (num(lh) && r0 && num(lh) > r0 ? Math.sqrt(num(lh) ** 2 - r0 ** 2) : null) : num(lh);
 let R = 80, H = 110, forced = false;
 if (r0 && hv) { const u = Math.min(100 / r0, 120 / hv); R = r0 * u; H = hv * u; if (R < 30) { forced = R < 21; R = 30; } if (H < 40) { forced = forced || H < 28; H = 40; } }
+
+
+const lw = String(lh || "").length * 7.5, wide = lw > R * 0.45 - 10;
+if (wide && H >= 75 && 128 - R - lw < 4) { const f = Math.max(0.45, (124 - lw) / R); R *= f; H = Math.max(75, H * f); }
 const by = 20 + H, ry = Math.max(8, R * 0.22);
 let b = '<ellipse cx="150" cy="' + f1(by) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-shape2"/>' + P([[150 - R, by], [150 + R, by], [150, 20]].map((p) => p.map(f1)), "f-shape") + L(150, f1(by), 150, 20, "f-accent", 'stroke-dasharray="5 4"') + L(f1(isD ? 150 - R : 150), f1(by), f1(150 + R), f1(by), "f-accent");
 const flat = H < 75, thin = R < 75;
 b += isD || flat || thin ? t(f1(isD ? 150 : 150 + R / 2), f1(by + ry + 16), lr, "f-accent f-txt") : t(f1(150 + R / 2), f1(by - 6), lr, "f-accent f-txt");
 const cx = 150 - R - 14;
-const lhT = thin && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
+const lhT = (thin || wide) && !flat ? L(f1(cx), 20, f1(cx), f1(by)) + L(f1(cx - 5), 20, f1(cx + 5), 20) + L(f1(cx - 5), f1(by), f1(cx + 5), f1(by)) + t(f1(cx - 8), f1(20 + H / 2 + 5), lh, "f-accent f-txt", "end") : t(156, f1(20 + H * (flat ? 0.72 : 0.45) + 4), lh, "f-accent f-txt", "start", flat ? 12 : 14);
 return svg(300, Math.round(by + ry + (isD || flat || thin ? 24 : 12)), b + lhT + (forced ? noScale(296, Math.round(by + ry + 8)) : ""), "cône");
 }
 
@@ -1317,7 +1327,73 @@ else g += L(cx + v * r, 8, cx + v * r, 182, "f-accent", 'stroke-width="2" stroke
 return svg(320, 190, g + t(cx + r + 8, cy + 14, "1", "f-txt", "start", 11), "cercle trigonométrique");
 }
 
-return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
+
+
+
+function hexTri(ls) {
+const cx = 150, cy = 86, r = 72, pts = Array.from({ length: 6 }, (_, i) => [+(cx + r * Math.cos((Math.PI / 3) * i)).toFixed(1), +(cy - r * Math.sin((Math.PI / 3) * i)).toFixed(1)]);
+let g = P(pts, "f-shape") + '<polygon points="' + [[cx, cy], pts[4], pts[5]].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="0.25" stroke="none"/>';
+pts.forEach((p) => (g += L(cx, cy, p[0], p[1], "f-line", 'stroke-dasharray="5 4"')));
+return svg(300, 182, g + '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + t(cx, f1(pts[4][1] + 20), ls), "hexagone régulier découpé en six triangles équilatéraux");
+}
+
+function squareDisk(ls) {
+const x = 85, y = 12, s = 130;
+const g = '<rect x="' + x + '" y="' + y + '" width="' + s + '" height="' + s + '" style="fill:var(--margin);fill-opacity:0.25;stroke:var(--ink);stroke-width:1.6"/>' + '<circle cx="' + (x + s / 2) + '" cy="' + (y + s / 2) + '" r="' + s / 2 + '" class="f-shape"/>';
+return svg(300, 166, g + t(x + s / 2, y + s + 20, ls), "disque inscrit dans un carré");
+}
+
+function capsule(ld, lL, vd, vL) {
+const u = Math.min(230 / vL, 90 / vd), r = (vd * u) / 2, w = vL * u, x0 = 150 - w / 2, x1 = 150 + w / 2, cy = r + 28;
+let g = '<path d="M' + f1(x0 + r) + "," + f1(cy - r) + " L" + f1(x1 - r) + "," + f1(cy - r) + " A" + f1(r) + "," + f1(r) + " 0 0 1 " + f1(x1 - r) + "," + f1(cy + r) + " L" + f1(x0 + r) + "," + f1(cy + r) + " A" + f1(r) + "," + f1(r) + " 0 0 1 " + f1(x0 + r) + "," + f1(cy - r) + ' Z" class="f-shape"/>';
+g += L(f1(x0 + r), f1(cy - r), f1(x0 + r), f1(cy + r), "f-line", 'stroke-dasharray="4 4"') + L(f1(x1 - r), f1(cy - r), f1(x1 - r), f1(cy + r), "f-line", 'stroke-dasharray="4 4"');
+g += L(150, f1(cy - r), 150, f1(cy + r), "f-accent", 'stroke-width="2"') + t(150, f1(cy - r - 7), ld, "f-accent f-txt", "middle", 13);
+const yb = cy + r + 16;
+g += L(f1(x0), yb, f1(x1), yb) + L(f1(x0), yb - 5, f1(x0), yb + 5) + L(f1(x1), yb - 5, f1(x1), yb + 5) + t(150, yb + 18, lL);
+return svg(300, Math.round(yb + 26), g, "gélule : cylindre et deux demi-boules");
+}
+
+function iceCone(lr, lh, vr, vh) {
+const u = Math.min(70 / vr, 150 / (vh + vr)), R = vr * u, H = vh * u, ry = Math.max(6, R * 0.22), by = 14 + R, cx = 168;
+let g = '<path d="M' + f1(cx - R) + "," + f1(by) + " A" + f1(R) + "," + f1(R) + " 0 0 1 " + f1(cx + R) + "," + f1(by) + ' Z" class="f-shape2"/>';
+g += P([[cx - R, by], [cx + R, by], [cx, by + H]].map((p) => p.map(f1)), "f-shape") + '<ellipse cx="' + cx + '" cy="' + f1(by) + '" rx="' + f1(R) + '" ry="' + f1(ry) + '" class="f-line"/>';
+g += L(cx, f1(by), f1(cx + R), f1(by), "f-accent", 'stroke-width="2"') + L(cx, f1(by), cx, f1(by + H), "f-accent", 'stroke-dasharray="5 4"');
+const xl = cx - R - 14;
+g += L(f1(xl), f1(by), f1(xl), f1(by + H)) + L(f1(xl - 5), f1(by), f1(xl + 5), f1(by)) + L(f1(xl - 5), f1(by + H), f1(xl + 5), f1(by + H)) + t(f1(xl - 7), f1(by + H / 2 + 5), lh, "f-accent f-txt", "end", 13);
+g += t(f1(cx + R + 6), f1(by + 4), lr, "f-accent f-txt", "start", 12);
+return svg(300, Math.round(by + H + 14), g, "cornet : cône et demi-boule");
+}
+
+function cubeHole(la, lr, k) {
+const x = 70, y = 50, s = 110, dx = 39, dy = -39, D = 'stroke-dasharray="5 4"', rr = Math.max(8, Math.min(0.42, k) * s), cx = x + s / 2, cy = y + s / 2;
+const F = [[x, y + s], [x + s, y + s], [x + s, y], [x, y]], B = F.map((p) => [p[0] + dx, p[1] + dy]);
+let g = P(F, "f-shape") + P([F[3], F[2], B[2], B[3]], "f-shape2") + P([F[1], B[1], B[2], F[2]], "f-shape2");
+g += L(B[0][0], B[0][1], F[0][0], F[0][1], "f-line", D) + L(B[0][0], B[0][1], B[1][0], B[1][1], "f-line", D) + L(B[0][0], B[0][1], B[3][0], B[3][1], "f-line", D);
+g += '<circle cx="' + f1(cx + dx) + '" cy="' + f1(cy + dy) + '" r="' + f1(rr) + '" class="f-line" stroke-dasharray="4 4"/>' + '<circle cx="' + cx + '" cy="' + cy + '" r="' + f1(rr) + '" class="f-soft"/>';
+g += L(cx, cy, f1(cx + rr), cy, "f-accent", 'stroke-width="2"') + '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+return svg(300, 190, g + t(f1(cx + rr / 2), cy - 6, lr, "f-accent f-txt", "middle", 13) + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start"), "cube percé d'un trou cylindrique");
+}
+
+function halfBall(lr) {
+const cx = 150, cy = 42, R = 90, ry = 18;
+let g = '<path d="M' + (cx - R) + "," + cy + " A" + R + "," + R + " 0 0 0 " + (cx + R) + "," + cy + ' Z" class="f-shape"/>' + '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + R + '" ry="' + ry + '" class="f-shape2"/>';
+g += L(cx, cy, cx + R, cy, "f-accent", 'stroke-width="2"') + '<circle cx="' + cx + '" cy="' + cy + '" r="2.5" fill="var(--ink)"/>';
+return svg(300, cy + R + 12, g + t(cx + R / 2, cy - ry - 6, lr, "f-accent f-txt"), "demi-boule");
+}
+
+
+function ballCut(vR, vd, labs = {}) {
+const cx = 150, cy = 92, R = 76, e = Math.max(0.12, Math.min(0.88, vd / vR)) * R, hy = cy - e, hw = Math.sqrt(R * R - e * e);
+let g = '<circle cx="' + cx + '" cy="' + cy + '" r="' + R + '" class="f-shape"/>' + '<ellipse cx="' + cx + '" cy="' + f1(hy) + '" rx="' + f1(hw) + '" ry="' + f1(Math.max(5, hw * 0.18)) + '" class="f-shape2"/>';
+g += L(cx, cy, cx, f1(hy), "f-line", 'stroke-dasharray="5 4"') + L(cx, cy, f1(cx + hw), f1(hy), "f-line", 'style="stroke:var(--blue);stroke-width:2"') + L(cx, f1(hy), f1(cx + hw), f1(hy), "f-accent", 'stroke-width="2"');
+g += '<path d="M' + (cx + 8) + "," + f1(hy) + " L" + (cx + 8) + "," + f1(hy + 8) + " L" + cx + "," + f1(hy + 8) + '" class="f-line" fill="none"/>' + '<circle cx="' + cx + '" cy="' + cy + '" r="3" class="f-dot"/>' + t(cx - 8, cy + 14, "O", "f-txt", "end", 13);
+if (labs.d) g += t(cx - 6, f1((cy + hy) / 2 + 4), labs.d, "f-txt", "end", 13);
+if (labs.R) g += t(f1(cx + hw / 2 + 10), f1((cy + hy) / 2 + 12), labs.R, "f-blue f-txt", "start", 13);
+if (labs.r) g += t(f1(cx + hw / 2), f1(hy - 9), labs.r, "f-accent f-txt", "middle", 13);
+return svg(300, 180, g, "boule coupée par un plan");
+}
+
+return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, barChart, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, balance, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, road, items, scaling, lineGraph, blocks, fractionOf, prioSteps, sciScale, areaSquare, tiles, fmt };
 })();
 
 
@@ -1340,8 +1416,11 @@ ops.push((T) => {
 const r = o.r || 20, u = T.dir(V, A, r), w = T.dir(V, B, r), x = T.X(V), y = T.Y(V);
 const cross = u[0] * w[1] - u[1] * w[0], m = T.dir(V, A, 1), n = T.dir(V, B, 1), bis = [m[0] + n[0], m[1] + n[1]], bl = Math.hypot(...bis) || 1;
 const ang = Math.acos(Math.max(-1, Math.min(1, m[0] * n[0] + m[1] * n[1]))), off = r + 14 + (ang < 0.45 ? 22 : 0);
-const lx = x + (bis[0] / bl) * off, ly = y + (bis[1] / bl) * off + 4;
-return '<path d="M' + (x + u[0]) + "," + (y + u[1]) + " A" + r + "," + r + " 0 0 " + (cross > 0 ? 1 : 0) + " " + (x + w[0]) + "," + (y + w[1]) + '" class="' + (/\?/.test(label) ? "f-accent" : "f-line") + '" fill="none"/>' + (label ? T.txt(lx, ly, label) : "");
+
+
+const bx = bis[0] / bl, an = String(label || "").length > 4 ? (bx > 0.3 ? "start" : bx < -0.3 ? "end" : "middle") : "middle", o2 = an === "middle" ? off : r + 6;
+const lx = x + bx * o2, ly = y + (bis[1] / bl) * o2 + 4;
+return '<path d="M' + (x + u[0]) + "," + (y + u[1]) + " A" + r + "," + r + " 0 0 " + (cross > 0 ? 1 : 0) + " " + (x + w[0]) + "," + (y + w[1]) + '" class="' + (/\?/.test(label) ? "f-accent" : "f-line") + '" fill="none"/>' + (label ? T.txt(lx, ly, label, an) : "");
 });
 return g;
 },
@@ -1407,10 +1486,14 @@ if (lc) g.add([p / 2 + q / 2, -h * 0.3]).text([(p + q) / 2, 0], lc, 0, 30);
 return g.svg("hauteur sur l'hypoténuse");
 },
 
-isoH(b, s, { lb = "", ls = "", lh = "" } = {}) {
-const h = Math.sqrt(Math.max(s * s - (b * b) / 4, 0.01));
-const g = GEO().pt("A", 0, 0).pt("B", b, 0).pt("C", b / 2, h).pt("H", b / 2, 0, false).poly(["A", "B", "C"]);
-g.seg("C", "H", { cls: "f-accent", dash: true }).right("H", "B", "C").side("A", "B", lb).side("B", "C", ls).side("C", "H", lh, { inside: true });
+
+isoH(b, s, { lb = "", ls = "", lh = "", names = ["A", "B", "C"] } = {}) {
+const h = Math.sqrt(Math.max(s * s - (b * b) / 4, 0.01)), [nA, nB, nC] = names || ["A", "B", "C"], sh = names !== false;
+const g = GEO().pt("A", 0, 0, false).pt("B", b, 0, false).pt("C", b / 2, h, false).pt("H", b / 2, 0, false).poly(["A", "B", "C"]);
+if (sh) g.text("A", nA, -11, 4).text("B", nB, 11, 4).text("C", nC, 0, -8);
+g.seg("C", "H", { cls: "f-accent", dash: true }).right("H", "B", "C").side("A", "B", lb).side("B", "C", ls);
+
+if (lh) g.raw((T) => T.txt(T.X([b / 2, h * 0.36]) + 6, T.Y([b / 2, h * 0.36]) + 4, lh, "start"));
 return g.svg("triangle isocèle et sa hauteur");
 },
 
@@ -1431,7 +1514,8 @@ return g.svg("parallélogramme");
 losange(D, d, { lD = "", ld = "" } = {}) {
 const g = GEO().pt("A", 0, 0, false).pt("B", D / 2, -d / 2, false).pt("C", D, 0, false).pt("E", D / 2, d / 2, false).poly(["A", "B", "C", "E"]);
 g.seg("A", "C", { dash: true }).seg("B", "E", { dash: true }).right([D / 2, 0], "C", "E");
-g.text([D / 4, 0], lD, 0, -6).text([D / 2, d / 4], ld, 22, 4);
+
+g.text([D * 0.3, 0], lD, 0, -5).raw((T) => T.txt(T.X([D / 2, d * 0.2]) + 6, T.Y([D / 2, d * 0.2]) + 4, ld, "start"));
 return g.svg("losange");
 },
 rect(w, h, { lw = "", lh = "", diag = "" } = {}) {
@@ -1457,7 +1541,9 @@ return g.svg("figure composée");
 },
 house(a, b, h, labs = {}) {
 const g = GEO().pt("A", 0, 0, false).pt("B", a, 0, false).pt("C", a, b, false).pt("S", a / 2, b + h, false).pt("D", 0, b, false).poly(["A", "B", "C", "S", "D"]);
-g.seg("D", "C", { dash: true }).seg("S", [a / 2, b], { cls: "f-accent", dash: true }).side("A", "B", labs.a || "").side("B", "C", labs.b || "").side("S", [a / 2, b], labs.h || "", { inside: true });
+g.seg("D", "C", { dash: true }).seg("S", [a / 2, b], { cls: "f-accent", dash: true }).side("A", "B", labs.a || "").side("B", "C", labs.b || "");
+
+if (labs.h) g.raw((T) => T.txt(T.X([a / 2, b + h * 0.3]) + 6, T.Y([a / 2, b + h * 0.3]) + 4, labs.h, "start"));
 return g.svg("façade");
 },
 frame(a, b, w, labs = {}) {
@@ -1489,24 +1575,34 @@ sector(0, a, 1.2, la); sector(a, a + b, 1.45, lb); sector(a + b, 360, 1.7, lc);
 return g.dot("O").svg("angles autour d'un point");
 },
 
-diam(cAng, { lA = "", lB = "", lAC = "", lBC = "", lAB = "", center = false } = {}) {
+
+diam(cAng, { lA = "", lB = "", lAC = "", lBC = "", lAB = "", center = false, lACO = "", lBCO = "" } = {}) {
 const t = (cAng * Math.PI) / 180, g = GEO().pt("A", -1, 0).pt("B", 1, 0).pt("C", Math.cos(t), Math.sin(t)).circle([0, 0], 1, "f-soft").poly(["A", "B", "C"]);
-g.right("C", "A", "B").side("A", "C", lAC).side("B", "C", lBC).side("A", "B", lAB, { inside: true });
+if (!lACO && !lBCO) g.right("C", "A", "B");
+g.side("A", "C", lAC).side("B", "C", lBC).side("A", "B", lAB, { inside: true });
 if (lA) g.angle("A", "B", "C", lA, { r: 24 });
 if (lB) g.angle("B", "C", "A", lB, { r: 24 });
-if (center) g.pt("O", 0, 0).dot("O");
+if (center || lACO || lBCO) g.pt("O", 0, 0).dot("O");
+if (lACO || lBCO) g.seg("C", "O", { dash: true }).angle("C", "A", "O", lACO, { r: 14 }).angle("C", "O", "B", lBCO, { r: 20 });
 return g.svg("cercle de Thalès");
 },
 
-tangent(r, d, { lr = "", ld = "", lt = "" } = {}) {
+
+tangent(r, d, { lr = "", ld = "", lt = "", lP = "", lO = "", both = false } = {}) {
 const ang = Math.acos(r / d), T = [r * Math.cos(ang), r * Math.sin(ang)];
-const g = GEO().pt("O", 0, 0).pt("P", d, 0).pt("T", T[0], T[1]).circle([0, 0], r, "f-soft").poly(["O", "P", "T"]).right("T", "O", "P").dot("O");
-g.side("O", "T", lr).side("O", "P", ld).side("P", "T", lt);
+const g = GEO().pt("O", 0, 0).pt("P", d, 0).pt("T", T[0], T[1]).circle([0, 0], r, "f-soft").poly(both ? ["O", "T", "P"] : ["O", "P", "T"]).right("T", "O", "P").dot("O");
+if (both) g.pt("T'", T[0], -T[1]).poly(["O", "T'", "P"]).right("T'", "O", "P").seg("O", "P", { dash: true });
+g.side("O", "T", lr).side("O", "P", both ? "" : ld).side("P", "T", lt);
+if (both && ld) g.text([d * 0.62, 0], ld, 0, -6);
+if (lP) g.angle("P", "O", "T", lP, { r: 16 });
+if (lO) g.angle("O", "P", "T", lO, { r: 16 });
 return g.svg("tangente au cercle");
 },
 
 thales(k, labs = {}) {
-const A = [0, 0], B = [6, -4], C = [7.5, 1.5], D = [B[0] * k, B[1] * k], E = [C[0] * k, C[1] * k];
+
+
+const k0 = k; k = Math.max(0.3, Math.min(0.75, k)); const kE = labs.kE ? (labs.kE * k) / k0 : k, A = [0, 0], B = [6, -4], C = [7.5, 1.5], D = [B[0] * k, B[1] * k], E = [C[0] * kE, C[1] * kE];
 
 const G = [(A[0] + B[0] + C[0]) / 3, (A[1] + B[1] + C[1]) / 3], inw = (P) => { const dx = G[0] - P[0], dy = G[1] - P[1], l = Math.hypot(dx, dy) || 1; return [(dx / l) * 14, -(dy / l) * 14 + 4]; };
 const g = GEO().pt("A", ...A).pt("B", ...B).pt("C", ...C).pt("D", ...D, false).pt("E", ...E, false).poly(["A", "B", "C"]).seg("D", "E", { cls: "f-accent", w: 2 }).text("D", "D", ...inw(D)).text("E", "E", ...inw(E));
@@ -1538,7 +1634,8 @@ g.poly(["A", "B", ...arc]).seg("D", "C", { dash: true });
 if (kind === "cone" || kind === "dome") g.seg([w / 2, 0], "B", { cls: "f-accent" }).text([w * 0.75, 0], labs.r || "", 0, 16);
 else g.side("A", "B", labs.a || "");
 g.side("B", "C", labs.h1 || "");
-if (kind !== "dome") g.side("S", [w / 2, h1], labs.h2 || "", { inside: true });
+
+if (kind !== "dome" && labs.h2) g.raw((T) => T.txt(T.X([w / 2, h1 + h2 * 0.3]) + 6, T.Y([w / 2, h1 + h2 * 0.3]) + 4, labs.h2, "start"));
 return g.svg("solide composé");
 },
 
@@ -1561,6 +1658,55 @@ const g = GEO().add([-1.2, -1.2], [1.2, 1.2]).circle([0, 0], r, "f-soft").seg([-
 g.seg("O", d(alpha), { w: 2 }).dot(d(alpha)).angle("O", [1, 0], d(alpha), la, { r: 18 });
 if (beta !== undefined) g.seg("O", d(beta), { cls: "f-accent", w: 2 }).dot(d(beta)).text(d(beta), lb, d(beta)[0] < 0 ? -16 : 16, d(beta)[1] < 0 ? 16 : -8);
 return g.svg("cercle trigonométrique");
+},
+
+
+complement(a, la, lb) {
+const r = (a * Math.PI) / 180, u = [4 * Math.cos(r), 4 * Math.sin(r)];
+return GEO().pt("O", 0, 0, false).add([-0.6, -0.6], [4.4, 4.4]).seg("O", [4.4, 0]).seg("O", [0, 4.4]).seg("O", u).right("O", [4, 0], [0, 4]).angle("O", [4, 0], u, la, { r: 34 }).angle("O", u, [0, 4], lb, { r: 46 }).svg("angle droit partagé");
+},
+
+centralTri(deg, lo, la) {
+const t = (deg * Math.PI) / 180, A = [Math.cos(-Math.PI / 2 - t / 2), Math.sin(-Math.PI / 2 - t / 2)], B = [Math.cos(-Math.PI / 2 + t / 2), Math.sin(-Math.PI / 2 + t / 2)];
+const g = GEO().circle([0, 0], 1, "f-soft").pt("O", 0, 0).pt("A", ...A).pt("B", ...B).poly(["A", "O", "B"]).dot("O");
+g.angle("O", "A", "B", lo, { r: 18 }).angle("A", "O", "B", la, { r: 22 });
+return g.svg("angle au centre et triangle AOB");
+},
+
+footH(B, lb, lh) {
+const t = (B * Math.PI) / 180, A = [4.5 * Math.cos(t), 4.5 * Math.sin(t)], H = [A[0], 0];
+const g = GEO().pt("B", 0, 0).pt("C", 6.5, 0).pt("A", ...A).pt("H", ...H, false).poly(["A", "B", "C"]).seg("A", "H", { cls: "f-accent", dash: true }).right("H", "C", "A").text("H", "H", 0, 16);
+g.angle("B", "C", "A", lb, { r: 24 }).angle("A", "B", "H", lh, { r: 30 });
+return g.svg("triangle et hauteur issue de A");
+},
+
+trapIso(B, b, h, { lB = "", lb = "", ll = "", lh = "" } = {}) {
+const k = (B - b) / 2, g = GEO().pt("A", 0, 0, false).pt("B", B, 0, false).pt("C", B - k, h, false).pt("D", k, h, false).pt("K", k, 0, false).poly(["A", "B", "C", "D"]);
+g.seg("D", "K", { cls: "f-accent", dash: true }).right("K", "B", "D").side("A", "B", lB).side("D", "C", lb).side("B", "C", ll).side("D", "K", lh, { inside: true });
+return g.svg("trapèze isocèle");
+},
+
+elev(al, be, labs = {}) {
+const ta = Math.tan((al * Math.PI) / 180), tb = Math.tan((be * Math.PI) / 180), x = ta / (tb - ta), H = x * tb;
+const g = GEO().pt("S", 0, H, false).pt("F", 0, 0, false).pt("P", x, 0, false).pt("Q", x + 1, 0, false).seg("F", "Q", { w: 2 }).seg("F", "S", { w: 3 }).seg("P", "S").seg("Q", "S");
+g.angle("P", "F", "S", labs.be || "", { r: 26 }).angle("Q", "F", "S", labs.al || "", { r: 40 }).side("P", "Q", labs.d || "").side("F", "S", labs.h || "");
+return g.svg("deux visées du sommet d'une tour");
+},
+
+allees(L, l, labs = {}) {
+const e = Math.min(L, l) * 0.16, cx = L * 0.42, cy = l * 0.55;
+const g = GEO().pt("A", 0, 0, false).pt("B", L, 0, false).pt("C", L, l, false).pt("D", 0, l, false).poly(["A", "B", "C", "D"]);
+g.poly([[cx - e / 2, 0], [cx + e / 2, 0], [cx + e / 2, l], [cx - e / 2, l]], "f-shape2").poly([[0, cy - e / 2], [L, cy - e / 2], [L, cy + e / 2], [0, cy + e / 2]], "f-shape2");
+g.side("A", "B", labs.L || "").side("D", "A", labs.l || "").raw((T) => T.txt(T.X([cx + e / 2, l]) + 5, T.Y([cx, l]) + 15, labs.x || "", "start"));
+return g.svg("jardin traversé par deux allées");
+},
+
+silo(w, h1, h2, labs = {}) {
+const g = GEO().pt("A", 0, 0, false).pt("B", w, 0, false).pt("C", w, h1, false).pt("D", 0, h1, false).pt("S", w / 2, -h2, false).poly(["S", "B", "C", "D", "A"]);
+g.seg("A", "B", { dash: true }).seg("S", [w / 2, 0], { cls: "f-accent", dash: true }).seg([w / 2, h1], "C", { cls: "f-accent", w: 2 }).text([w * 0.75, h1], labs.r || "", 0, -8);
+g.side("B", "C", labs.h1 || "");
+if (labs.h2) g.raw((T) => T.txt(T.X([w / 2, -h2 * 0.3]) + 6, T.Y([w / 2, -h2 * 0.3]) + 4, labs.h2, "start"));
+return g.svg("silo : cylindre et fond conique");
 },
 };
 
@@ -2679,7 +2825,7 @@ return svg(300, 190, g, "secteur");
 
 FIG.sphere = function (lr) {
 let g = '<circle cx="150" cy="90" r="70" class="f-shape"/><ellipse cx="150" cy="90" rx="70" ry="18" class="f-line" fill="none" stroke-dasharray="4 4"/>';
-g += L(150, 90, 220, 90, "f-accent") + t(185, 84, lr, "f-accent f-txt");
+g += L(150, 90, 220, 90, "f-accent") + t(185, 66, lr, "f-accent f-txt");
 return svg(300, 180, g, "boule");
 };
 
@@ -4948,7 +5094,7 @@ V34("relrep",
 );
 
 V("volpave", 1,
-() => { const a = R.int(3, 9); return QV("Calcule le volume d'un cube d'arête " + a + " cm (en cm³).", a ** 3, M(a + "^3 = " + a ** 3) + " cm³.", { guide: [GS("Aire d'une face : " + M(a + "^2") + " = ?", a * a, M(a * a) + " cm²."), GS("Volume : " + M(a * a + " \\cdot " + a) + " = ?", a ** 3, M(a ** 3) + " cm³.")], traps: [TRAP(3 * a, "Le volume : arête · arête · arête."), TRAP(a * a, "C'est l'aire d'une face ; le volume : arête au cube.")] }); },
+() => { const a = R.int(3, 9); return QV("Calcule le volume d'un cube d'arête " + a + " cm (en cm³).", a ** 3, M(a + "^3 = " + a ** 3) + " cm³.", { fig: FIG.cube(a + " cm"), guide: [GS("Aire d'une face : " + M(a + "^2") + " = ?", a * a, M(a * a) + " cm²."), GS("Volume : " + M(a * a + " \\cdot " + a) + " = ?", a ** 3, M(a ** 3) + " cm³.")], traps: [TRAP(3 * a, "Le volume : arête · arête · arête."), TRAP(a * a, "C'est l'aire d'une face ; le volume : arête au cube.")] }); },
 () => { const a = R.int(3, 8), b = R.int(2, 6), h = R.int(2, 9); return QV("Un pavé droit a un volume de " + a * b * h + " cm³ et une base de " + a + " cm sur " + b + " cm. Quelle est sa hauteur (en cm) ?", h, M(a * b * h + " : (" + a + " \\cdot " + b + ") = " + h) + " cm.", { guide: [GS("Aire de la base ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + " cm²."), GS("Hauteur = volume : aire de la base ?", h, M(a * b * h + " : " + a * b + " = " + h) + " cm.")], traps: [TRAP(a * b * h - a * b, "On divise le volume par l'aire de la base."), TRAP(a * b * h / a, "Divise par l'aire de la base : " + a + " · " + b + " = " + a * b + " cm².")] }); },
 );
 V34("volpave",

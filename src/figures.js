@@ -178,8 +178,8 @@ const FIG = (() => {
        et diagonale du cube (D), sans valeur. */
     if (withPyr === "diag") {
       const A = 'style="stroke:var(--margin);stroke-width:2.2"';
-      g += L(F[3][0], F[3][1], F[1][0], F[1][1], "f-line", A) + L(F[0][0], F[0][1], B[2][0], B[2][1], "f-line", A + ' stroke-dasharray="7 4"');
-      g += t(x + s * 0.72 + 6, y + s * 0.72 + 12, "d", "f-accent f-txt", "start") + t(F[0][0] + (B[2][0] - F[0][0]) * 0.75 + 8, F[0][1] + (B[2][1] - F[0][1]) * 0.75 + 4, "D", "f-accent f-txt", "start");
+      g += L(F[3][0], F[3][1], F[1][0], F[1][1], "f-line", A) + L(F[0][0], F[0][1], B[2][0], B[2][1], "f-line", 'style="stroke:var(--ok);stroke-width:2.4" stroke-dasharray="7 4"'); /* 28.11 (enseignant) : D d'une autre couleur que d, pointillés gardés */
+      g += t(x + s * 0.72 + 6, y + s * 0.72 + 12, "d", "f-accent f-txt", "start") + t(F[0][0] + (B[2][0] - F[0][0]) * 0.75 + 8, F[0][1] + (B[2][1] - F[0][1]) * 0.75 + 4, "D", "f-txt", "start").replace("<text ", '<text style="fill:var(--ok);font-weight:700" ');
       return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start"), "cube : diagonale d'une face d et diagonale du cube D");
     }
     return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");

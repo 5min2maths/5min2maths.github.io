@@ -30,6 +30,9 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 
 ## À faire
 
+Ordre décidé le 28.11 (2 agents au plus) : après la publication en cours → `/app présentations` + `/entretien tests` ;
+puis grand problème de la semaine (`/contenu`, puis `/app mine`) ; puis deux dépôts GitHub.
+
 0. **GitHub : deux dépôts** (décision du 28.11, APRÈS la fusion des branches Pépite²) : dépôt privé `5min2maths-dev`
    (tout : sources, tests, tools, historique complet) ; dépôt public `5min2maths.github.io` réduit à l'app publiée
    (`docs/`), historique neuf (les rapports, qui citent les écoles et classes, ne doivent plus être lisibles) ;
@@ -50,6 +53,11 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
 6. Présentation PDF : faire une version Suisse romande seule (retour du 26.11) ; c'est peut-être fait par l'agent présentations, à vérifier.
 
 ## Décisions de l'enseignant
+
+- **28.11 : figures** — lot de /contenu figures validé (105 formes, 17 notions). Pas de figure là où elle ferait le travail
+  de l'élève (mise en équation eq2 4 / idrem 4, réciproque de Pythagore pythrec 1–2, paraboles) : « parfois c'est à l'élève de la faire » ; piste : indice ou étape « Fais un croquis à main levée ».
+  Diagonales du cube : d (face) rouge, D (cube) verte en pointillés. Petits chevauchements à reprendre : « r = 3 » du cube
+  percé et de la glace (volcomp).
 
 - **28.11 : pépites = seul score à poursuivre** (commentaire « deux monnaies, l'élève ne sait plus laquelle poursuivre »).
   Le Mathélo devient un indicateur de niveau : retiré de l'accueil, de l'en-tête et du bilan ; visible seulement dans
