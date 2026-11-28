@@ -217,7 +217,8 @@
           { ctx: c[1], guide: [G("Écart = plus grand − plus petit : " + M(bb + " - " + par(a)) + " = ?", vv, M(bb + " + " + -a + " = " + vv) + ".")], traps: [TR(bb + a, "Soustraire un négatif, c'est ajouter : " + bb + " − (" + a + ") = " + bb + " + " + -a + "."), TR(-vv, "Un écart est positif.")] }); },
     ],
     3: [
-      () => { const xs = Array.from({ length: 5 }, () => nz(-12, 12)), v = xs.reduce((s, x) => s + x, 0), pos = xs.filter((x) => x > 0).reduce((s, x) => s + x, 0), neg = xs.filter((x) => x < 0).reduce((s, x) => s + x, 0);
+      () => { let xs; do xs = Array.from({ length: 5 }, () => nz(-12, 12)); while (xs.filter((x) => x < 0).length < 2 || xs.filter((x) => x > 0).length < 2); /* 28.11 (audit 10e) : « 7 + 11 + 9 + 4 + 8 » sortait (que des positifs) */
+        const v = xs.reduce((s, x) => s + x, 0), pos = xs.filter((x) => x > 0).reduce((s, x) => s + x, 0), neg = xs.filter((x) => x < 0).reduce((s, x) => s + x, 0);
         const e = xs.map((x, i) => (i === 0 ? String(x) : x < 0 ? " - " + -x : " + " + x)).join("");
         return Qv("Calcule : " + M(e), v, "On regroupe les positifs (" + M(pos) + ") et les négatifs (" + M(neg) + ") : " + M(pos + " + " + par(neg) + " = " + v) + ".",
           { ctx: "regrouper", guide: [G("Somme des termes positifs ?", pos, M(pos) + "."), G("Somme des termes négatifs ?", neg, M(neg) + "."), G("Total ?", v, M(v) + ".")], traps: [TR(pos - neg, "Les termes négatifs se soustraient : total = " + pos + " + (" + neg + ")."), TR(-v, "Vérifie le signe.")] }); },

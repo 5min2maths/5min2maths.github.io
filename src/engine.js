@@ -157,6 +157,10 @@ const HORS_CO = {
     pythfig: ["conehaut", "conegen"],
     echelle: [/\baires?\b|volume|cube|m³|dm³/],
     vitesse: [/aller de|aller-retour|, puis [^.]*km\/h/], /* vitesse moyenne sur deux trajets : 11e (10e = sensibilisation) */
+    /* 28.11 (audit de niveau 10e) : double distributivité (11e) ; formule du rectangle A = L · l, P = 2(L + l) : trop facile en 10e
+       (substitution de nombres positifs dans une formule du primaire), il reste les formes avec relatifs et décimaux. */
+    litconv: ["equiv-double"],
+    valnum: ["aire", "perim"],
   },
 };
 /* 26.11 (revue élèves p3, n° 1, grave : 2nde FR servie avec l'équation du cercle circonscrit, un « cercle déguisé », la
@@ -819,6 +823,14 @@ const Engine = {
        carré de côté 9, faces d'un pavé, périmètre d'un losange) : il tire les formes du niveau 2. La 10e et la 11e ne changent pas. */
     const UP9 = ["decread", "deccomp", "perim", "aire1", "solides", "quadri"];
     if (level === 1 && UP9.includes(id) && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 9) level = 2;
+    /* 28.11 (audit de niveau 10e, tools/niveau_910.md § 3 ; plan de cheminement 10e : « révision nombres décimaux »,
+       fractions et arithmétique au chapitre 3, solides au chapitre 4) : notions de 9e reprises en 10e. Leur niveau 1 (et
+       parfois 2) est un automatisme de 9e ou du primaire (« 37 − 16 : 2 », « PGDC de 35 et 40 », « 1/6 + 2/6 »,
+       « 18,70 + rendu sur 20 CHF », « (−9) + (−4) », « sommets d'un pavé », « 4 cahiers coûtent 32 CHF ») : en 10e,
+       niveau minimal UP10[id] (le code de la question reste reproductible : …-2-…). La 9e et la 11e ne changent pas. */
+    const UP10 = { prio: 2, arith: 2, premiers: 2, fracadd: 2, fracsimp: 2, fracrep: 2, fracconv: 2, fractout: 2, decmul: 2, decdiv: 2,
+      ordgr: 2, aire3: 2, solides: 2, numer: 2, decadd: 3, reladd: 3, prop: 3 };
+    if (level < 4 && UP10[id] && level < UP10[id] && state && state.profile && state.profile.system === "CH" && state.profile.track !== "mp" && state.profile.grade === 10) level = UP10[id];
     // Notions de révision trop faciles au niveau 2 pour les grandes classes (21.11, « relève le niveau 2 pour la 11e ») :
     // dès la classe indiquée, le niveau 2 tire les formes du niveau 3 (le code de la question reste reproductible : …-3-…).
     const UP2 = { rel: 11 };
@@ -874,7 +886,10 @@ const Engine = {
     if (pKey(q)) { for (const k in cday) if (cday[k] < lim) delete cday[k]; cday[pKey(q)] = day(); }
     sceneNote(state, sceneKey(q));
     rec.push(key(q)); state.recentQ[id] = rec.slice(-15);
-    if (q.ctx) state.recentCtx[id] = [...ctxs, q.ctx].slice(-2);
+    /* 28.11 (audit de niveau 10e) : la mémoire garde les 2 DERNIÈRES questions de la notion, avec ou sans ctx (règle du 14.11).
+       Avant, seules les questions à ctx y entraient : dans une notion où une ou deux formes ont un ctx et les autres non
+       (aire3, fracrep…), ces formes restaient « vues » indéfiniment et n'étaient presque plus tirées (1 fois sur 60). */
+    state.recentCtx[id] = [...ctxs, q.ctx || ""].slice(-2);
     state.recentForm[id] = [...forms, qForm(q)].slice(-2);
     return keep(this.finalize(state, id, q));
   },

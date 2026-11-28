@@ -62,11 +62,28 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
   À décider : 4 ou 3 essais pour les faibles (durée) ; chapitre en classe sans grand → riche du chapitre
   (choix actuel) ou grand d'un autre chapitre ; ordre d'écriture des grands problèmes manquants.
 
+- **Audit de niveau 10e terminé** (28.11, `/contenu niveau 10e`, rapport `archive/contenu_niveau10_28-11.md`, branche
+  `agent/contenu5`, à fusionner) : 61 notions de l'année, toutes auditées (`niveau_910.md` § 3, registre `niveau.json`).
+  30 nouvelles : 9 au niveau, 12 remontées (**UP10** : niveau 1 des reprises de 9e → 2, decadd / reladd / prop → 3), 5 corrigées
+  (13 formes de 10e : fractions négatives, aires avec disque, pyramide, substitution avec relatifs, deux simples
+  distributivités ; double distributivité et formule du rectangle écartées), 2 hors programme retirées de l'année (dec10,
+  proptab), 2 à valider (arith, premiers). **Défaut du moteur corrigé** : la mémoire des ctx ne retenait que les questions
+  à ctx → 1 ou 2 formes à ctx parmi des formes sans ctx presque plus tirées (42 couples notion × niveau, toutes classes).
+  Contrôle `tests/parcours.html#section=niv10`. Ordre proposé pour le « nickel » 10e : ch. 6 Puissances et racines, 7 Calcul
+  littéral, 9 Équations, 8 Pythagore, 10 Proportionnalité, 11 Fonctions, 4 3D, puis reprises 3, 1, 2 et courts 5, 12–14.
+
+## À décider
+
+- **10e (28.11)** : arith, premiers (« CT » au plan, travaillés dans les MER 10e) gardés ou retirés de l'année ? ; dec10 et
+  proptab retirés de l'année : d'accord ? ; decadd, reladd, prop au niveau 3 dès le niveau 1 (révision) ou retirés de
+  l'année ? ; restent du 25.11 : vitesse moyenne sur deux trajets écartée, affine 2 (pente par deux points, parallèle),
+  racenc 2, puiss 3, monomes 3 en 10e LS ?
+
 ## À faire
 
 Ordre (28.11, 2 agents au plus) : fait : figures, élagage, tests regroupés, grand problème (moteur) ;
 puis `/app animations` (en cours) et `/contenu curieux et histoire` (fait, `agent/contenu4` à fusionner) ; puis `/app mine` (API digMore) ;
-puis `/contenu niveau 10e` (audit, 9 notions sur ≈ 34) et le « nickel » 9e et 10e chapitre par chapitre (comme le chantier 11e) ;
+puis `/contenu niveau 10e` (fait 28.11, `agent/contenu5` à fusionner) et le « nickel » 9e et 10e chapitre par chapitre (comme le chantier 11e ; ordre 10e dans « En cours ») ;
 puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11LS).
 - **`/entretien` vitesse des tests** (après le regroupement, mesurer d'abord) : un seul navigateur qui enchaîne les pages
   (au lieu d'un Chromium par page, 1–3 s perdues chacune) ; puis 2 pages en parallèle quand aucun agent ne tourne (PC :

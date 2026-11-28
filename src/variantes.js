@@ -1434,6 +1434,103 @@ const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXT
       return QV("Une locomotive réelle mesure " + M(dec(m)) + " m de long ; sa maquette mesure " + M(c) + " cm. L'échelle de la maquette est " + M("1\\,:\\,n") + ". Que vaut " + M("n") + " ?", n, M(dec(m) + " \\text{ m} = " + dec(r6(m * 100)) + "\\text{ cm}") + " ; " + M(dec(r6(m * 100)) + " \\div " + c + " = " + n) + ".",
         { ctx: "maquette-n", guide: [GS("Longueur réelle en cm ?", r6(m * 100), M(dec(r6(m * 100))) + " cm."), GS(M("n") + " = ?", n, M(dec(r6(m * 100)) + " \\div " + c + " = " + n) + ".")], traps: [TRAP(r6(m / c), "Mets les deux longueurs dans la même unité (cm) avant de diviser.")] }); },
   );
+
+  // ======================= 28.11 : audit de niveau 10e (tools/niveau_910.md § 3, archive/contenu_niveau10_28-11.md) =======================
+  // Formes du programme de 10e là où l'audit a relevé des formes de 9e seulement (fracrep dans Q+, aire3 sans disque,
+  // solides sans pyramide) ou écarté des formes (valnum : formule du rectangle ; litconv : double distributivité, perco.js).
+  const fr = (n, d) => (n < 0 ? "-" : "") + "\\frac{" + Math.abs(n) + "}{" + d + "}";
+  const frac0 = () => { let a, b; do { b = R.int(3, 9); a = R.int(1, 2 * b - 1); } while (gcd(a, b) !== 1 || a === b); return [a, b]; };
+  const PI1 = (v) => dec(+v.toFixed(1)); /* valeur au dixième, pour le corrigé */
+  const QVpi = (q, value, sol, o) => { const x = QV(q, value, sol, Object.assign({ round: 0.1 }, o)); x.spec.exactOk = true; return x; };
+  // --- 10e : fracrep, niveau 2 (comparer dans Q : fractions négatives) ---
+  VA("fracrep", 2, [10],
+    () => { let a, b, c, d; do { [a, b] = frac0(); [c, d] = frac0(); } while (b === d || a * d === b * c || Math.abs(a / b - c / d) > 0.3);
+      const big = R.rand() < 0.5, x = -a / b, y = -c / d, ans = big ? Math.max(x, y) : Math.min(x, y), oth = ans === x ? y : x, L = (b * d) / gcd(b, d);
+      return QV("Quelle est la plus " + (big ? "grande" : "petite") + " de ces deux fractions : " + M(fr(-a, b)) + " ou " + M(fr(-c, d)) + " ?", ans,
+        "Sur le dénominateur " + L + " : " + M(fr(-a, b) + " = " + fr(-a * L / b, L)) + " et " + M(fr(-c, d) + " = " + fr(-c * L / d, L)) + ". Entre deux négatifs, le plus grand est le plus proche de 0 : la plus " + (big ? "grande" : "petite") + " est " + M(ans === x ? fr(-a, b) : fr(-c, d)) + ".",
+        { ctx: "neg-compare", guide: [GS("Dénominateur commun le plus petit ?", L, M(L) + "."), GS("Numérateur de " + M(fr(-a, b)) + " sur " + L + " ?", -a * L / b, M(fr(-a * L / b, L)) + "."), GS("Numérateur de " + M(fr(-c, d)) + " sur " + L + " ?", -c * L / d, M(fr(-c * L / d, L)) + "."),
+          GS("La plus " + (big ? "grande" : "petite") + " des deux fractions (écrite comme dans l'énoncé) ?", ans, M(ans === x ? fr(-a, b) : fr(-c, d)) + ".")],
+          traps: [TRAP(oth, "Entre deux nombres négatifs, le plus grand est celui qui est le plus proche de 0 : l'ordre est inversé par rapport à " + M(fr(a, b)) + " et " + M(fr(c, d)) + "."), TRAP(-ans, "Garde le signe − : les deux fractions sont négatives.")] }); },
+    () => { let f; do f = [frac0(), frac0(), frac0()]; while (new Set(f.map(([a, b]) => a / b)).size < 3 || f.some(([a, b]) => a > b));
+      const twoNeg = R.rand() < 0.5, sgn = twoNeg ? [-1, -1, 1] : [-1, 1, 1], v = f.map(([a, b], i) => sgn[i] * a / b), tx = f.map(([a, b], i) => fr(sgn[i] * a, b));
+      const o = [0, 1, 2].sort((i, j) => v[i] - v[j]), mid = o[1], ord = shuffle([0, 1, 2]);
+      return QV("On range dans l'ordre croissant " + ord.map((i) => M(tx[i])).join(", ") + ". Quelle fraction est au milieu ?", v[mid],
+        "Ordre croissant : " + M(o.map((i) => tx[i]).join(" < ")) + ". " + (twoNeg ? "Le positif est le plus grand ; entre les deux négatifs, le plus grand est le plus proche de 0." : "Le négatif est le plus petit ; on compare ensuite les deux positifs."),
+        { ctx: "neg-ranger", guide: [GS("Combien de ces fractions sont négatives ?", twoNeg ? 2 : 1, M(twoNeg ? 2 : 1) + "."), GS("La fraction du milieu (écrite comme dans l'énoncé) ?", v[mid], M(tx[mid]) + ".")],
+          traps: [TRAP(-v[mid], "Garde le signe de la fraction."), TRAP(twoNeg ? Math.min(v[0], v[1]) : Math.max(v[1], v[2]), twoNeg ? "Entre deux négatifs, le plus petit est le plus éloigné de 0." : "Compare les deux positifs : au même dénominateur.")] }); },
+  );
+  // --- 10e : fracrep, niveau 3 (encadrer dans Q) ---
+  VA("fracrep", 3, [10],
+    () => { let n, d; do { d = R.int(3, 9); n = R.int(d + 1, 6 * d); } while (n % d === 0 || gcd(n, d) !== 1); const f = Math.floor(n / d), lo = -(f + 1);
+      return QV("La fraction " + M(fr(-n, d)) + " est comprise entre deux entiers consécutifs. Quel est le plus petit des deux ?", lo,
+        M(n + " = " + f + " \\cdot " + d + " + " + (n - f * d)) + ", donc " + M(f + " < " + fr(n, d) + " < " + (f + 1)) + " et " + M(lo + " < " + fr(-n, d) + " < " + -f) + ".",
+        { ctx: "neg-encadrer", guide: [GS("D'abord " + M(fr(n, d)) + " : combien de fois " + d + " entre-t-il dans " + n + " ?", f, M(n + " = " + f + " \\cdot " + d + " + " + (n - f * d)) + "."), GS("Le plus petit des deux entiers qui encadrent " + M(fr(-n, d)) + " ?", lo, M(lo + " < " + fr(-n, d) + " < " + -f) + ".")],
+          traps: [TRAP(-f, "Pour un nombre négatif, l'entier juste en dessous est plus loin de 0 : " + M(lo) + ", pas " + M(-f) + "."), TRAP(f, "La fraction est négative : les entiers qui l'encadrent aussi.")] }); },
+    () => { let n1, d1, n2, d2; do { d1 = R.int(2, 7); n1 = R.int(d1 + 1, 5 * d1); d2 = R.int(2, 7); n2 = R.int(d2 + 1, 5 * d2); } while (n1 % d1 === 0 || n2 % d2 === 0 || gcd(n1, d1) !== 1 || gcd(n2, d2) !== 1 || d1 === d2);
+      const lo = -Math.floor(n1 / d1), hi = Math.floor(n2 / d2), v = hi - lo + 1;
+      return QV("Combien de nombres entiers sont strictement compris entre " + M(fr(-n1, d1)) + " et " + M(fr(n2, d2)) + " ?", v,
+        M(-(Math.floor(n1 / d1) + 1) + " < " + fr(-n1, d1) + " < " + lo) + " et " + M(hi + " < " + fr(n2, d2) + " < " + (hi + 1)) + " : les entiers de " + M(lo) + " à " + M(hi) + ", zéro compris, soit " + M(v) + ".",
+        { ctx: "neg-compter", guide: [GS("Le plus petit entier strictement supérieur à " + M(fr(-n1, d1)) + " ?", lo, M(lo) + "."), GS("Le plus grand entier strictement inférieur à " + M(fr(n2, d2)) + " ?", hi, M(hi) + "."), GS("Combien d'entiers de " + M(lo) + " à " + M(hi) + " (zéro compris) ?", v, M(hi + " - (" + lo + ") + 1 = " + v) + ".")],
+          traps: [TRAP(v - 1, "N'oublie pas de compter 0."), TRAP(hi + Math.floor(n1 / d1), "Compte aussi 0 : de " + lo + " à " + hi + ", il y a " + v + " entiers.")] }); },
+  );
+  // --- 10e : solides, niveaux 2–3 (la pyramide : plan de cheminement 10e, chapitre 4) ---
+  VA("solides", 2, [10],
+    () => { const n = R.int(4, 10), [nm, v, f, w, fw] = R.pick([["faces", n + 1, "n + 1", n + 2, "n + 2"], ["sommets", n + 1, "n + 1", 2 * n, "2n"], ["arêtes", 2 * n, "2n", 3 * n, "3n"]]);
+      return QV("Une pyramide a pour base un polygone à " + M(n) + " côtés. Combien " + (nm === "arêtes" ? "d'" : "de ") + nm + " possède-t-elle ?", v,
+        "Pyramide dont la base a " + M(n) + " côtés : " + (nm === "faces" ? M(n) + " faces triangulaires et la base, " : nm === "sommets" ? M(n) + " sommets de la base et le sommet principal, " : M(n) + " arêtes de la base et " + M(n) + " arêtes latérales, ") + M((nm === "arêtes" ? "2 \\cdot " + n : n + " + 1") + " = " + v) + " " + nm + ".",
+        { ctx: "pyr-" + (nm === "arêtes" ? "aretes" : nm), guide: nm === "faces" ? [GS("Faces triangulaires (une par côté de la base) ?", n, M(n) + "."), GS("Avec la base : combien de faces ?", n + 1, M(n + " + 1 = " + (n + 1)) + ".")]
+          : nm === "sommets" ? [GS("Sommets de la base ?", n, M(n) + "."), GS("Avec le sommet de la pyramide ?", n + 1, M(n + " + 1 = " + (n + 1)) + ".")]
+          : [GS("Arêtes de la base ?", n, M(n) + "."), GS("Arêtes latérales (du sommet vers chaque sommet de la base) ?", n, M(n) + "."), GS("Total ?", 2 * n, M(n + " + " + n + " = " + 2 * n) + ".")],
+          traps: [TRAP(w, "Ça, c'est pour un prisme droit (" + fw + "). Une pyramide n'a qu'une base.")] }); },
+  );
+  VA("solides", 3, [10],
+    () => { const n = R.int(5, 12), E = 2 * n;
+      return QV("Une pyramide a " + M(E) + " arêtes. Combien de faces a-t-elle ?", n + 1, "Pyramide : " + M("2n") + " arêtes, donc " + M("n = " + E + " : 2 = " + n) + " côtés à la base, et " + M(n + " + 1 = " + (n + 1)) + " faces.",
+        { ctx: "pyr-inverse-faces", guide: [GS("Une pyramide dont la base a n côtés a 2n arêtes. Combien de côtés a la base ?", n, M(E + " : 2 = " + n) + "."), GS("Nombre de faces (n faces latérales + la base) ?", n + 1, M(n + 1) + ".")],
+          traps: [TRAP(n, "C'est le nombre de côtés de la base ; il faut ajouter la base elle-même."), TRAP(E / 3 + 2 === Math.round(E / 3 + 2) ? E / 3 + 2 : n + 2, "Ça, ce serait un prisme (3n arêtes, n + 2 faces).")] }); },
+    () => { const n = R.int(5, 12), S = n + 1;
+      return QV("Une pyramide a " + M(S) + " sommets. Combien d'arêtes a-t-elle ?", 2 * n, "Un sommet en haut et " + M(n) + " sommets à la base : la base a " + M(n) + " côtés. Arêtes : " + M(n + " + " + n + " = " + 2 * n) + ".",
+        { ctx: "pyr-inverse-aretes", guide: [GS("Sommets de la base (sans le sommet principal) ?", n, M(S + " - 1 = " + n) + "."), GS("Arêtes : celles de la base plus les arêtes latérales ?", 2 * n, M(n + " + " + n + " = " + 2 * n) + ".")],
+          traps: [TRAP(2 * S, "Le sommet principal n'est pas sur la base : la base a " + n + " sommets, pas " + S + "."), TRAP(3 * n, "Ça, ce serait un prisme droit (3n arêtes).")] }); },
+  );
+  // --- 10e : aire3, niveaux 2–3 (décomposition avec disque : plan de cheminement 10e, chapitre 2) ---
+  VA("aire3", 2, [10],
+    () => { const L = R.pick([60, 80, 100, 120]), H = 10 * R.int(9, 15), r = L / 2, A1 = L * H, A2 = (Math.PI * r * r) / 2, v = A1 + A2;
+      return QVpi("Une fenêtre a la forme d'un rectangle de " + M(L) + " cm de large et " + M(H) + " cm de haut, surmonté d'un demi-disque de " + M(L) + " cm de diamètre. Quelle est l'aire de la vitre (en cm², valeur exacte avec π ou arrondie au dixième) ?", v,
+        "Rectangle : " + M(L + " \\cdot " + H + " = " + mille(A1)) + " cm² ; demi-disque de rayon " + M(r) + " cm : " + M("\\frac{\\pi \\cdot " + r + "^2}{2} = " + mille(r * r / 2) + "\\pi") + " cm². Total : " + M(mille(A1) + " + " + mille(r * r / 2) + "\\pi \\approx " + PI1(v)) + " cm².",
+        { ctx: "demi-disque-fenetre", guide: [GS("Aire du rectangle (en cm²) ?", A1, M(mille(A1)) + " cm²."), GS("Rayon du demi-disque (en cm) ?", r, M(L + " : 2 = " + r) + " cm."), GS("Aire du demi-disque (en cm², au dixième) ?", A2, M("\\frac{\\pi \\cdot " + r + "^2}{2} \\approx " + PI1(A2)) + " cm².", 0.1), GS("Aire totale (au dixième) ?", v, M(PI1(v)) + " cm².", 0.1)],
+          traps: [TRAP(A1 + 2 * A2, "C'est un demi-disque : divise l'aire du disque par 2."), TRAP(A1 + (Math.PI * L * L) / 2, "Le rayon est la moitié du diamètre : " + r + " cm.")] }); },
+    () => { const a = 10 * R.int(2, 6), A1 = a * a, A2 = (Math.PI * a * a) / 4, v = A1 - A2;
+      return QVpi("Dans une plaque carrée de " + M(a) + " cm de côté, on découpe un quart de disque : son centre est un sommet du carré et son rayon mesure " + M(a) + " cm. Quelle est l'aire de la plaque qui reste (en cm², valeur exacte avec π ou arrondie au dixième) ?", v,
+        "Carré : " + M(a + "^2 = " + mille(A1)) + " cm² ; quart de disque : " + M("\\frac{\\pi \\cdot " + a + "^2}{4} = " + mille(A1 / 4) + "\\pi") + " cm². Reste : " + M(mille(A1) + " - " + mille(A1 / 4) + "\\pi \\approx " + PI1(v)) + " cm².",
+        { ctx: "quart-disque", guide: [GS("Aire du carré (en cm²) ?", A1, M(mille(A1)) + " cm²."), GS("Aire du quart de disque (en cm², au dixième) ?", A2, M("\\frac{\\pi \\cdot " + a + "^2}{4} \\approx " + PI1(A2)) + " cm².", 0.1), GS("Aire qui reste (au dixième) ?", v, M(PI1(v)) + " cm².", 0.1)],
+          traps: [TRAP(A1 - 4 * A2, "On retire un QUART de disque, pas un disque entier."), TRAP(A2, "Ça, c'est l'aire découpée ; on demande ce qui reste.")] }); },
+  );
+  VA("aire3", 3, [10],
+    () => { const L = 10 * R.int(8, 11), l = 10 * R.int(5, 7), v = 2 * L + Math.PI * l;
+      return QVpi("Une piste d'athlétisme est formée de deux lignes droites de " + M(L) + " m et de deux demi-cercles de " + M(l) + " m de diamètre, un à chaque bout. Quelle est la longueur d'un tour de piste (en m, valeur exacte avec π ou arrondie au dixième) ?", v,
+        "Deux droites : " + M("2 \\cdot " + L + " = " + 2 * L) + " m ; deux demi-cercles = un cercle entier : " + M("\\pi \\cdot " + l + " = " + l + "\\pi") + " m. Tour : " + M(2 * L + " + " + l + "\\pi \\approx " + PI1(v)) + " m.",
+        { ctx: "stade-perim", guide: [GS("Longueur des deux lignes droites (en m) ?", 2 * L, M(2 * L) + " m."), GS("Les deux demi-cercles forment un cercle de diamètre " + l + " m : sa longueur (au dixième) ?", Math.PI * l, M(l + "\\pi \\approx " + PI1(Math.PI * l)) + " m.", 0.1), GS("Un tour de piste (au dixième) ?", v, M(PI1(v)) + " m.", 0.1)],
+          traps: [TRAP(2 * L + 2 * l, "Les bouts sont des demi-cercles, pas des segments."), TRAP(2 * L + 2 * Math.PI * l, "Deux demi-cercles font UN cercle entier (" + M("\\pi \\cdot d") + ").")] }); },
+    () => { const L = 10 * R.int(8, 11), l = 10 * R.int(5, 7), r = l / 2, v = L * l + Math.PI * r * r;
+      return QVpi("La pelouse d'un stade est formée d'un rectangle de " + M(L) + " m sur " + M(l) + " m et de deux demi-disques de " + M(l) + " m de diamètre accolés à ses petits côtés. Quelle est l'aire de la pelouse (en m², valeur exacte avec π ou arrondie au dixième) ?", v,
+        "Rectangle : " + M(L + " \\cdot " + l + " = " + mille(L * l)) + " m² ; deux demi-disques = un disque de rayon " + M(r) + " m : " + M("\\pi \\cdot " + r + "^2 = " + mille(r * r) + "\\pi") + " m². Total : " + M(mille(L * l) + " + " + mille(r * r) + "\\pi \\approx " + PI1(v)) + " m².",
+        { ctx: "stade-aire", guide: [GS("Aire du rectangle (en m²) ?", L * l, M(mille(L * l)) + " m²."), GS("Les deux demi-disques forment un disque de rayon " + r + " m : son aire (au dixième) ?", Math.PI * r * r, M(mille(r * r) + "\\pi \\approx " + PI1(Math.PI * r * r)) + " m².", 0.1), GS("Aire de la pelouse (au dixième) ?", v, M(PI1(v)) + " m².", 0.1)],
+          traps: [TRAP(L * l + Math.PI * l * l, "Le rayon est la moitié du diamètre : " + r + " m."), TRAP(L * l + (Math.PI * r * r) / 2, "Il y a DEUX demi-disques : ensemble, un disque entier.")] }); },
+  );
+  // --- 10e : valnum, niveau 1 (relatifs ; la formule du rectangle est écartée en 10e, HORS_CO) ---
+  VA("valnum", 1, [10],
+    () => { let a, b, c, x; do { a = R.int(2, 5); c = R.pick([2, 3, 4, 5]); x = -R.int(2, 7); b = R.nz(-9, 9); } while ((a * x + b) % c !== 0 || a * x + b === 0);
+      const n = a * x + b, v = n / c;
+      return QV("Calcule " + M("\\frac{" + a + "x" + (b < 0 ? " - " + -b : " + " + b) + "}{" + c + "}") + " pour " + M("x = " + x) + ".", v, M("\\frac{" + a + " \\cdot (" + x + ")" + (b < 0 ? " - " + -b : " + " + b) + "}{" + c + "} = \\frac{" + n + "}{" + c + "} = " + v) + ".",
+        { ctx: "quot-rel", guide: [GS("Numérateur : " + M(a + " \\cdot (" + x + ")" + (b < 0 ? " - " + -b : " + " + b)) + " = ?", n, M(n) + "."), GS("Divise par " + c + " :", v, M(v) + ".")],
+          traps: [TRAP((-a * x + b) / c, M(a + " \\cdot (" + x + ") = " + a * x) + " : un produit d'un positif et d'un négatif est négatif."), TRAP(a * x + b / c, "La barre de fraction porte sur tout le numérateur.")] }); },
+    () => { let a, b, x; do { a = R.int(2, 6); b = R.int(2, 9); x = -R.int(2, 8); } while (x === -b);
+      const v = a * (x - b);
+      return QV("Calcule " + M(a + "(x - " + b + ")") + " pour " + M("x = " + x) + ".", v, M(a + " \\cdot (" + x + " - " + b + ") = " + a + " \\cdot (" + (x - b) + ") = " + v) + ".",
+        { ctx: "paren-rel", guide: [GS("La parenthèse : " + M(x + " - " + b) + " = ?", x - b, M(x - b) + "."), GS("Multiplie par " + a + " :", v, M(v) + ".")],
+          traps: [TRAP(a * x - b, "Le facteur " + a + " multiplie toute la parenthèse."), TRAP(-v, "Un positif fois un négatif donne un négatif.")] }); },
+  );
 })();
 
 // ======================= 27.11 : variété (agent variete, tools/archive/variete_27-11.md) =======================
