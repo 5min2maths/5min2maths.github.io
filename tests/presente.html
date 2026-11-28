@@ -23,7 +23,7 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     ok(app.querySelector("#pztry .qtext") && app.querySelector("#pztry .qtext").textContent.trim(), "vraie question affichée");
     ok(app.querySelector(".pz-qr svg"), "QR code");
     /* 28.11 (univers Pépite²) : pépites et Mathélo présentés côte à côte, chacun avec ce qu'il mesure ; ancien vocabulaire absent (l'adresse 5min2maths.github.io reste, elle). */
-    ok(/pépites = ton travail/.test(txt()) && /Mathélo = ton niveau/.test(txt()) && /Pousse/.test(txt()), "pépites (travail) et Mathélo (niveau) distingués");
+    ok(/Pépites = ton travail de l'année, Mathélo = ton niveau/i.test(txt()), "pépites (travail) et Mathélo (niveau) distingués");
     { const m = txt().match(/.{0,40}(points de l'année|carnet d'erreurs|5 minutes de maths|5min2maths(?![-./])|\bsérie\b).{0,40}/i); ok(!m, "élèves : pas d'ancien vocabulaire" + (m ? " : " + m[0] : "")); }
     for (const g of [9, 10, 11, 12]) {
       app.querySelector(`#pzg1 button[data-v="${g}"]`).click();
@@ -64,7 +64,7 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     ok(app.querySelectorAll(".pz-loop-n").length === 5, "boucle d'une séance");
     ok(/ne fait pas/.test(txt()) && /plan d'études/i.test(txt()), "limites et programme présentés");
     /* 28.11 : enseignants, pépites (travail) et Mathélo (niveau) distingués ; pas d'ancien vocabulaire. */
-    ok(/pépites comptent le travail/.test(txt()) && /Mathélo situe le niveau/.test(txt()), "enseignants : pépites et Mathélo distingués");
+    ok(/Pépites = le travail de l'année, Mathélo = le niveau/.test(txt()), "enseignants : pépites et Mathélo distingués");
     { const m = txt().match(/.{0,40}(points de l'année|carnet d'erreurs|5 minutes de maths|5min2maths(?![-./])|\bsérie\b).{0,40}/i); ok(!m, "enseignants : pas d'ancien vocabulaire" + (m ? " : " + m[0] : "")); }
     for (const g of [9, 11, 12]) {
       app.querySelector(`#pzg3 button[data-v="${g}"]`).click();

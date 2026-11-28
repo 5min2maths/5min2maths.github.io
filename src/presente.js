@@ -141,18 +141,10 @@ function screenDecouvrir() {
   <section class="pz-s">
     <div class="eyebrow">⚙️ Comment ça marche</div><h2>L'app s'adapte à toi</h2>
     <div class="pz-grid pz-anim">
-      <div class="card flat"><b>🎯 Ta pépite du jour</b><p class="small">Une courte séance choisie pour toi, ni trop facile, ni impossible : les questions suivent tes progrès.</p></div>
+      <div class="card flat"><b>🎯 Ta pépite du jour</b><p class="small">Ni trop facile, ni impossible : les questions suivent ton niveau. <b>Pépites</b> = ton travail de l'année, <b>Mathélo</b> = ton niveau.</p></div>
       <div class="card flat"><b>🪜 Pas à pas</b><p class="small">Une erreur ? L'app repère le piège (« tu as pris l'angle extérieur ? ») et te guide, une étape à la fois.</p></div>
       <div class="card flat"><b>✨ À polir</b><p class="small">Chaque question ratée devient une pépite brute qui attend sa revanche : réussis-la du premier coup, elle est polie (deux fois de suite si tu es à l'aise).</p></div>
       <div class="card flat"><b>📝 Jour J</b><p class="small">Prépare ton évaluation : donne la date et les notions : chaque jour, juste ce qu'il faut réviser, plus un sujet de préparation corrigé.</p></div>
-    </div>
-  </section>
-
-  <section class="pz-s">
-    <div class="eyebrow">🏅 Tes progrès</div><h2>Deux compteurs, deux rôles</h2>
-    <div class="pz-grid pz-anim">
-      <div class="card flat pz-gem"><b>🟡 Tes pépites = ton travail</b><p class="small">Chaque question réussie, chaque séance finie, chaque erreur polie te fait trouver des pépites. Elles te font monter en grade, de 🌱 Pousse à 🌟 Légende. Tout le monde repart à zéro à la rentrée.</p></div>
-      <div class="card flat"><b>📈 Ton Mathélo = ton niveau</b><p class="small">Il monte quand tu réussis, il baisse un peu quand tu te trompes, comme aux échecs. Il sert surtout à te donner des questions à ta mesure.</p></div>
     </div>
   </section>
 
@@ -239,7 +231,6 @@ function screenParents() {
       <p class="par-gems">🟡 Cette semaine, votre enfant a trouvé <b>38 pépites</b> et en a poli <b>2</b>.</p>
       <div><b>Ce qui a été travaillé</b><ul class="plain par-list small"><li>• Équations du 1er degré</li><li>• Théorème de Pythagore</li></ul></div>
       <div class="par-fete"><span>🏅</span><div><b>À fêter</b><div class="small">Une erreur enfin réussie : une pépite polie !</div></div></div></div>
-    <p class="small">Les <b>pépites</b> comptent son travail de la semaine (questions réussies, séances, erreurs reprises) ; une pépite <b>polie</b> est une erreur enfin réussie. Ce n'est pas une note.</p>
     <p class="small"><b>Ce que vous ne verrez pas</b> : ni notes, ni Mathélo (son niveau), ni heures de connexion, ni liste de fautes. L'effort et les progrès, c'est tout.</p>
   </section>
 
@@ -417,7 +408,7 @@ function screenEnseignants() {
     <div class="eyebrow">🧭 Honnêtement</div><h2>Ce que l'app ne fait pas</h2>
     <div class="pz-grid pz-anim">
       <div class="card flat"><b>Remplacer le cours</b><p class="small">Elle entraîne ce qui a été vu en classe ; elle n'introduit pas une notion à votre place.</p></div>
-      <div class="card flat"><b>Noter vos élèves</b><p class="small">Pas de note ni de classement. Les pépites comptent le travail de l'année (grades de Pousse à Légende) ; le Mathélo situe le niveau, pour choisir les questions. Deux repères pour l'élève, pas une évaluation.</p></div>
+      <div class="card flat"><b>Noter vos élèves</b><p class="small">Pas de note ni de classement. Pépites = le travail de l'année, Mathélo = le niveau : deux repères pour l'élève, pas une évaluation.</p></div>
       <div class="card flat"><b>Suivre une classe</b><p class="small">Il n'y a pas de tableau de bord enseignant : sans compte, aucune donnée nominative ne remonte.</p></div>
       <div class="card flat"><b>Tout évaluer</b><p class="small">Constructions, raisonnements rédigés et démonstrations restent l'affaire de la classe.</p></div>
     </div>
