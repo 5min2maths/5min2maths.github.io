@@ -1873,7 +1873,10 @@ const RECALC = (() => {
   const posR = (a, b, c) => (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
   DF("probeq2", rs("photo de # cm sur # cm est entourée d'un cadre de largeur x\\. L'ensemble mesure # cm²"), (g, lab) => { const [w, h, A] = g.map(nn); return pick(lab, { a: w * h, b: posR(4, 2 * (w + h), w * h - A), c: A - w * h }); });
   DF("probeq2", rs("deux nombres entiers positifs consécutifs vaut #\\."), (g, lab) => { const n = posR(1, 1, -nn(g[0])); return pick(lab, { a: n, b: n + 1, c: n * n + (n + 1) ** 2 }); });
-  DF("probeq2", rs("carré de # cm de côté en allongeant chaque côté de x cm\\. Son aire augmente alors de # cm²"), (g, lab) => { const [c, D] = g.map(nn), x = posR(1, 2 * c, -D); return pick(lab, { a: c * c, b: x, c: 4 * (c + x) }); });
+  DF("probeq2", rs("carré de # cm de côté en allongeant chaque côté de x cm\\. Son aire augmente alors de # cm²"), (g, lab) => { const [c, D] = g.map(nn), x = posR(1, 2 * c, -D);
+    /* 28.11 soir (grands problèmes, src/defis_sec2.js) : version en 4 parties, lue par le libellé (aire du nouveau carré, aire doublée) */
+    if (/nouveau carré \(cm²\)/.test(lab)) return (c + x) ** 2; if (/aire double/.test(lab)) return c * (Math.SQRT2 - 1);
+    return pick(lab, { a: c * c, b: x, c: 4 * (c + x) }); });
   DF("litelab", /rectangle a une largeur x cm et une longueur x \+ (\d+) cm/, (g, lab) => { const k = nn(g[0]), x = lm(lab, /pour x = (\d+)/), P = lm(lab, /périmètre de (\d+) cm/);
     return pick(lab, { a: x ? 4 * x[0] + 2 * k : null, b: x ? x[0] * (x[0] + k) : null, c: P ? (P[0] - 2 * k) / 4 : null }); });
   DF("litelab", /triangle isocèle a une base de x cm, et ses deux autres côtés mesurent chacun x \+ (\d+) cm/, (g, lab) => { const k = nn(g[0]), x = lm(lab, /pour x = (\d+)/), P = lm(lab, /périmètre (?:de|vaut) (\d+) cm/);
@@ -2016,7 +2019,12 @@ const RECALC = (() => {
   DF("ensembles", rs("On donne A = \\[§ ; §\\[ et B = \\]§ ; §\\]"), (g, lab) => ENSO(...g.map(nn), lab));
   DF("ensembles", rx("ouvert de # h \\(compris\\) à # h \\(non compris\\) ; Léo est libre après # h \\(non compris\\) et jusqu'à # h \\(compris\\)"), (g, lab) => ENSO(...g.map(nn), lab));
   DF("ensembles", rx("jeunes de # ans \\(compris\\) à # ans \\(non compris\\)\\. Le tarif « jeune adulte » s'applique au-delà de # ans \\(non compris\\) et jusqu'à # ans \\(compris\\)"), (g, lab) => ENSO(...g.map(nn), lab));
-  DF("trinfact", /B\(x\) = (-[^(]+?) \(en milliers/, (g, lab) => { const c = pl2(g[0]); if (!c) return null; const s = -c[1] / (2 * c[0]); return pick(lab, { b: s, c: c[0] * s * s + c[1] * s + c[2] }); });
+  DF("trinfact", /B\(x\) = (-[^(]+?) \(en milliers/, (g, lab) => { const c = pl2(g[0]); if (!c) return null; const s = -c[1] / (2 * c[0]);
+    /* 28.11 soir : lu par le libellé (version en 4 parties de src/defis_sec2.js : zéros, sommet, maximum) */
+    const z = qroots(c[0], c[1], c[2]).sort((u, v) => u - v);
+    if (/^\S+ Plus petite production/.test(lab)) return z.length === 2 ? z[0] : NaN; if (/^\S+ Plus grande production/.test(lab)) return z.length === 2 ? z[1] : NaN;
+    if (/plus grand bénéfice/.test(lab)) return s; if (/Bénéfice maximal/.test(lab)) return c[0] * s * s + c[1] * s + c[2];
+    return pick(lab, { b: s, c: c[0] * s * s + c[1] * s + c[2] }); });
   DF("trinfact", /sa hauteur vaut h\(x\) = (-[^(]+?) \(m\)/, (g, lab) => { const c = pl2(g[0]); if (!c) return null; const r = rq(...c), s = -c[1] / (2 * c[0]); return pick(lab, { a: Math.max(...r), b: s, c: c[0] * s * s + c[1] * s + c[2] }); });
   DF("trinfact", /On considère P\(x\) = ([^.]+)\./, (g, lab) => { const c = pl2(g[0]); if (!c) return null; const r = rq(...c), m = lm(lab, /P\((-?\d+)\)/); let k = 0; for (let x = -60; x <= 60; x++) if (c[0] * x * x + c[1] * x + c[2] < 0) k++;
     return pick(lab, { a: r[0] + r[1], b: k, c: m ? c[0] * m[0] ** 2 + c[1] * m[0] + c[2] : null }); });
@@ -2052,6 +2060,9 @@ const RECALC = (() => {
   DF("ineq", rx("en moyenne # points par match sur ses # premiers matchs\\. \\S+ vise une moyenne d'au moins # points"), (g, lab) => { const [m, n, M0] = g.map(nn); return pick(lab, { a: n * m, b: (n + 1) * M0 - n * m, c: ce(((n + 2) * M0 - n * m) / 2) }); });
   DF("f2expr", rs("sommet S\\(§ ; §\\) et passe par le point \\(§ ; §\\)"), (g, lab) => { const [h, k, x1, y1] = g.map(nn), a = (y1 - k) / (x1 - h) ** 2; return pick(lab, { a, c: a * h * h + k }); });
   DF("f2expr", rx("pieds sont au sol, à # m l'un de l'autre, et son sommet est à # m de haut"), (g, lab) => { const [w, H] = g.map(nn), h = w / 2, a = -H / (h * h), L = lm(lab, /large de (\d+) m/), y = lm(lab, /à (\d+(?:,\d+)?) m de haut/);
+    /* 28.11 soir (grands problèmes, src/defis_sec2.js) : version en 4 parties, lue par le libellé */
+    const yAt = (x) => H + a * x * x, wy = lm(lab, /Largeur de l'arche à (\d+(?:,\d+)?) m de hauteur/), dp = lm(lab, /à (\d+(?:,\d+)?) m d'un pied/), cw = lm(lab, /camion de (\d+(?:,\d+)?) m de large/);
+    if (wy) return 2 * Math.sqrt((wy[0] - H) / a); if (dp) return yAt(h - dp[0]); if (cw) return yAt(cw[0] / 2);
     return pick(lab, { a, b: L ? a * ((L[0] / 2) ** 2 - h * h) : null, c: y ? Math.sqrt(y[0] / a + h * h) : null }); });
   DF("f2expr", rx("il est à # m au-dessus de la route ; il est fixé au sommet de deux pylônes de # m, à # m de part et d'autre"), (g, lab) => { const [h0, H, d] = g.map(nn), a = (H - h0) / (d * d), x = lm(lab, /à (\d+) m du milieu/), y = lm(lab, /à (\d+(?:,\d+)?) m de haut/);
     return pick(lab, { a, b: x ? h0 + a * x[0] ** 2 : null, c: y ? Math.sqrt((y[0] - h0) / a) : null }); });
