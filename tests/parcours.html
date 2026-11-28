@@ -403,5 +403,65 @@ try {
 } catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
 document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
 });
+Lot.section("niv10", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* 28.11 (/contenu niveau 10e, tools/niveau_910.md § 3, tools/archive/contenu_niveau10_28-11.md) : notions de 10e au niveau du
+   plan de cheminement 10e. Chaque contrôle échoue sans la correction : UP10 (niveau minimal des reprises de 9e), HORS_CO[10]
+   (litconv double distributivité, valnum formule du rectangle), dec10 et proptab hors de l'année, formes de 10e (fracrep dans
+   Q, aire3 avec disque, solides : pyramide, valnum avec relatifs, litconv deux simples distributivités), mémoire des ctx
+   (recentCtx : les 2 dernières questions, avec ou sans ctx), reladd 3 « regrouper » avec des négatifs. */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const st = (g) => { const x = Engine.newState({ system: "CH", grade: g, track: "co", minutes: 5 }); Engine.autoInit(x); return x; };
+const txt = (q) => String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").replace(/\{,\}/g, ",");
+const cnt = (S, id, d, n = 60) => { const c = {}; for (let k = 0; k < n; k++) { const q = Engine.make(S, id, d); c[q.ctx || "-"] = (c[q.ctx || "-"] || 0) + 1; } return c; };
+try {
+  const S10 = st(10), S9 = st(9), S11 = st(11), cur = new Set(Engine.catalog(S10.profile).filter((c) => c.current).map((c) => c.id));
+  ok(!cur.has("dec10") && !cur.has("proptab") && cur.has("litconv") && cur.has("prop") && cur.has("fracrep"), "catalogue 10e : dec10 et proptab plus « de l'année », litconv, prop, fracrep oui");
+  /* UP10 */
+  const up = [["decadd", 3], ["reladd", 3], ["prop", 3], ["prio", 2], ["fracadd", 2], ["solides", 2], ["aire3", 2]].filter(([id, m]) => { const q = Engine.make(S10, id, 1); return !new RegExp("^" + id + "-" + m + "-").test(q.code) || q.d !== 1; });
+  ok(!up.length, "UP10 : en 10e, niveau 1 de decadd, reladd, prop → 3 ; prio, fracadd, solides, aire3 → 2 (niveau affiché 1) " + up.map((x) => x[0]).join(" "));
+  ok(/^decadd-1-/.test(Engine.make(S9, "decadd", 1).code) && /^prio-1-/.test(Engine.make(S9, "prio", 1).code), "UP10 : la 9e ne change pas");
+  /* HORS_CO[10] */
+  const l10 = cnt(S10, "litconv", 3), l11 = cnt(S11, "litconv", 3, 80), v10 = cnt(S10, "valnum", 1);
+  ok(!l10["equiv-double"] && l10["equiv-deuxsimples"] >= 5 && l11["equiv-double"] >= 3, "litconv 3 : pas de double distributivité en 10e, deux simples distributivités à la place ; en 11e, toujours là " + JSON.stringify(l10));
+  ok(!v10.aire && !v10.perim && v10["quot-rel"] >= 5 && v10["paren-rel"] >= 5 && Object.keys(v10).length >= 3, "valnum 1 en 10e : plus de formule du rectangle, formes avec relatifs " + JSON.stringify(v10));
+  /* formes de 10e, tirées (mémoire des ctx corrigée) et réservées à la 10e */
+  const F = [["fracrep", 2, ["neg-compare", "neg-ranger"]], ["fracrep", 3, ["neg-encadrer", "neg-compter"]], ["aire3", 2, ["demi-disque-fenetre", "quart-disque"]], ["aire3", 3, ["stade-perim", "stade-aire"]], ["solides", 3, ["pyr-inverse-faces", "pyr-inverse-aretes"]]];
+  for (const [id, d, cs] of F) { const c = cnt(S10, id, d), c9 = cnt(S9, id, d, 40);
+    ok(cs.every((k) => c[k] >= 5) && cs.every((k) => !c9[k]), id + " " + d + " : formes de 10e tirées en 10e (≥ 5 sur 60 chacune), jamais en 9e " + JSON.stringify(c)); }
+  /* recalcul indépendant des formes ajoutées (nombres relus dans l'énoncé) */
+  const bad = [], fr = (t) => { const m = /(-?)\\frac\{(\d+)\}\{(\d+)\}/g; const r = []; let x; while ((x = m.exec(t))) r.push((x[1] ? -1 : 1) * +x[2] / +x[3]); return r; };
+  const near = (a, b, e = 1e-9) => Math.abs(a - b) <= e;
+  for (let s = 1; s <= 120; s++) {
+    const q1 = Engine.build("fracrep", 3, s), t1 = String(q1.q);
+    if (q1.ctx === "neg-encadrer") { const [f] = fr(t1); if (!near(q1.spec.value, Math.floor(f))) bad.push(q1.code); }
+    if (q1.ctx === "neg-compter") { const [a, b] = fr(t1); let n = 0; for (let k = Math.ceil(a); k <= Math.floor(b); k++) if (k > a && k < b) n++; if (q1.spec.value !== n) bad.push(q1.code); }
+    const q2 = Engine.build("fracrep", 2, s), t2 = String(q2.q), v2 = fr(t2);
+    if (q2.ctx === "neg-compare" && !near(q2.spec.value, /grande/.test(t2) ? Math.max(...v2) : Math.min(...v2))) bad.push(q2.code);
+    if (q2.ctx === "neg-ranger" && !near(q2.spec.value, [...v2].sort((a, b) => a - b)[1])) bad.push(q2.code);
+    const q3 = Engine.build("solides", 3, s), t3 = txt(q3), n3 = +((/a (\d+) (arêtes|sommets)/.exec(t3) || [])[1]);
+    if (q3.ctx === "pyr-inverse-faces" && q3.spec.value !== n3 / 2 + 1) bad.push(q3.code);
+    if (q3.ctx === "pyr-inverse-aretes" && q3.spec.value !== 2 * (n3 - 1)) bad.push(q3.code);
+    const q4 = Engine.build("solides", 2, s), t4 = txt(q4), n4 = +((/polygone à (\d+) côtés/.exec(t4) || [])[1]);
+    if (/^pyr-/.test(q4.ctx || "") && q4.spec.value !== (/arêtes/.test(t4) ? 2 * n4 : n4 + 1)) bad.push(q4.code);
+    for (const d of [2, 3]) { const q = Engine.build("aire3", d, s), t = txt(q), N = (t.match(/\d+/g) || []).map(Number);
+      const want = { "demi-disque-fenetre": () => N[0] * N[1] + Math.PI * (N[0] / 2) ** 2 / 2, "quart-disque": () => N[0] ** 2 * (1 - Math.PI / 4),
+        "stade-perim": () => 2 * N[0] + Math.PI * N[1], "stade-aire": () => N[0] * N[1] + Math.PI * (N[1] / 2) ** 2 }[q.ctx];
+      if (want && !(near(q.spec.value, want(), 1e-6) && q.spec.exactOk && q.spec.round === 0.1)) bad.push(q.code); }
+    const q5 = Engine.build("valnum", 1, s), t5 = txt(q5);
+    if (q5.ctx === "quot-rel") { const m = /frac\{(\d+)x ([+-]) (\d+)\}\{(\d+)\} pour x = (-\d+)/.exec(t5); if (!m || !near(q5.spec.value, (+m[1] * +m[5] + (m[2] === "-" ? -1 : 1) * +m[3]) / +m[4])) bad.push(q5.code); }
+    if (q5.ctx === "paren-rel") { const m = /(\d+)\(x - (\d+)\) pour x = (-\d+)/.exec(t5); if (!m || q5.spec.value !== +m[1] * (+m[3] - +m[2])) bad.push(q5.code); }
+    const q6 = Engine.build("litconv", 3, s);
+    if (q6.ctx === "equiv-deuxsimples") { const t = String(q6.q), m = /(\d+)\(([a-z]) ([+-]) (\d+)\) - (\d+)\(\2 ([+-]) (\d+)\)/.exec(t.replace(/\\\(|\\\)/g, ""));
+      const opts = [...t.matchAll(/<b>(\d)<\/b> — \\\((-?\d*)([a-z]) ([+-]) (\d+)\\\)/g)].map((o) => [+o[1], (o[2] === "" ? 1 : o[2] === "-" ? -1 : +o[2]), (o[4] === "-" ? -1 : 1) * +o[5]]);
+      if (!m || opts.length !== 4) bad.push(q6.code + "?"); else { const a = +m[1], b = (m[3] === "-" ? -1 : 1) * +m[4], c = +m[5], d = (m[6] === "-" ? -1 : 1) * +m[7], g = opts.filter((o) => o[1] === a - c && o[2] === a * b - c * d);
+        if (g.length !== 1 || g[0][0] !== q6.spec.value) bad.push(q6.code); } }
+  }
+  ok(!bad.length, "recalcul des formes de 10e (120 graines, fracrep, solides, aire3, valnum, litconv) : " + (bad.length ? bad.slice(0, 8).join(" ") : "tout juste"));
+  /* reladd 3 « regrouper » : au moins deux termes négatifs et deux positifs */
+  let rg = 0, rb = 0; for (let s = 1; s <= 200; s++) { const q = Engine.build("reladd", 3, s); if (q.ctx !== "regrouper") continue; rg++; const t = txt(q).replace(/^[^:]*:\s*/, "").trim(), neg = (t.match(/(^|\s)-\s?\d|^-\d/g) || []).length; if (neg < 2 || (t.match(/\+/g) || []).length + (/^\d/.test(t) ? 1 : 0) < 2) rb++; }
+  ok(rg >= 10 && !rb, "reladd 3 « regrouper » : positifs et négatifs mêlés (" + rb + " sur " + rg + " sans)");
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+});
 Lot.lance();
 </script>

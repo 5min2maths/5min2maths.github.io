@@ -42,24 +42,42 @@ relatifs », p. 54), mais le plan de cheminement et les prescriptions cantonales
    2a² + 3ab pour a = 1,5 et b = 4 ; aire totale d'un pavé A = 2(ab + bc + ac). E9-10-2 : volume d'un pavé x, x + 5, 4.
 11. **Transformations** — symétries axiale et centrale, translation. 12. **Diagrammes** — lecture, colonnes.
 
-### 10e (PLAN10)
-1. **Relatifs** — 4 opérations dans ℤ (LC/LS). E10-1-1 : (−3)³ − 2 · (−5) + (−1)³.
-2. **Aires et périmètres** — disque, arc et secteur (LC/LS), grandeur manquante. E10-2-1 : secteur de 150°, r = 5 cm.
-3. **Écriture fractionnaire** — 4 opérations dans ℚ (LS), pourcentages, périodiques → fraction (LS).
-4. **3D** — prismes droits, cylindre (LC/LS), décomposition, contenances. E10-4-1 : cylindre creux.
-5. **Unités** — temps et vitesses (sensibilisation). E10-5-1 : 60 km à 90 km/h en minutes.
-6. **Puissances et racines** — carrés parfaits, √ et ∛ dans ℝ⁺, encadrement, notation scientifique, propriétés (LC/LS).
-7. **Calcul littéral** — réduire, substituer, élaborer ; × de monômes (degré 6 LS) ; **simple distributivité**.
-   E10-7-1 (MER10 FA170) : 1,5x + 4(x − 1) ; 3(3x − 2) − 4(4x − 2). E10-7-2 : 4x(4x − 2) − 2x(3x + 6) + 8x.
+### 10e (PLAN10 ; complété le 28.11 avec les MER 10e 2025, `Livre_10E_2025.pdf`)
+Le plan de 10e reprend des notions de 9e (révision des décimaux au chapitre 1, PGDC/PPMC « CT » au chapitre 3, solides au
+chapitre 4) : en 10e, leur niveau 1 n'est plus un automatisme de l'année (règle UP10, § 4). Référence : LS.
+1. **Relatifs et révision des décimaux** — 4 opérations dans ℤ (LC/LS), révision des 4 opérations sur les décimaux et des
+   priorités, systèmes de numération (MER 10e, « Exploration de quelques systèmes de numération », NO95 numération grecque).
+   E10-1-1 : (−3)³ − 2 · (−5) + (−1)³. E10-1-2 : (−9) − 4 · (−9) + 7 ; 2,6 + 2,4 − 8,4. E10-1-3 : 9 − (−6) − 6 − (−9) ;
+   −[−2 − (6 − 8) · 2] + 5. E10-1-4 : écrire 1419 en chiffres romains, 100110 (base 2) en base 10.
+2. **Aires et périmètres** — disque, arc et secteur (LC/LS), aire et périmètre **par décomposition, avec des parties de
+   disque** (MER 10e GM29 « Place de jeux » : hexagone et demi-disques), grandeur manquante. E10-2-1 : secteur de 150°,
+   r = 5 cm. E10-2-2 : fenêtre = rectangle 80 × 140 cm surmonté d'un demi-disque ; plaque carrée moins un quart de
+   disque. E10-2-3 : tour de piste (deux droites de 100 m, deux demi-cercles de 60 m de diamètre) ; aire de la pelouse.
+3. **Écriture fractionnaire et arithmétique** — nombres premiers, décomposition, PGDC, PPMC (CT ; MER 10e NO14–NO21) ;
+   dans ℚ : comparaison, encadrement, droite numérique (fractions **négatives**), simplification, amplification ;
+   4 opérations dans ℚ (LS), pourcentages, périodiques → fraction (LS). E10-3-1 : la plus grande de −3/4 et −5/6 ;
+   encadrer −25/8 entre deux entiers ; nombre d'entiers entre −24/5 et 3/2. E10-3-2 : 0,2363636… = 13/55 (LS).
+   E10-3-3 : (3/4 − 1/6) : 7/9 ; (−7/4) : 9/2. E10-3-4 : PGDC de 56 et 32 (problème de sachets), 2² · 3 · 5².
+4. **3D** — prismes droits, cylindre (LC/LS), **pyramide** (reconnaissance, faces, arêtes, sommets ; MER 10e ES49–ES63),
+   décomposition, unités de volume et de capacité (m³ ↔ L). E10-4-1 : cylindre creux. E10-4-2 : pyramide à 18 arêtes :
+   combien de faces ? ; pyramide à 12 sommets : combien d'arêtes ? E10-4-3 : 2,6 m³ en hL ; 4,4 cL en cm³.
+5. **Unités** — temps et vitesses (sensibilisation). E10-5-1 : 60 km à 90 km/h en minutes ; 2 h 5 min 26 s en s.
+6. **Puissances et racines** — carrés parfaits, √ et ∛ dans ℝ⁺, encadrement, notation scientifique, propriétés (LC/LS),
+   ensembles ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ (irrationnels : √n non carré). E10-6-1 : √83 entre 9 et 10 ; (4/5)⁻² ; 6 · 10³ + 1,5 · 10².
+7. **Calcul littéral** — conventions d'écriture, expressions équivalentes (LC/LS ; contre-exemple), substitution avec
+   relatifs, élaboration, réduire ; × de monômes (degré 6 LS) ; **simple distributivité**. E10-7-1 (MER10 FA170) :
+   1,5x + 4(x − 1) ; 3(3x − 2) − 4(4x − 2). E10-7-2 : 4x(4x − 2) − 2x(3x + 6) + 8x. E10-7-3 : laquelle est égale à
+   4(x − 2) − 5(x + 4) ? ; (5x − 3)/3 pour x = −6.
 8. **Pythagore (LC/LS)** — dans le plan, dans l'espace (LS) ; **pas de réciproque** ; valeur exacte √n (a√b en 11e).
 9. **Équations (LC/LS)** — 1er degré, mise en équation. E10-9-1 (MER10 FA198 j, FA199 f) : 2x + 1 = 4(2x + 4) − (4x + 8) ;
    1,2(x + 6) = 4,8 + 3x ; 5(x − 4) − 4(x + 1) = 4(x − 3) + 9.
-10. **Proportionnalité** — échelle, pourcentages, pente. E10-10-1 : carte 1:25'000 → 1:50'000 ; plan d'appartement ;
-   maquette 1:87. (Aires × k², volumes × k³ : 11e.)
-11. **Fonctions (LC/LS)** — tableaux, x ↦ ax + b, ax² ; tracés. 12. **Polygones réguliers**. 13. **Rotations**.
-14. **Diagrammes** — circulaires et en barres.
+10. **Proportionnalité** — échelle, pourcentages (augmentation, diminution), pente ; règle de trois en reprise (niveau 3
+   de 9e au moins). E10-10-1 : carte 1:25'000 → 1:50'000 ; plan d'appartement ; maquette 1:87. (Aires × k², volumes × k³ : 11e.)
+11. **Fonctions (LC/LS)** — tableaux, x ↦ ax + b, ax² ; tracés ; lire un graphique, reconnaître une situation de
+   proportionnalité ou affine. 12. **Polygones réguliers**. 13. **Rotations, agrandissements et réductions** (LC/LS),
+   isométries (reprise de 9e et composition). 14. **Diagrammes** — circulaires (angle d'un secteur) et en barres, moyenne.
 
-## 3. Audit (sonde `tests/_niv910.html`, non commitée : 4–6 tirages distincts par notion et par niveau, profil CH)
+## 3. Audit (sonde `tests/_niv910.html`, non commitée : 4–6 tirages distincts par notion et par niveau, profil CH ; 10e complétée le 28.11)
 
 45 notions de 9e, 34 de 10e. Verdicts : **au niveau** ; **remonté** (niveau 1 trop facile → formes du niveau 2) ;
 **corrigé** (formes hors programme écartées pour la classe, `HORS_CO` dans `src/engine.js`, et formes du programme
@@ -112,13 +130,66 @@ ajoutées, `VARX` / `PROBX` dans `src/variantes.js`, réservées à la classe pa
 | 10e | 11 | affine | au niveau | à valider | **corrigé** | au niveau | inéquation graphique f(x) > g(x) écartée ; pente, droites parallèles : à valider |
 | 10e | 12–13 | polyreg, rotation | au niveau | au niveau | au niveau | = N3 | |
 
+**Suite de l'audit de la 10e (28.11, `/contenu niveau 10e`, sonde `tests/_niv_10e.html` non commitée : profil CH 10e, tirages
+par `Engine.make` sans graine, 6–8 par notion et par niveau ; rapport `archive/contenu_niveau10_28-11.md`).** Le catalogue de
+10e compte 63 notions « de l'année » (chapitre de 10e dans `CO_BY` ou `again: [10]`) : les 33 ci-dessus et 30 notions de 9e
+reprises en 10e ou ajoutées par l'agent PER. **UP10** = niveau 1 (et 2) remonté en 10e (§ 4).
+
+| Cl. | Ch. | Notion | N1 | N2 | N3 | N4 | Remarque |
+|---|---|---|---|---|---|---|---|
+| 10e | 1 | prio | **remonté** (UP10 → 2) | au niveau | au niveau | au niveau | N1 « 37 − 16 : 2 », « 8 + 3 · 3 » (9e) |
+| 10e | 1 | decadd, reladd | **remonté** (→ 3) | **remonté** (→ 3) | au niveau | au niveau | « 18,70 + rendu sur 20 CHF », « (−9) + (−4) » : primaire et 9e ; « révision » au plan |
+| 10e | 1 | decmul, decdiv, ordgr | **remonté** (→ 2) | au niveau | au niveau | au niveau | N1 « 6,5 : 1000 », « arrondis 5506 à la centaine » |
+| 10e | 1 | reladd (N3 « regrouper ») | | | **corrigé** | | « 7 + 11 + 9 + 4 + 8 » sortait (que des positifs, aussi en 9e) : 2 négatifs et 2 positifs au moins |
+| 10e | 1 | numer | **remonté** (→ 2) | au niveau | au niveau | au niveau | MER 10e : systèmes de numération ; N1 « 7 · 10³ + 2 · 10² + 9 » (9e) |
+| 10e | — | dec10 | **hors programme** | | | | pas au plan de 10e (9NO2.04) : retiré de l'année (`again: [10]` supprimé), reste en remobilisation |
+| 10e | — | proptab | **hors programme** | | | | 9FA1.01 ; en 10e, prop, echelle, pctvar, pente : retiré de l'année |
+| 10e | 2 | aire3 | **remonté** (→ 2) | **corrigé** | **corrigé** | au niveau | polygones seulement (9e) : + fenêtre à demi-disque, plaque moins quart de disque (N2), piste et pelouse de stade (N3), `q.co = [10]` |
+| 10e | 3 | arith, premiers | **remonté** (→ 2) | au niveau | au niveau | au niveau | PGDC/PPMC « CT » au plan, travaillés dans les MER 10e (NO14–NO21) ; à valider (§ 5) |
+| 10e | 3 | fracadd | **remonté** (→ 2) | au niveau | au niveau | au niveau | N1 « 1/6 + 2/6 » ; N2–N3 dans ℚ (négatifs permis en 10e) |
+| 10e | 3 | fracsimp, fractout, fracconv | **remonté** (→ 2) | au niveau | au niveau | au niveau | N1 « 1/6 = ?/30 », « 3/4 de 24 km », « 0,6 en fraction » |
+| 10e | 3 | fracrep | **remonté** (→ 2) | **corrigé** | **corrigé** | au niveau | dans ℚ⁺ seulement (9e) : + comparer, ranger, encadrer, compter des entiers avec des fractions négatives |
+| 10e | 3 | fracper | au niveau | au niveau | au niveau | au niveau | conversion périodique → fraction = objectif LS de 10e |
+| 10e | 4 | solides | **remonté** (→ 2) | **corrigé** | **corrigé** | au niveau | pyramide (10e) absente des niveaux 2–3 : + faces, arêtes, sommets d'une pyramide, et le chemin inverse |
+| 10e | 4 | uvol | au niveau | au niveau | au niveau | au niveau | m³ ↔ L = objectif de 10e |
+| 10e | 5 | utemps | au niveau | au niveau | au niveau | au niveau | sensibilisation au plan |
+| 10e | 6 | ensco | au niveau | au niveau | au niveau | au niveau | ℝ, irrationnels avec les racines |
+| 10e | 7 | valnum | **corrigé** | au niveau | au niveau | au niveau | « A = L · l pour 13 et 7 cm », « P = 2(L + l) » écartés en 10e ; + (5x − 3)/3 et 5(x − 9) pour x négatif |
+| 10e | 7 | litelab | au niveau | au niveau | au niveau | au niveau | élaboration (LC/LS) ; réduction permise en 10e |
+| 10e | 7 | litconv | au niveau | au niveau | **corrigé** | au niveau | « (a − 1)(a − 3) » (double distributivité, 11e) écarté en 10e ; + 4(x − 2) − 5(x + 4) |
+| 10e | 10 | prop | **remonté** (→ 3) | **remonté** (→ 3) | au niveau | au niveau | règle de trois de 9e (« 4 cahiers coûtent 32 CHF ») |
+| 10e | 11 | fctlec | au niveau | au niveau | au niveau | au niveau | lire un graphique, reconnaître proportionnalité / affine |
+| 10e | 13 | agrand, isom | au niveau | au niveau | au niveau | au niveau | agrandissements (LC/LS) ; isométries, rotation d'un quart de tour, compositions |
+| 10e | 14 | diagr | au niveau | au niveau | au niveau | au niveau | angle d'un secteur = objectif de 10e |
+
+Re-sondage des 33 notions de 10e du 25.11 (4 tirages) : aucun écart nouveau. Défaut du moteur trouvé en passant (corrigé,
+§ 4) : la mémoire « contexte vu dans les 2 dernières questions » ne retenait que les questions à ctx ; dans une notion où
+une ou deux formes ont un ctx et les autres non, ces formes restaient « vues » et n'étaient presque plus tirées (1 fois sur
+60 au lieu de 10) : 42 couples notion × niveau concernés, toutes classes (dec10 2, relrep 2–3, fracrep 2–3, aire3 2–3,
+solides 3, quadri 3, pct 2, disque 2, eqverif 3, rotation 3, eqrat, log, cercletan…).
+
 « = N3 » : le défi reprend les formes du niveau 3 (pas de problème propre) ; à enrichir plus tard.
 Aucun chapitre vide. Les règles de la nuit ne touchent pas la 9e et la 10e : `UP11` exige `grade === 11`, `UP2` (rel)
 `grade >= 11`, `UPC` et `UPC_MIN` `grade >= 12`, `finalize` reste inchangé jusqu'à la 11e (vérifié dans le code et à la sonde : les formes
 de niveau 1 de 9e–10e sortent toujours au niveau 1, hors `UP9`). Les nouvelles règles (`UP9`, `HORS_CO`, formes `q.co`) ne touchent que la 9e et
 la 10e : vérifié en 11e (prio, valnum, distrib, eq1, fracadd, litelab : aucune forme ajoutée tirée).
 
-## 4. Corrections (25.11)
+## 4. Corrections (25.11 ; 28.11 pour la 10e)
+
+28.11 (branche `agent/contenu5`) :
+- `src/engine.js` : **UP10** (niveau minimal en 10e des notions de 9e reprises : prio, arith, premiers, fracadd, fracsimp,
+  fracrep, fracconv, fractout, decmul, decdiv, ordgr, aire3, solides, numer → 2 ; decadd, reladd, prop → 3 ; niveau affiché
+  inchangé, code `…-2-…`) ; `HORS_CO[10]` : `litconv` (equiv-double), `valnum` (aire, perim) ; mémoire des ctx
+  (`recentCtx` : les 2 dernières questions, avec ou sans ctx).
+- `src/gen3.js` : dec10 et proptab plus « de l'année » en 10e ; solides (indice, leçon) et fracrep (indice) : pyramide,
+  fractions négatives. `src/competences.js` : solides 2–3 « Décrire un prisme droit ou une pyramide ».
+- `src/variantes.js` (section « 28.11 : audit de niveau 10e ») : 13 formes réservées à la 10e (`q.co = [10]`) : fracrep 2–3
+  (4), aire3 2–3 (4), solides 2–3 (3 : pyr-faces / sommets / arêtes, pyr-inverse-faces, pyr-inverse-aretes), valnum 1 (2).
+  `src/perco.js` : litconv 3 « equiv-deuxsimples ». `src/ch10_no.js` : reladd 3 « regrouper » avec des négatifs.
+- Contrôle : `tests/parcours.html#section=niv10` (chaque règle, formes tirées en 10e et jamais en 9e, recalcul indépendant
+  des 13 formes sur 120 graines).
+
+25.11 :
 
 - `src/engine.js` : `HORS_CO` (formes écartées par classe : contexte, énoncé ou réponse) et `horsCO()` (aussi utilisé par
   les sujets, `src/sujet.js`, et les QCM, `src/qcm.js`) ; si un niveau n'a plus de forme du programme, on descend d'un
@@ -140,3 +211,8 @@ la 10e : vérifié en 11e (prio, valnum, distrib, eq1, fracadd, litelab : aucune
 6. **diagr** en 9e : angle d'un secteur circulaire et moyenne pondérée (le plan de 9e ne cite que la lecture et les
    diagrammes en colonnes).
 7. Défis « = N3 » (decread, deccomp, perim, aire1, quadri…) : problèmes propres à écrire.
+8. (28.11) **arith, premiers en 10e** : le plan de 10e les réserve au regroupement CT ; les MER 10e les travaillent
+   (NO14–NO21). Gardés (niveau 1 remonté) ou retirés de l'année de 10e (comme dec10 et proptab) ?
+9. (28.11) **dec10, proptab retirés de l'année de 10e** (pas d'objectif de 10e) : d'accord ? Ils restent en remobilisation.
+10. (28.11) **UP10 : decadd, reladd, prop au niveau 3 dès le niveau 1** (révision au plan) : les trois niveaux se ressemblent ;
+   autre choix : retirer ces trois notions de l'année de 10e (rel, fracops, pctvar couvrent l'année).
