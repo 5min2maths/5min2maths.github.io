@@ -481,3 +481,128 @@
   /* grades : banque réservée à la 10e (richChapter, src/riche.js) — les ids sont aussi ceux de la 11e (RICH.litt11). */
   RICH.litt10 = { ids: ["litelab", "valnum", "reduire", "monomes", "distrib", "litconv"], label: "Calcul littéral (10e)", ex: EXL10, raison: RAISONL10, minutes: 45, grades: [10] };
 })();
+
+// ======================= 28.11 : nickel 10e, chapitre 8 Pythagore (archive/contenu_nickel10_ch8_28-11.md) =======================
+// Test de préparation de 10e (« Je prépare une évaluation » → Théorème de Pythagore). Modèles : MER 10e, ch. 11 GMA (GM62
+// échelle sous la fenêtre, GM63 armoire, GM64 casier de consigne et skis, GM68 trapèze rectangle, GM69 losange, GM70
+// hauteur issue de l'angle droit, QSJ : repérer l'hypoténuse), modelés et non recopiés ; plan de cheminement 10e :
+// plan (LC/LS) et espace (LS), PAS de réciproque, valeur exacte √n ou valeur arrondie. Avant le 28.11, la 10e recevait
+// RICH.pyth11 (réciproque, racines simplifiées a√b, cônes : 11e). Bloc séparé (fin de fichier).
+(function () {
+  const { r6, N, Nk, A, Q, pk, sh, X, ul, who, VF } = RICHU;
+  const rd = (v, s) => Math.round(v / s) * s;
+  const Ad = (v, k) => Nk(v, k); /* valeur arrondie à k décimales (TeX) */
+  const EXPY10 = [
+    // L'échelle sous la fenêtre (MER GM62) : hypoténuse, cathète, question inverse
+    () => { const h = pk([5, 5.5, 6, 6.5]), d = pk([1.5, 2, 2.5]), L = Math.sqrt(h * h + d * d), L2 = pk([5, 6, 7].filter((v) => v < L && v > h - 1.2)), h2 = r6(Math.min(h - pk([0.5, 0.8, 1]), rd(L2 * 0.92, 0.1))), d2 = Math.sqrt(L2 * L2 - h2 * h2), q4 = L2 / 4, h4 = Math.sqrt(L2 * L2 - q4 * q4);
+      return X({ id: "pyth", lv: 1, titre: "L'échelle sous la fenêtre",
+        q: "Une fenêtre se trouve à " + Q(h, "m") + " au-dessus du sol. On appuie une échelle contre le mur vertical : son sommet doit arriver juste sous la fenêtre.",
+        parts: [{ label: "Le pied de l'échelle est à " + Q(d, "m") + " du mur. Quelle doit être la longueur de l'échelle (au centième) ?", pts: 2 },
+          { label: "On n'a qu'une échelle de " + Q(L2, "m") + ". On veut atteindre " + Q(h2, "m") + " de haut. À quelle distance du mur faut-il placer le pied (au centième) ?", pts: 2 },
+          { label: "Par sécurité, le pied doit être à environ un quart de la longueur de l'échelle. Avec l'échelle de " + Q(L2, "m") + " placée ainsi, quelle hauteur atteint-on (au centième) ? Est-ce assez pour la fenêtre ?", pts: 2 },
+          { label: "Fais un croquis de la situation de la question a) et colorie l'hypoténuse.", pts: 1 }],
+        sol: ul([M("L^2 = " + N(h) + "^2 + " + N(d) + "^2 = " + N(h * h + d * d)) + ", " + M("L = \\sqrt{" + N(h * h + d * d) + "} \\approx " + Ad(L, 2)) + " m.",
+          "L'échelle est l'hypoténuse : on soustrait. " + M("x^2 = " + N(L2) + "^2 - " + N(h2) + "^2 = " + N(L2 * L2 - h2 * h2)) + ", " + M("x \\approx " + Ad(d2, 2)) + " m.",
+          "Pied à " + M(N(L2) + " : 4 = " + N(q4)) + " m : " + M("\\sqrt{" + N(L2) + "^2 - " + N(q4) + "^2} \\approx " + Ad(h4, 2)) + " m. " + (h4 >= h ? "C'est assez : " + M(Ad(h4, 2) + " \\geq " + N(h)) + "." : "Ce n'est pas assez : " + M(Ad(h4, 2) + " < " + N(h)) + " m."),
+          "Triangle rectangle formé par le mur (" + N(h) + " m), le sol (" + N(d) + " m) et l'échelle : l'échelle, en face de l'angle droit, est l'hypoténuse."]),
+        chk: [[L2 < L && L2 > h2, "échelle possible"], [d2 > 0.3, "pied"]], vals: [L, d2, h4] }); },
+    // Le losange (MER GM69) : demi-diagonales, périmètre, aire ; inverse
+    () => { const [a, b, c] = pk([[6, 8, 10], [5, 12, 13], [9, 12, 15], [8, 15, 17], [12, 16, 20]]), s = pk([7.5, 6, 6.5]), dd = Math.sqrt(s * s - (s * 0.6) ** 2), w = who();
+      return X({ id: "pythfig", lv: 1, titre: "Le losange",
+        q: "Un carreau de vitrail a la forme d'un losange dont les diagonales mesurent " + Q(2 * a, "cm") + " et " + Q(2 * b, "cm") + ".",
+        parts: [{ label: "Calcule la longueur d'un côté du losange.", pts: 2 }, { label: "Calcule son périmètre et son aire.", pts: 2 },
+          { label: w.n + " écrit : « le côté vaut " + M("\\sqrt{" + 2 * a + "^2 + " + 2 * b + "^2}") + " ». Explique son erreur.", pts: 1 },
+          { label: "Un autre losange a des côtés de " + Q(s, "cm") + " et une diagonale de " + Q(r6(2 * s * 0.6), "cm") + ". Calcule l'autre diagonale.", pts: 2 }],
+        sol: ul(["Les diagonales se coupent en leur milieu à angle droit : " + M("c = \\sqrt{" + a + "^2 + " + b + "^2} = \\sqrt{" + c * c + "} = " + c) + " cm.",
+          "Périmètre " + M("4 \\cdot " + c + " = " + 4 * c) + " cm ; aire " + M("\\frac{" + 2 * a + " \\cdot " + 2 * b + "}{2} = " + 2 * a * b) + " cm².",
+          w.n + " a pris les diagonales entières : les cathètes du triangle rectangle sont les <b>demi</b>-diagonales, " + M(a) + " et " + M(b) + " cm.",
+          "Demi-diagonale connue " + M(N(s * 0.6)) + " cm : " + M("\\sqrt{" + N(s) + "^2 - " + N(s * 0.6) + "^2} = \\sqrt{" + N(s * s - (s * 0.6) ** 2) + "} = " + N(dd)) + " cm, donc l'autre diagonale vaut " + M(N(2 * dd)) + " cm."]),
+        chk: [[Math.abs(dd - s * 0.8) < 1e-9, "3-4-5"]], vals: [c, 4 * c, 2 * a * b, 2 * dd] }); },
+    // La parcelle en trapèze rectangle (MER GM68) : hauteur, aire, clôture, coût ; figure (info spatiale, sans la hauteur)
+    () => { const [p, h, s] = pk([[9, 12, 15], [12, 16, 20], [15, 20, 25], [10, 24, 26], [18, 24, 30]]), b = pk([20, 25, 30, 35]), B = b + p, Ar = ((B + b) * h) / 2, P = B + b + h + s, px = pk([4.5, 6, 7.5]);
+      const fig = GEO().pt("A", 0, 0, false).pt("B", B, 0, false).pt("C", b, h, false).pt("E", 0, h, false).poly(["A", "B", "C", "E"]).right("A", "B", "E").right("E", "A", "C").side("A", "B", B + " m").side("E", "C", b + " m").side("B", "C", s + " m").svg("parcelle en trapèze rectangle");
+      return X({ id: "pythfig", lv: 2, titre: "La parcelle",
+        q: "Une parcelle a la forme d'un trapèze rectangle (deux angles droits) : ses côtés parallèles mesurent " + Q(B, "m") + " et " + Q(b, "m") + ", et le côté oblique " + Q(s, "m") + "." + fig,
+        parts: [{ label: "Calcule la largeur de la parcelle (la distance entre les deux côtés parallèles).", pts: 2 }, { label: "Calcule son aire.", pts: 1 },
+          { label: "On pose une clôture tout autour. Quelle longueur faut-il ?", pts: 1 }, { label: "Le gazon coûte " + M(Nk(px, 2) + "\\ \\text{CHF}") + " le m². Combien coûte le gazon pour toute la parcelle ?", pts: 1 }],
+        sol: ul(["On abaisse la hauteur depuis l'extrémité du petit côté : triangle rectangle de cathètes " + M(B + " - " + b + " = " + p) + " m et " + M("h") + ", d'hypoténuse " + M(s) + " m. " + M("h = \\sqrt{" + s + "^2 - " + p + "^2} = \\sqrt{" + h * h + "} = " + h) + " m.",
+          M("\\frac{(" + B + " + " + b + ") \\cdot " + h + "}{2} = " + N(Ar)) + " m².", M(B + " + " + b + " + " + h + " + " + s + " = " + P) + " m (le côté perpendiculaire mesure la largeur, " + h + " m).", M(N(Ar) + " \\cdot " + Nk(px, 2) + " = " + Nk(Ar * px, 2)) + " CHF."]),
+        chk: [[p * p + h * h === s * s, "triplet"]], vals: [h, Ar, P, Ar * px] }); },
+    // La hauteur sur l'hypoténuse (MER GM70) : cathète, aire de deux façons
+    () => { const [a, b, c] = pk([[6, 8, 10], [9, 12, 15], [5, 12, 13], [8, 15, 17], [12, 16, 20]]), h = (a * b) / c, [L, l] = pk([[15, 8], [24, 7], [12, 5], [21, 20]]), dg = Math.sqrt(L * L + l * l), x = (L * l) / dg;
+      return X({ id: "pyth", lv: 2, titre: "La hauteur sur l'hypoténuse",
+        q: "Le triangle " + M("ABC") + " est rectangle en " + M("C") + ", avec " + M("AC = " + a) + " cm et " + M("AB = " + c) + " cm.",
+        parts: [{ label: "Quel côté est l'hypoténuse ? Calcule " + M("BC") + ".", pts: 2 }, { label: "Calcule l'aire du triangle.", pts: 1 },
+          { label: "Calcule la hauteur issue de " + M("C") + " (perpendiculaire à " + M("[AB]") + ") en écrivant l'aire d'une autre façon.", pts: 2 },
+          { label: "Un rectangle mesure " + Q(L, "cm") + " sur " + Q(l, "cm") + ". Quelle est la distance d'un sommet à la diagonale qui ne passe pas par ce sommet (au centième) ?", pts: 2 }],
+        sol: ul([M("[AB]") + ", en face de l'angle droit. " + M("BC = \\sqrt{" + c + "^2 - " + a + "^2} = \\sqrt{" + b * b + "} = " + b) + " cm.",
+          M("\\frac{" + a + " \\cdot " + b + "}{2} = " + (a * b) / 2) + " cm² (les cathètes sont perpendiculaires : l'une est la hauteur de l'autre).",
+          M("\\frac{" + c + " \\cdot h}{2} = " + (a * b) / 2) + ", donc " + M("h = \\frac{" + a * b + "}{" + c + "} = " + N(h)) + " cm.",
+          "Diagonale " + M("\\sqrt{" + L + "^2 + " + l + "^2} = " + N(dg)) + " cm ; le demi-rectangle est un triangle rectangle d'aire " + M("\\frac{" + L + " \\cdot " + l + "}{2} = " + (L * l) / 2) + " cm², donc " + M("x = \\frac{" + L * l + "}{" + N(dg) + "} \\approx " + Ad(x, 2)) + " cm."]),
+        chk: [[Number.isInteger(dg), "diagonale entière"]], vals: [b, (a * b) / 2, h, x] }); },
+    // Le casier de consigne (MER GM64, espace : LS) ; figure du pavé (dimensions seulement)
+    () => { const [w, H, p] = pk([[80, 150, 60], [60, 120, 45], [50, 160, 40], [70, 140, 55]]), df0 = Math.sqrt(w * w + H * H + p * p), S = Math.round(df0) + pk([-7, -4, 4, 7]), df = Math.sqrt(w * w + H * H), D = Math.sqrt(w * w + H * H + p * p), b = Math.sqrt(w * w + p * p), ok = S < D;
+      return X({ id: "pythfig", lv: 3, titre: "Le casier de consigne",
+        q: "Dans une gare, les casiers de consigne sont des pavés de " + Q(w, "cm") + " de large, " + Q(H, "cm") + " de haut et " + Q(p, "cm") + " de profondeur." + FIG.box(w + " cm", p + " cm", H + " cm"),
+        parts: [{ label: "Calcule la diagonale de la face avant (largeur × hauteur), au dixième.", pts: 1 }, { label: "Calcule la grande diagonale du casier (d'un coin du bas au coin opposé du haut), au dixième.", pts: 2 },
+          { label: "Peut-on y ranger une paire de skis de " + Q(S, "cm") + " ? Justifie.", pts: 1 }, { label: "Quelle est la plus longue canne qu'on peut poser à plat sur le fond du casier (au dixième) ?", pts: 1 }],
+        sol: ul([M("\\sqrt{" + w + "^2 + " + H + "^2} = \\sqrt{" + (w * w + H * H) + "} \\approx " + Ad(df, 1)) + " cm.",
+          "Triangle rectangle (diagonale de la face avant, profondeur) : " + M("\\sqrt{" + (w * w + H * H) + " + " + p + "^2} = \\sqrt{" + (w * w + H * H + p * p) + "} \\approx " + Ad(D, 1)) + " cm.",
+          ok ? "Oui : " + M(S + " < " + Ad(D, 1)) + ", en les plaçant selon la grande diagonale." : "Non : " + M(S + " > " + Ad(D, 1)) + " ; même en diagonale, les skis sont trop longs.",
+          "Diagonale du fond : " + M("\\sqrt{" + w + "^2 + " + p + "^2} = \\sqrt{" + (w * w + p * p) + "} \\approx " + Ad(b, 1)) + " cm."]),
+        chk: [[Math.abs(S - D) > 3, "écart net"]], vals: [df, D, b] }); },
+    // La pyramide (espace : LS) : demi-diagonale, hauteur, apothème
+    () => { const [c, s, h] = pk([[8, 9, 7], [12, 11, 7], [16, 12, 4], [12, 9, 3]]), ap = Math.sqrt(s * s - (c / 2) ** 2);
+      return X({ id: "pythfig", lv: 3, titre: "La pyramide",
+        q: "Une pyramide régulière a une base carrée de " + Q(c, "cm") + " de côté ; ses quatre arêtes latérales mesurent " + Q(s, "cm") + ". Son sommet est à la verticale du centre de la base." + FIG.pyramid(c + " cm", "h"),
+        parts: [{ label: "Calcule la diagonale de la base (valeur exacte et valeur au dixième).", pts: 1 }, { label: "Calcule la hauteur de la pyramide.", pts: 2 },
+          { label: "Calcule l'apothème (hauteur d'une face triangulaire), au dixième.", pts: 2 }, { label: "Pourquoi utilise-t-on la demi-diagonale pour la hauteur, mais le demi-côté pour l'apothème ?", pts: 1 }],
+        sol: ul([M("d = \\sqrt{" + c + "^2 + " + c + "^2} = \\sqrt{" + 2 * c * c + "} \\approx " + Ad(Math.sqrt(2 * c * c), 1)) + " cm.",
+          "Triangle rectangle (hauteur, demi-diagonale, arête) : " + M("\\left(\\frac{d}{2}\\right)^2 = \\frac{" + 2 * c * c + "}{4} = " + c * c / 2) + ", " + M("h = \\sqrt{" + s + "^2 - " + c * c / 2 + "} = \\sqrt{" + h * h + "} = " + h) + " cm.",
+          "Triangle rectangle (apothème, demi-côté, arête) : " + M("\\sqrt{" + s + "^2 - " + c / 2 + "^2} = \\sqrt{" + (s * s - c * c / 4) + "} \\approx " + Ad(ap, 1)) + " cm.",
+          "Sous l'arête, le pied de la hauteur est le centre, au bout d'une demi-diagonale ; l'apothème tombe au milieu d'un côté de la base, à un demi-côté du coin."]),
+        chk: [[s * s - c * c / 2 === h * h, "hauteur entière"]], vals: [h, ap] }); },
+  ];
+  const RAISONPY10 = [
+    // Trouve l'erreur : additionner les côtés, oublier la racine, prendre l'hypoténuse pour une cathète
+    () => { const [a, b, c] = pk([[6, 8, 10], [9, 12, 15], [5, 12, 13], [8, 15, 17]]), w = who(), w2 = who(w.n);
+      return X({ id: "pyth", lv: 1, titre: "Trouve l'erreur",
+        q: "Dans un triangle rectangle, les cathètes mesurent " + Q(a, "cm") + " et " + Q(b, "cm") + ". " + w.n + " répond « l'hypoténuse mesure " + M(a + b) + " cm », " + w2.n + " répond « elle mesure " + M(c * c) + " cm ». Puis, pour un triangle d'hypoténuse " + Q(c, "cm") + " et de cathète " + Q(a, "cm") + ", ils calculent l'autre cathète : " + M("\\sqrt{" + c + "^2 + " + a + "^2} \\approx " + Ad(Math.sqrt(c * c + a * a), 2)) + " cm.",
+        parts: [{ label: "Explique l'erreur de " + w.n + ", puis celle de " + w2.n + ".", pts: 2 }, { label: "Quelle est l'erreur dans le calcul de l'autre cathète ? Comment pouvait-on voir, sans calculer, que le résultat est faux ?", pts: 2 }, { label: "Donne les bonnes réponses.", pts: 1 }],
+        sol: ul([w.n + " a additionné les côtés : on additionne leurs <b>carrés</b>. " + w2.n + " a trouvé " + M("c^2 = " + c * c) + " mais a oublié la racine carrée.",
+          "On a additionné les carrés alors qu'on cherche une cathète : il faut soustraire. Une cathète est toujours plus courte que l'hypoténuse : " + M(Ad(Math.sqrt(c * c + a * a), 2) + " > " + c) + ", c'est impossible.",
+          "Hypoténuse " + M("\\sqrt{" + a * a + " + " + b * b + "} = " + c) + " cm ; autre cathète " + M("\\sqrt{" + c * c + " - " + a * a + "} = " + b) + " cm."]),
+        vals: [a + b, c * c, c, b] }); },
+    // Vrai ou faux ? Justifie (hypothèse « rectangle », carrés et racines, ordre des côtés)
+    () => VF({ id: "pyth", titre: "Vrai ou faux ? Justifie" }, [
+      () => ["Dans n'importe quel triangle, le carré du plus grand côté est égal à la somme des carrés des deux autres.", false, "Seulement dans un triangle <b>rectangle</b>. Contre-exemple : le triangle équilatéral de côté 2 : " + M("2^2 = 4") + " mais " + M("2^2 + 2^2 = 8") + "."],
+      () => { const [a, b] = pk([[9, 16], [36, 64], [25, 144]]); return [M("\\sqrt{" + a + " + " + b + "} = \\sqrt{" + a + "} + \\sqrt{" + b + "}"), false, M("\\sqrt{" + (a + b) + "} = " + N(Math.sqrt(a + b))) + " mais " + M("\\sqrt{" + a + "} + \\sqrt{" + b + "} = " + (Math.sqrt(a) + Math.sqrt(b))) + " : la racine d'une somme n'est pas la somme des racines."]; },
+      () => ["Dans un triangle rectangle, une cathète peut être plus longue que l'hypoténuse.", false, "Non : " + M("c^2 = a^2 + b^2 > a^2") + ", donc " + M("c > a") + " ; l'hypoténuse est toujours le plus long côté."],
+      () => { const s = pk([5, 10, 20]); return ["La diagonale d'un carré de côté " + s + " cm mesure " + 2 * s + " cm.", false, M("\\sqrt{" + s + "^2 + " + s + "^2} = \\sqrt{" + 2 * s * s + "} \\approx " + Nk(Math.sqrt(2 * s * s), 1)) + " cm, moins que " + 2 * s + " cm (le chemin par deux côtés est plus long)."]; },
+      () => ["Si on double les deux cathètes d'un triangle rectangle, l'hypoténuse double aussi.", true, "Exemple : cathètes 3 et 4 → hypoténuse 5 ; cathètes 6 et 8 → " + M("\\sqrt{36 + 64} = 10") + ". En général " + M("(2a)^2 + (2b)^2 = 4(a^2 + b^2) = (2c)^2") + "."],
+      () => ["L'hypoténuse d'un triangle rectangle de cathètes 5 cm et 7 cm mesure entre 8 cm et 9 cm.", true, M("5^2 + 7^2 = 74") + ", et " + M("64 < 74 < 81") + " : " + M("8 < \\sqrt{74} < 9") + "."],
+    ]),
+    // Estimation et ordre de grandeur : encadrer avant de calculer
+    () => { const [a, b] = pk([[4, 7], [5, 9], [3, 8], [6, 7]]), n = a * a + b * b, lo = Math.floor(Math.sqrt(n)), w = who();
+      return X({ id: "pyth", lv: 2, titre: "Estime avant de calculer",
+        q: "Un triangle rectangle a des cathètes de " + Q(a, "cm") + " et " + Q(b, "cm") + ".",
+        parts: [{ label: "Sans calculatrice, entre quels nombres entiers consécutifs se trouve l'hypoténuse ? Explique.", pts: 2 },
+          { label: "Explique pourquoi l'hypoténuse est forcément plus longue que " + Q(b, "cm") + " et plus courte que " + Q(a + b, "cm") + ".", pts: 2 },
+          { label: w.n + " trouve " + M(N(rd(Math.sqrt(n) * 1.4, 0.1))) + " cm. Sans refaire le calcul, comment sais-tu que c'est faux ? Donne la valeur exacte et la valeur au dixième.", pts: 1 }],
+        sol: ul([M(a + "^2 + " + b + "^2 = " + n) + " ; " + M(lo * lo + " < " + n + " < " + (lo + 1) ** 2) + ", donc l'hypoténuse est entre " + lo + " et " + (lo + 1) + " cm.",
+          "L'hypoténuse est le plus long côté (" + M("c^2 = " + b + "^2 + " + a + "^2 > " + b + "^2") + ") ; et le chemin direct est plus court que le chemin par les deux cathètes (" + M(n + " < (" + a + " + " + b + ")^2 = " + (a + b) ** 2) + ").",
+          M(N(rd(Math.sqrt(n) * 1.4, 0.1))) + " n'est pas entre " + lo + " et " + (lo + 1) + ". Valeur exacte " + M("\\sqrt{" + n + "}") + ", soit " + M("\\approx " + Nk(Math.sqrt(n), 1)) + " cm."]),
+        chk: [[!Number.isInteger(Math.sqrt(n)), "non entier"], [rd(Math.sqrt(n) * 1.4, 0.1) > lo + 1, "réponse fausse hors encadrement"]], vals: [n, lo, lo + 1] }); },
+    // Où est l'hypoténuse ? Écrire la relation (QSJ MER 10e : repérer le triangle rectangle et son hypoténuse)
+    () => { const [P, Qn, Rn] = sh(["P", "Q", "R"]), [a, b, c] = pk([[20, 21, 29], [9, 40, 41], [12, 35, 37], [7, 24, 25]]);
+      return X({ id: "pyth", lv: 2, titre: "Où est l'hypoténuse ?",
+        q: "Le triangle " + M(P + Qn + Rn) + " est rectangle en " + M(Qn) + ". On connaît " + M(P + Qn + " = " + a) + " cm et " + M(P + Rn + " = " + c) + " cm.",
+        parts: [{ label: "Quel côté est l'hypoténuse ? Écris l'égalité de Pythagore pour ce triangle.", pts: 2 }, { label: "Calcule " + M(Qn + Rn) + ".", pts: 2 }, { label: "Calcule le périmètre et l'aire du triangle.", pts: 1 }],
+        sol: ul(["L'hypoténuse est le côté opposé à l'angle droit en " + M(Qn) + " : " + M("[" + P + Rn + "]") + ". " + M(P + Rn + "^2 = " + P + Qn + "^2 + " + Qn + Rn + "^2") + ".",
+          M(Qn + Rn + "^2 = " + c + "^2 - " + a + "^2 = " + (c * c - a * a)) + ", donc " + M(Qn + Rn + " = " + b) + " cm.",
+          "Périmètre " + M(a + " + " + b + " + " + c + " = " + (a + b + c)) + " cm ; aire " + M("\\frac{" + a + " \\cdot " + b + "}{2} = " + (a * b) / 2) + " cm²."]),
+        vals: [b, a + b + c, (a * b) / 2] }); },
+  ];
+  /* grades : banque réservée à la 10e (richChapter, src/riche.js) ; ids aussi présents dans RICH.pyth11 (11e). */
+  RICH.pyth10 = { ids: ["pyth", "pythfig"], label: "Théorème de Pythagore (10e)", ex: EXPY10, raison: RAISONPY10, minutes: 45, grades: [10] };
+})();
