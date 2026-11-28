@@ -160,9 +160,31 @@ const HORS_CO = {
     /* 28.11 (audit de niveau 10e) : double distributivité (11e) ; formule du rectangle A = L · l, P = 2(L + l) : trop facile en 10e
        (substitution de nombres positifs dans une formule du primaire), il reste les formes avec relatifs et décimaux. */
     litconv: ["equiv-double"],
-    valnum: ["aire", "perim"],
+    valnum: ["aire", "perim", "trapeze"],
+    /* 28.11 (nickel 10e, ch. 7, tools/archive/contenu_nickel10_ch7_28-11.md) : « le nombre entier qui suit n » (n + 1) est
+       trivial en 10e ; aire du trapèze avec des entiers positifs (valnum 2) = formule de 9e, remplacée par des formes avec relatifs. */
+    litelab: [/nombre entier qui suit/],
   },
 };
+/* 28.11 (nickel 10e, ch. 7 Calcul littéral ; règle « leçons progressives » du 15.11 : n'afficher que ce qui est au programme
+   et présenté) : textes d'une notion propres à une classe du CO (exemple du catalogue, indice, rappel de cours). En 10e,
+   « Développer » = simple distributivité (plan de cheminement 10e : « pas de double distributivité ») ; le texte général
+   (11e) parle de (x + 2)(x − 3). Lu par Engine.catalog (ex) et, pour l'indice et le rappel, par des accesseurs sur HINTS et
+   LESSONS (fin de ce fichier) qui lisent le profil de l'élève (state, src/app.js) : app.js n'a pas à changer. */
+const TXT_CO = {
+  10: {
+    distrib: {
+      ex: "-3(2x - 5) = -6x + 15",
+      hint: "Le facteur devant la parenthèse multiplie CHAQUE terme de la parenthèse : 3(2x − 5) = 6x − 15. Un facteur négatif change tous les signes : −2(x − 4) = −2x + 8. Puis réduis.",
+      lesson: {
+        regle: "Simple distributivité : \\(k(a + b) = ka + kb\\) et \\(k(a - b) = ka - kb\\). Le facteur devant la parenthèse multiplie chaque terme de la parenthèse. Un facteur négatif change le signe de chaque terme : \\(-3(2x - 5) = -6x + 15\\). Avec plusieurs parenthèses, on développe chacune, puis on réduit.",
+        exemple: ["\\(3(2x - 5) = 6x - 15\\).", "\\(-2(4x - 3) = -8x + 6\\).", "\\(2x(4x^2 + x - 3) = 8x^3 + 2x^2 - 6x\\).", "\\(3(x + 2) - 2(x - 4) = 3x + 6 - 2x + 8 = x + 14\\)."],
+        piege: "Le facteur multiplie tous les termes : \\(3(2x + 5)\\) n'est pas \\(6x + 5\\). Et devant une parenthèse, \\(-2(x - 4) = -2x + 8\\) : moins par moins donne plus.",
+      },
+    },
+  },
+};
+function txtCO(profile, id) { const p = profile; return p && p.system === "CH" && p.track !== "mp" && TXT_CO[p.grade] && TXT_CO[p.grade][id] || null; }
 /* 26.11 (revue élèves p3, n° 1, grave : 2nde FR servie avec l'équation du cercle circonscrit, un « cercle déguisé », la
    perpendiculaire par les pentes — banque de la 2e du Collège suisse) : contenus hors programme d'une classe française,
    repérés dans le TEXTE de la question ou de l'exercice (énoncé, parties, corrigé), quelle que soit la notion :
@@ -429,7 +451,9 @@ const Engine = {
       // suisse devenait « de l'année » en 2nde, grade 10 aussi).
       const again = sesa || coYear || (profile.track !== "mp" && ((profile.system === "FR" ? n.againFR : n.again) || []).includes(profile.grade));
       const label = profile.system === "FR" && n.labelFR && profile.grade < n.labelFR[0] ? n.labelFR[1] : n.label; /* 26.11 : libellé du collège français (fr_couv.js) */
-      return { ...n, label, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
+      /* 28.11 (nickel 10e, ch. 7) : exemple de la notion propre à la classe (TXT_CO : « Développer » sans double distributivité en 10e) */
+      const tc = txtCO(profile, n.id), ex = tc && tc.ex ? tc.ex : n.ex;
+      return { ...n, label, ex, theme: this.themeKey(profile, n.id), defaultStatus: g < profile.grade ? "vu" : "avenir", current: g === profile.grade || again, again };
     });
   },
   // 22.11 : référentiel « FR » pour un profil français (ordre et chapitres dans ORDRE.FR / ORDRE_THEME.FR, src/fr_2nde.js).
@@ -1724,4 +1748,17 @@ if (typeof ACTIVE !== "undefined") for (const A of Object.values(ACTIVE)) if (A 
   /* 27.11 (revue, n° 2 et 3) : PRIM.note (jours en grande difficulté), PRIM.vary (pas plus de 2 fois la même notion) */
   Engine.planSession = function (state, format) { const p = plan0.call(this, state, format), X = P(); if (X) X.note(state); return X ? (state.placedOn === day() ? X.strip(p) : X.inject(state, X.vary(state, X.strip(p)))) : p; };
   Engine.oneLesson = function (state, plan, n) { const X = P(); return X ? X.inject(state, X.vary(state, one0.call(this, state, X.strip(plan), n))) : one0.call(this, state, plan, n); };
+})();
+/* 28.11 (nickel 10e, ch. 7) : indice et rappel de cours propres à la classe (TXT_CO, plus haut) : accesseurs sur HINTS[id] et
+   sur les champs de LESSONS[id], selon le profil de l'élève en cours (state, src/app.js). Sans profil (tests, autre classe) :
+   le texte général, inchangé. LESSONS[id] peut être remplacé plus tard (L_ dans un autre fichier) : l'accesseur est posé ici,
+   après tous les fichiers de leçons (engine.js est chargé après eux). */
+(function () {
+  const cur = (id) => (typeof state !== "undefined" && state && state.profile ? txtCO(state.profile, id) : null);
+  const ids = new Set(Object.values(TXT_CO).flatMap((o) => Object.keys(o)));
+  for (const id of ids) {
+    if (typeof HINTS !== "undefined" && id in HINTS) { const h0 = HINTS[id]; Object.defineProperty(HINTS, id, { configurable: true, enumerable: true, get: () => { const t = cur(id); return t && t.hint ? t.hint : h0; }, set: (v) => { Object.defineProperty(HINTS, id, { value: v, writable: true, configurable: true, enumerable: true }); } }); }
+    const L = typeof LESSONS !== "undefined" && LESSONS[id];
+    if (L) for (const k of ["regle", "exemple", "piege"]) { const v0 = L[k]; Object.defineProperty(L, k, { configurable: true, enumerable: true, get: () => { const t = cur(id); return t && t.lesson && t.lesson[k] !== undefined ? t.lesson[k] : v0; } }); }
+  }
 })();

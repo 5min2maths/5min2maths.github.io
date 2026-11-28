@@ -1531,6 +1531,83 @@ const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXT
         { ctx: "paren-rel", guide: [GS("La parenthèse : " + M(x + " - " + b) + " = ?", x - b, M(x - b) + "."), GS("Multiplie par " + a + " :", v, M(v) + ".")],
           traps: [TRAP(a * x - b, "Le facteur " + a + " multiplie toute la parenthèse."), TRAP(-v, "Un positif fois un négatif donne un négatif.")] }); },
   );
+  // ======================= 28.11 : nickel 10e, chapitre 7 Calcul littéral (archive/contenu_nickel10_ch7_28-11.md) =======================
+  // Formes réservées à la 10e (q.co = [10]) là où la liste de contrôle « nickel » (chantier_11e.md) relevait un manque :
+  // litelab 2 (« le nombre entier qui suit n » trivial, écarté par HORS_CO), valnum 2 (trapèze à entiers positifs écarté),
+  // reduire 2 (coefficients décimaux, MER FA170 « 1,5x + 4(x − 1) »), distrib 3 (décimaux, deux lettres) ; deux défis.
+  const dx = (c, v = "x") => (c === 1 ? v : c === -1 ? "-" + v : dec(c) + v); /* coefficient décimal devant une lettre (TeX) */
+  const dl = (a, b, v = "x") => dx(a, v) + (b < 0 ? " - " + dec(-b) : b > 0 ? " + " + dec(b) : ""); /* ax + b, décimaux (TeX) */
+  const pl = (a, b, v = "x") => a + "*" + v + (b < 0 ? "-" + -b : "+" + b); /* ax + b pour le correcteur */
+  // --- litelab, niveau 2 ---
+  VA("litelab", 2, [10],
+    () => { const p = R.pick([10, 20, 25, 30, 40]), L = R.pick([6.5, 8, 9.5, 12]), k = r6(1 - p / 100), e = pl(k, L);
+      return QXt("Un article coûte " + M("x") + " CHF. En solde, son prix baisse de " + p + " %, puis on paie " + M(chf(L)) + " CHF de livraison. Écris le prix total à payer en fonction de " + M("x") + ", sous forme réduite.", e,
+        "Payer " + (100 - p) + " % du prix, c'est le multiplier par " + M(dec(k)) + " ; puis on ajoute la livraison : " + M(dl(k, L)) + " (en CHF).",
+        { form: "reduced", ctx: "solde", guide: [GS("Après une baisse de " + p + " %, le prix est multiplié par… ?", k, M("100\\,\\% - " + p + "\\,\\% = " + (100 - p) + "\\,\\%") + ", soit " + M(dec(k)) + "."), GE("Écris le prix soldé, puis ajoute la livraison :", e, M(dl(k, L)) + ".")],
+          traps: [{ e: "x-" + p + "+" + L, m: "Une baisse de " + p + " % n'enlève pas " + p + " CHF : on paie " + (100 - p) + " % du prix, " + M(dec(k) + "x") + "." }, { e: pl(r6(p / 100), L), m: "Ça, c'est le montant de la baisse ; on paie ce qui reste, " + M(dec(k) + "x") + "." }] }); },
+    () => { const imp = R.rand() < 0.5, c = imp ? 9 : 6, e = "6*n+" + c, t = imp ? "impair" : "pair", s0 = imp ? "2n + 1" : "2n";
+      return QXt("Avec " + M("n") + " un nombre entier, " + M(s0) + " est un nombre " + t + ". Écris la somme de ce nombre " + t + " et des deux nombres " + t + "s qui le suivent, sous forme réduite.", e,
+        M(imp ? "(2n + 1) + (2n + 3) + (2n + 5) = 6n + 9" : "2n + (2n + 2) + (2n + 4) = 6n + 6") + " : deux nombres " + t + "s qui se suivent diffèrent de 2.",
+        { form: "reduced", ctx: "pairs", guide: [GE("Le nombre " + t + " qui suit " + M(s0) + " ?", imp ? "2*n+3" : "2*n+2", M(imp ? "2n + 3" : "2n + 2") + " (on ajoute 2)."), GE("Et le suivant ?", imp ? "2*n+5" : "2*n+4", M(imp ? "2n + 5" : "2n + 4") + "."), GE("La somme des trois, réduite :", e, M("6n + " + c) + ".")],
+          traps: [{ e: imp ? "6*n+6" : "6*n+3", m: "Deux nombres " + t + "s qui se suivent diffèrent de 2, pas de 1 : " + M(s0) + ", " + M(imp ? "2n + 3" : "2n + 2") + ", " + M(imp ? "2n + 5" : "2n + 4") + "." }, { e: imp ? "2*n+5" : "2*n+4", m: "On demande la somme des trois nombres, pas le troisième." }] }); },
+    () => { const [a, b] = R.pick([["Mia", "son frère"], ["Noé", "sa sœur"], ["Lina", "son cousin"]]), d = R.int(2, 5), k = R.int(4, 6), n = R.int(2, 10), C = 3 * n - d, sn = (c) => (c < 0 ? "-" + -c : "+" + c), e = (k + 2) + "*x" + sn(C);
+      return QXt(a + " a " + M("x") + " ans. " + b.charAt(0).toUpperCase() + b.slice(1) + " a " + d + " ans de moins, et leur grand-mère a " + k + " fois l'âge de " + a + ". Écris la somme de leurs trois âges <b>dans " + n + " ans</b>, sous forme réduite.", e,
+        "Dans " + n + " ans : " + M("x + " + n) + ", " + M("x - " + d + " + " + n) + " et " + M(k + "x + " + n) + " ; somme " + M((k + 2) + "x " + (C < 0 ? "- " + -C : "+ " + C)) + ".",
+        { form: "reduced", ctx: "ages-futur", guide: [GE("Âge de " + a + " dans " + n + " ans ?", "x+" + n, M("x + " + n) + "."), GE("Âge de " + b + " dans " + n + " ans ?", "x" + sn(n - d), M("x - " + d + " + " + n + " = x " + (n - d < 0 ? "- " + (d - n) : "+ " + (n - d))) + "."), GE("Âge de la grand-mère dans " + n + " ans ?", k + "*x+" + n, M(k + "x + " + n) + " (elle a " + k + "x ans aujourd'hui)."), GE("Somme réduite :", e, M((k + 2) + "x " + (C < 0 ? "- " + -C : "+ " + C)) + ".")],
+          traps: [{ e: (k + 2) + "*x" + sn(n - d), m: "Dans " + n + " ans, chacun des trois a " + n + " ans de plus : ajoute " + n + " trois fois." }, { e: (k + 2) + "*x-" + d, m: "Il faut ajouter les " + n + " ans pour chacun." }, { e: (k + 2) + "*x+" + (3 * n + d), m: a + " est plus âgé" + (a === "Noé" ? "" : "e") + " : " + b + " a " + M("x - " + d) + " ans." }] }); },
+  );
+  // --- valnum, niveau 2 (relatifs ; remplacent le trapèze à entiers positifs, écarté en 10e) ---
+  VA("valnum", 2, [10],
+    () => { const a = R.int(2, 6), b = R.int(2, 7), c = R.int(1, 9), v = -a * a - a * b - c;
+      return QV("Calcule " + M("-x^2 + " + b + "x - " + c) + " pour " + M("x = -" + a) + ".", v,
+        M("-(-" + a + ")^2 + " + b + " \\cdot (-" + a + ") - " + c + " = -" + a * a + " - " + a * b + " - " + c + " = " + v) + ".",
+        { ctx: "moins-carre", guide: [GS(M("x^2") + " pour " + M("x = -" + a) + " ?", a * a, M("(-" + a + ")^2 = " + a * a) + "."), GS("Donc " + M("-x^2") + " = ?", -a * a, M("-" + a * a) + " (le signe − est devant le carré)."), GS(M(b + "x") + " = ?", -a * b, M(b + " \\cdot (-" + a + ") = -" + a * b) + "."), GS("Total ?", v, M(v) + ".")],
+          traps: [TRAP(a * a - a * b - c, M("-x^2 = -(x^2)") + " : pour " + M("x = -" + a) + ", " + M("x^2 = " + a * a) + " et " + M("-x^2 = -" + a * a) + "."), TRAP(-a * a + a * b - c, M(b + " \\cdot (-" + a + ")") + " est négatif : " + M("-" + a * b) + ".")] }); },
+    () => { let a, b, v; do { a = R.nz(-9, 9); b = R.nz(-6, 6); v = a + b !== 0 ? (a - 2 * b) / (a + b) : 0.5; } while (!Number.isInteger(v) || Math.abs(v) < 2 || (a > 0 && b > 0));
+      const w = (a + 2 * b) / (a + b), pa = (t) => (t < 0 ? "(" + t + ")" : t);
+      return QV("Calcule " + M("\\frac{a - 2b}{a + b}") + " pour " + M("a = " + a) + " et " + M("b = " + b) + ".", v,
+        M("\\frac{" + a + " - 2 \\cdot " + pa(b) + "}{" + a + " + " + pa(b) + "} = \\frac{" + (a - 2 * b) + "}{" + (a + b) + "} = " + v) + ".",
+        { ctx: "quot-deux", guide: [GS("Numérateur " + M("a - 2b") + " ?", a - 2 * b, M(a + " - 2 \\cdot " + pa(b) + " = " + (a - 2 * b)) + "."), GS("Dénominateur " + M("a + b") + " ?", a + b, M(a + " + " + pa(b) + " = " + (a + b)) + "."), GS("Quotient ?", v, M((a - 2 * b) + " \\div " + pa(a + b) + " = " + v) + ".")],
+          traps: Number.isFinite(w) && w !== v ? [TRAP(w, "Attention au signe : " + M("2b = 2 \\cdot " + pa(b) + " = " + 2 * b) + ", et " + M("a - " + pa(2 * b)) + ".")] : [] }); },
+  );
+  // --- reduire, niveau 2 (coefficients décimaux) ---
+  VA("reduire", 2, [10],
+    () => { let p, q, r, c1, c2, A, B; do { p = d1(0.5, 4.5); q = d1(0.2, 2.5); r = d1(1.1, 5.5); c1 = R.int(2, 9); c2 = d1(0.5, 6.5); A = r6(p + q - r); B = r6(-c1 + c2); } while (Math.abs(A) < 0.15 || Math.abs(Math.abs(A) - 1) < 1e-9 || Math.abs(B) < 0.1 || Number.isInteger(p) || Number.isInteger(r));
+      const e = pl(A, B);
+      return QXt("Réduis : " + M(dx(p) + " - " + c1 + " + " + dx(q) + " + " + dec(c2) + " - " + dx(r)) + ".", e,
+        "Termes en " + M("x") + " : " + M(dec(p) + " + " + dec(q) + " - " + dec(r) + " = " + dec(A)) + " ; nombres : " + M("-" + c1 + " + " + dec(c2) + " = " + dec(B)) + ". Résultat : " + M(dl(A, B)) + ".",
+        { form: "reduced", ctx: "decimaux", guide: [GS("Coefficient de " + M("x") + " : " + M(dec(p) + " + " + dec(q) + " - " + dec(r)) + " = ?", A, M(dec(A)) + "."), GS("Nombres : " + M("-" + c1 + " + " + dec(c2)) + " = ?", B, M(dec(B)) + "."), GE("Expression réduite :", e, M(dl(A, B)) + ".")],
+          traps: [{ e: pl(r6(p + q + r), B), m: "Le terme " + M("-" + dx(r)) + " est soustrait : son coefficient est " + M("-" + dec(r)) + "." }, { e: pl(A, r6(c1 + c2)), m: "Le nombre " + c1 + " est précédé d'un « − »." }] }); },
+  );
+  // --- distrib, niveau 3 (décimaux ; deux lettres) — VA niveau 3 = niveaux 3 et 4 (le 4 tire les défis) ---
+  VA("distrib", 3, [10],
+    () => { let p, q, a, b, c, d, A, B; do { p = R.pick([0.5, 1.5, 2.5]); q = R.pick([0.5, 1.5, 2.5]); a = R.int(2, 6); b = R.int(1, 8); c = R.int(2, 6); d = R.int(1, 8); A = r6(p * a - q * c); B = r6(-p * b + q * d); } while (Math.abs(A) < 0.1 || Math.abs(B) < 0.1 || Math.abs(Math.abs(A) - 1) < 1e-9 || (p === q && a === c) || r6(-b + d) === B);
+      const e = pl(A, B), t = dec(p) + "(" + a + "x - " + b + ") - " + dec(q) + "(" + c + "x - " + d + ")";
+      return QXt("Développe et réduis : " + M(t) + ".", e,
+        M(dx(r6(p * a)) + " - " + dec(r6(p * b)) + " - " + dx(r6(q * c)) + " + " + dec(r6(q * d)) + " = " + dl(A, B)) + ".",
+        { form: "reduced", ctx: "dec-deux", guide: [GE("Développe " + M(dec(p) + "(" + a + "x - " + b + ")") + " :", pl(r6(p * a), r6(-p * b)), M(dl(r6(p * a), r6(-p * b))) + "."), GE("Développe " + M("-" + dec(q) + "(" + c + "x - " + d + ")") + " (attention au signe −) :", pl(r6(-q * c), r6(q * d)), M(dl(r6(-q * c), r6(q * d))) + "."), GE("Réduis le tout :", e, M(dl(A, B)) + ".")],
+          traps: [{ e: pl(A, r6(-p * b - q * d)), m: M("-" + dec(q) + " \\cdot (-" + d + ") = +" + dec(r6(q * d))) + " : moins par moins donne plus." }, { e: pl(r6(p * a - q * c), r6(-b + d)), m: "Le facteur multiplie aussi le nombre de la parenthèse." }] }); },
+    () => { const k1 = R.int(2, 4), m = R.int(2, 5), k2 = R.int(2, 4), n = R.int(2, 5), A = k1 * m, Bc = k1 + k2, C = k2 * n, e = A + "*a^2-" + Bc + "*a*b+" + C + "*b^2";
+      return QXt("Développe et réduis : " + M(k1 + "a(" + m + "a - b) - " + k2 + "b(a - " + n + "b)") + ".", e,
+        M(A + "a^2 - " + k1 + "ab - " + k2 + "ab + " + C + "b^2 = " + A + "a^2 - " + Bc + "ab + " + C + "b^2") + " (" + M("ba = ab") + " : les deux termes en " + M("ab") + " sont semblables).",
+        { form: "reduced", ctx: "deuxlettres", guide: [GE("Développe " + M(k1 + "a(" + m + "a - b)") + " :", A + "*a^2-" + k1 + "*a*b", M(A + "a^2 - " + k1 + "ab") + "."), GE("Développe " + M("-" + k2 + "b(a - " + n + "b)") + " :", "-" + k2 + "*a*b+" + C + "*b^2", M("-" + k2 + "ab + " + C + "b^2") + "."), GE("Réduis (les termes en " + M("ab") + " sont semblables) :", e, M(A + "a^2 - " + Bc + "ab + " + C + "b^2") + ".")],
+          traps: [{ e: A + "*a^2-" + Bc + "*a*b-" + C + "*b^2", m: M("-" + k2 + "b \\cdot (-" + n + "b) = +" + C + "b^2") + " : moins par moins donne plus." }].concat(k1 !== k2 ? [{ e: A + "*a^2" + (k2 - k1 < 0 ? "-" + (k1 - k2) : "+" + (k2 - k1)) + "*a*b+" + C + "*b^2", m: "Le « − » devant " + M(k2 + "b") + " porte sur toute la parenthèse : " + M("-" + k2 + "b \\cdot a = -" + k2 + "ab") + "." }] : [], [{ e: A + "*a-" + Bc + "*a*b+" + C + "*b", m: M("a \\cdot a = a^2") + ", pas " + M("a") + "." }]) }); },
+  );
+  // --- défis (niveau 4) de 10e : programme de calcul ; allée autour d'un jardin (simple distributivité) ---
+  const EXS = (expr) => ({ kind: "expr", expr, form: "reduced" });
+  PX("litelab", [10], () => { let m, M2, p, a, x0; do { m = R.pick([3, 4, 5]); M2 = R.pick([2, 3]); p = R.pick([2, 3]); a = R.int(2, 7); x0 = R.int(3, 12); } while (M2 * m - p < 2 || -4 * p + M2 * a === 0 || Math.abs(-4 * p + M2 * a) === 1);
+    const s = M2 * m - p, q = M2 * a, r = p * x0 + q, f = (t) => p * t + q;
+    return { q: "Programme de calcul : « Choisis un nombre. Multiplie-le par " + m + ". Ajoute " + a + ". Multiplie le résultat par " + M2 + ". Retranche " + s + " fois le nombre choisi. »", ctx: "programme",
+      parts: [{ label: "a) Résultat quand on choisit 5", spec: { kind: "value", value: f(5) } }, { label: "b) Résultat quand on choisit " + M("-4"), spec: { kind: "value", value: f(-4) } },
+        { label: "c) Avec " + M("x") + " le nombre choisi, le résultat sous forme réduite", spec: EXS(p + "*x+" + q) }, { label: "d) Quel nombre faut-il choisir pour obtenir " + M(r) + " ?", spec: { kind: "value", value: x0 } }],
+      hints: ["a) Applique les étapes dans l'ordre : 5 · " + m + ", puis + " + a + ", puis · " + M2 + ", puis − " + s + " · 5.", "c) Écris chaque étape avec x : " + m + "x, puis " + m + "x + " + a + ", puis " + M2 + "(" + m + "x + " + a + "), puis retire " + s + "x. Développe et réduis.", "d) Le résultat vaut " + p + "x + " + q + " : quel x donne " + r + " ?"],
+      sol: M("x \\to " + m + "x \\to " + m + "x + " + a + " \\to " + M2 + "(" + m + "x + " + a + ") = " + M2 * m + "x + " + q + " \\to " + M2 * m + "x + " + q + " - " + s + "x = " + p + "x + " + q) + ". a) " + M(p + " \\cdot 5 + " + q + " = " + f(5)) + ". b) " + M(p + " \\cdot (-4) + " + q + " = " + f(-4)) + ". c) " + M(p + "x + " + q) + ". d) " + M(p + "x + " + q + " = " + r) + ", " + M(p + "x = " + (r - q)) + ", " + M("x = " + x0) + "." }; });
+  PX("distrib", [10], () => { const L = R.pick([8, 10, 12, 15]), w = R.pick([1, 2]), X0 = L + R.pick([4, 6, 10]), x0 = R.int(L + 2, 30), Lt = L + 2 * w, cA = 2 * w, kA = 2 * w * Lt, A0 = cA * x0 + kA;
+    return { q: "Un jardin rectangulaire mesure " + M("x") + " m de long et " + M(L) + " m de large. On l'entoure d'une allée de " + M(w) + " m de large tout autour (jardin et allée forment un grand rectangle).", ctx: "allee",
+      parts: [{ label: "a) Aire du grand rectangle (jardin et allée), développée (en m²)", spec: EXS(Lt + "*x+" + Lt * 2 * w) }, { label: "b) Aire de l'allée seule, réduite (en m²)", spec: EXS(cA + "*x+" + kA) },
+        { label: "c) Aire de l'allée pour un jardin de " + M(X0) + " m de long (m²)", spec: { kind: "value", value: cA * X0 + kA } }, { label: "d) Longueur du jardin si l'allée couvre " + M(A0) + " m² (m)", spec: { kind: "value", value: x0 } }],
+      hints: ["a) Le grand rectangle mesure " + M("(x + " + 2 * w + ")") + " m sur " + M(Lt) + " m : son aire est " + M(Lt + "(x + " + 2 * w + ")") + ". Développe (simple distributivité).", "b) Aire de l'allée = aire du grand rectangle − aire du jardin (" + M(L + "x") + ").", "d) Résous " + M(cA + "x + " + kA + " = " + A0) + "."],
+      sol: "a) " + M(Lt + "(x + " + 2 * w + ") = " + Lt + "x + " + Lt * 2 * w) + ". b) " + M(Lt + "x + " + Lt * 2 * w + " - " + L + "x = " + cA + "x + " + kA) + ". c) " + M(cA + " \\cdot " + X0 + " + " + kA + " = " + (cA * X0 + kA)) + " m². d) " + M(cA + "x + " + kA + " = " + A0) + ", " + M(cA + "x = " + (A0 - kA)) + ", " + M("x = " + x0) + " m." }; });
 })();
 
 // ======================= 27.11 : variété (agent variete, tools/archive/variete_27-11.md) =======================
