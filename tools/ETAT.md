@@ -49,6 +49,9 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
    trinômes disparaissent. Le 8 est une décision de l'enseignant (21.11) : le GARDER. Piste retenue : 8 lignes par test rapide, mais choisies en
    rotation (jamais testées, puis ✗ / ~, puis les plus anciennes) → tout le chapitre en 2–3 tests ; écran final « N
    compétences du chapitre pas encore testées : refais un test rapide avant le jour J ».
+   **+ « Test complet du chapitre »** (validé 28.11) dans Jour J : exhaustif (une question par compétence du chapitre),
+   annoncé « ≈ 15 min », conseillé une fois à J−3 / J−2, interruptible et repris sans perte, grille complète ✓ ~ ✗ et
+   liste « à revoir » à la fin.
 2. **Couverture du Jour J = plan d'études** (règle générale) : pour chaque chapitre, le parcours Jour J (séances de
    préparation, test rapide, sujet, grille « Je sais… ») touche CHAQUE objectif du plan d'études ; contrôle automatique
    objectifs ↔ formes servies ; 11e d'abord (tests 7 et 8 : Calcul littéral 1 et 2), puis 1re Collège.
