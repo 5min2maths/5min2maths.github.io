@@ -32,9 +32,10 @@ Claude 6 h 40, gardien Chromium toutes les 5 min (tableau dans la commande /entr
   notion × niveau × figure retirés (128 sites) — balances, objets alignés, barres de %, trajets, « ×k », bâtons et urnes
   qui répètent l'énoncé, paraboles / hyperboles / tangentes / sinus qui donnaient la réponse, mise en équation
   (probeq2), cercle trigo sur des conversions ; fonctions `balance`, `items`, `blocks`, `sciScale`, `road`, `barChart`
-  supprimées. 364 gardés (géométrie, graphiques à lire). À décider (11 points du rapport) : droite graduée sur
-  « Calcule (−1) + 7 », carré « aire → côté », faces du pavé, arbres de choix, polyreg 2, cercle trigo des valeurs
-  exactes, fref x² ≤ 9, tableau de signes, repère de sys3, plongeuse, figures des leçons.
+  supprimées. Décisions de l'enseignant sur les 11 cas (28.11, appliquées) : retirés aussi la droite graduée de
+  « Calcule (−1) + 7 », le pavé de solides 1 (compter les faces), les arbres de denombr 1 (énoncés sans renvoi à
+  l'arbre ; pas à pas réécrit), polyreg 2 (`FIG.polyTri` supprimé), fref « x² ≤ 9 » ; gardés : carré aire → côté,
+  cercle trigo des valeurs exactes, tableau de signes, repère de sys3, plongeuse, figures des leçons.
 
 ## À faire
 

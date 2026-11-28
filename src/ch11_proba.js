@@ -35,7 +35,7 @@
           a = R.int(2, 5), b = R.int(3, 6), c = R.int(2, 4), n = a * b * c;
         return Qv(x[0] + " " + M(a) + " " + x[1] + ", " + M(b) + " " + x[2] + " et " + M(c) + " " + x[3] + ". Combien de " + x[4] + " peut-on composer ?", n,
           "Arbre : " + M(a + " \\cdot " + b + " \\cdot " + c + " = " + n) + ".",
-          { ctx: x[5], fig: tree(a, b, x[1], x[2]), guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
+          { ctx: x[5], guide: [GS("Nombre de choix pour les deux premiers éléments (" + x[1] + " et " + x[2] + ") ?", a * b, M(a + " \\cdot " + b + " = " + a * b) + "."), GS("Avec les " + x[3] + " ?", n, M(a * b + " \\cdot " + c + " = " + n) + ".")],
             traps: [TR(a + b + c, "On ne les additionne pas : chaque choix se combine avec tous les autres (arbre), on multiplie."), TR(a * b, "N'oublie pas le 3e choix (" + x[3] + ").")] }); },
       () => { const n = pk([4, 5, 6, 10]), k = pk([3, 4]), v = n ** k, x = pk([["Un cadenas a " + M(k) + " molettes portant chacune les chiffres de " + M(1) + " à " + M(n), "cadenas"], ["Un code secret est formé de " + M(k) + " symboles, chacun choisi parmi " + M(n) + " (on peut répéter)", "code"]]);
         if (n === 10 && k === 4) return null;
@@ -44,7 +44,7 @@
             traps: [TR(n * k, "On ne multiplie pas par le nombre de molettes : chaque molette multiplie les possibilités par " + n + "."), TR(k ** n, "C'est " + n + "^" + k + " : " + k + " positions, " + n + " choix chacune.")] }); },
       () => { const a = R.int(2, 4), b = R.int(3, 5), x = pk([["Pour aller de A à B, il y a " + M(a) + " chemins ; de B à C, il y a " + M(b) + " chemins. Combien de trajets différents de A à C passant par B ?", "chemins", "A → B", "B → C", "trajet"], ["Une glace : on choisit un cornet parmi " + M(a) + " et un parfum parmi " + M(b) + ". Combien de glaces différentes ?", "glaces", "cornet", "parfum", "glace"]]);
         return Qv(x[0], a * b, M(a + " \\cdot " + b + " = " + a * b) + " " + x[1] + ".",
-          { ctx: x[4], fig: tree(a, b, x[2], x[3]), guide: [GS("Compte les branches au bout de l'arbre : " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
+          { ctx: x[4], guide: [GS("Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie. " + M(a + " \\cdot " + b) + " = ?", a * b, M(a * b) + ".")], traps: [TR(a + b, "Chaque choix de la 1re étape se combine avec chaque choix de la 2e : on multiplie.")] }); },
     ],
     2: [ // sans répétition
       () => { const n = R.int(6, 12), v = n * (n - 1) * (n - 2);

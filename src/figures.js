@@ -175,17 +175,6 @@ const FIG = (() => {
     }
     return svg(300, 190, g + t(x + s / 2, y + s + 20, la) + t(x + s + dx / 2 + 8, y + s + dy / 2 + 8, la, "f-txt", "start") + t(x - 8, y + s / 2, la, "f-txt", "end"), withPyr ? "pyramide inscrite dans un cube" : "cube");
   }
-  /* 28.11 (commentaire de l'auteur sur polyreg 2 : « il faudrait une figure ici ») : polygone à n côtés (pas forcément
-     régulier) découpé en n − 2 triangles par les diagonales issues d'un sommet. */
-  function polyTri(n) {
-    const cx = 150, cy = 92, pts = Array.from({ length: n }, (_, i) => { const a = (2 * Math.PI * i) / n - Math.PI / 2, r = 74 * (1 + 0.1 * Math.sin(3 * i + 1)); return [+(cx + r * Math.cos(a)).toFixed(1), +(cy + r * Math.sin(a) * 0.95).toFixed(1)]; });
-    let g = "";
-    for (let i = 1; i < n - 1; i++) g += '<polygon points="' + [pts[0], pts[i], pts[i + 1]].map((p) => p.join(",")).join(" ") + '" fill="var(--margin)" fill-opacity="' + (i % 2 ? 0.08 : 0.25) + '" stroke="none"/>';
-    g += P(pts, "f-shape");
-    for (let i = 2; i < n - 1; i++) g += L(pts[0][0], pts[0][1], pts[i][0], pts[i][1], "f-line", 'style="stroke:var(--margin);stroke-width:1.6" stroke-dasharray="5 4"');
-    g += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="var(--margin)"/>';
-    return svg(300, 185, g, "polygone à " + n + " côtés découpé en triangles depuis un sommet");
-  }
   /* 28.11 (audit des figures) : o.apo = apothème (hauteur de la face avant, du sommet au milieu de l'arête de base),
      o.edge = arête latérale (avant droite) ; lh vide ou absent : pas de hauteur dessinée. */
   function pyramid(lc, lh, o = {}) {
@@ -485,5 +474,5 @@ const FIG = (() => {
     return svg(300, 180, g, "boule coupée par un plan");
   }
 
-  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, polyTri, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, scaling, lineGraph, fractionOf, prioSteps, areaSquare, tiles, fmt };
+  return { num, triPts, solveTri, rightMark, arcMark, sideLab, unitLine, cylinder, unitCircle, anyTriangle, parabola, trigTriangle, circleAngles, numberLine, fractionBars, percentBar, rightTriangle, thales, rectFig, triangleFig, trapezoid, disk, square, box, cube, pyramid, cone, hexTri, squareDisk, capsule, iceCone, cubeHole, halfBall, ballCut, scaling, lineGraph, fractionOf, prioSteps, areaSquare, tiles, fmt };
 })();

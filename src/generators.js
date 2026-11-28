@@ -150,7 +150,7 @@ const GEN = {
     if (d === 1) {
       const a = R.nz(-12, 12), b = R.nz(-12, 12);
       const same = a * b > 0, big = Math.abs(a) >= Math.abs(b) ? a : b, A = Math.abs(a), B = Math.abs(b);
-      return { fig: FIG.numberLine(a, [], { span: [a + b] }), q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
+      return { q: "Calcule : " + M(par(a) + " + " + par(b)), spec: { kind: "value", value: a + b }, sol: M(par(a) + " + " + par(b) + " = " + (a + b)),
         guide: [same ? GS("Même signe : on additionne les distances à zéro. " + M(A + " + " + B) + " = ?", A + B, M(A + " + " + B + " = " + (A + B)) + ".")
           : GS("Signes contraires : on soustrait les distances à zéro (la grande moins la petite). " + M(Math.max(A, B) + " - " + Math.min(A, B)) + " = ?", Math.abs(A - B), M(Math.max(A, B) + " - " + Math.min(A, B) + " = " + Math.abs(A - B)) + "."),
           GS(same ? "Le résultat garde le signe commun : résultat ?" : "Le résultat prend le signe du nombre le plus loin de zéro (" + M(par(big)) + ") : résultat ?", a + b, M(par(a) + " + " + par(b) + " = " + (a + b)) + ".")] };

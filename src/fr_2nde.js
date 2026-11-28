@@ -366,7 +366,7 @@
     2: [
       () => { const r = pk([2, 3, 4, 5, 6, 7, 9, 10]), op = pk(["<=", "<"]), k = r * r, ivs = [[-r, op === "<=", r, op === "<="]];
         return QS("Résous " + M("x^2 " + OPT[op] + " " + nf(k)) + "." + SETQ, ivs, "La parabole " + M("y = x^2") + " est sous la droite " + M("y = " + nf(k)) + " entre ses points d'intersection " + M("x = -" + r) + " et " + M("x = " + r) + " : " + M("S = " + IV(ivs)) + ".",
-          { ctx: "carre-inf", fig: FIG.plot([{ f: (x) => (x * x) / (k / 6) }], [], { xr: [-r * 1.6, r * 1.6].map((v) => Math.round(v)), yr: [-1, 8], hlines: [6], label: "parabole et droite horizontale", ticks: false }), guide: [GSet("Solutions de " + M("x^2 = " + nf(k)) + " ?", [-r, r], M("-" + r) + " et " + M(r) + "."), GSS("Ensemble des solutions de l'inéquation ?", ivs, M(IV(ivs)) + ".")],
+          { ctx: "carre-inf", guide: [GSet("Solutions de " + M("x^2 = " + nf(k)) + " ?", [-r, r], M("-" + r) + " et " + M(r) + "."), GSS("Ensemble des solutions de l'inéquation ?", ivs, M(IV(ivs)) + ".")],
             traps: [TS([[-Infinity, false, r, op === "<="]], "Les nombres très négatifs ont un grand carré : (−" + (r + 10) + ")² > " + k + ". Il y a une borne de chaque côté."), TS([[-Infinity, false, -r, op === "<="], [r, op === "<=", Infinity, false]], "C'est l'ensemble des x dont le carré est PLUS GRAND.")] }); },
       () => { const r = pk([2, 3, 4, 5, 6, 8, 10]), op = pk([">", ">="]), k = r * r, I = op === ">=", ivs = [[-Infinity, false, -r, I], [r, I, Infinity, false]];
         return QS("Résous " + M("x^2 " + OPT[op] + " " + nf(k)) + "." + SETQ, ivs, "Le carré dépasse " + M(nf(k)) + " quand " + M("x") + " est loin de 0 : à gauche de " + M("-" + r) + " ou à droite de " + M(r) + ". " + M("S = " + IV(ivs)) + ".",

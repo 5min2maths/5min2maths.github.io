@@ -11,7 +11,7 @@ Sonde non commitée `tests/_elag_fig.html#60` : chaque notion (toutes classes et
 (10'165 tirages avec figure sur 60 graines) ; après : 364 (8'707). Lecture des sources pour chaque type douteux
 (`tests/_elag_code.html#code1,code2` : énoncé + étiquettes de la figure).
 
-## Retiré (57 couples notion × niveau × figure ; 128 sites `fig:` dans 17 fichiers)
+## Retiré (premier lot : 57 couples notion × niveau × figure ; 128 sites `fig:` dans 17 fichiers ; deuxième lot ci-dessous)
 
 | Type | Notions (exemple de code) | Raison |
 |---|---|---|
@@ -46,26 +46,22 @@ renvoie au graphique (« La courbe représente… », « Lis… », « On a trac
 roues de loterie, arbres pondérés porteurs des données, droite graduée quand l'énoncé parle de la droite graduée
 (reladd, relrep, p8droite, ineq1, symax, médiatrice), situations spatiales (horloge, façade, cadre, pavage, plongeuse).
 
-## À décider (gardées pour l'instant)
+## Décisions de l'enseignant sur les 11 cas « à décider » (28.11, appliquées)
 
-1. Droite graduée sur « Calcule : (−1) + 7 » (rel 1, ch10_no « même signe / signes contraires », ch11_no2 addition) :
-   exception « relatifs » ; la droite ne montre que le point de départ.
-2. Carré « aire 169 cm², côté = ? » (rac 1 jardin / carrelage / terrain ; exactes 1 « cote-aire », forme obligatoire
-   de `tests/figs.html` validée le matin) : figure qui redit l'énoncé, mais objet géométrique.
-3. solides 1 « Combien de faces un pavé droit possède-t-il ? » : le dessin permet de compter (donne presque la réponse).
-4. Arbres de choix (denombr 1–2, `tree` de ch11_proba : « pantalons, t-shirts… ») : méthode du chapitre ; le pas à pas
-   dit « compte les branches au bout de l'arbre ».
-5. polyreg 2 (découpage en triangles) et racprop 4 (cube d, D) : demandés par l'enseignant le 28.11, mais le découpage
-   fait le raisonnement.
-6. Cercle trigonométrique pour les valeurs exactes (trigcercle 2 « sin 60° », ch_mp2 « -exact », coordonnées) et
-   angles associés (`GF.assoc`, gen3 sin(180° − α)) : outil du chapitre, mais il montre la méthode.
-7. fref 2 « Résous x² ≤ 9 » (France 2nde) : parabole + droite y = 9 ; résolution graphique attendue au programme,
-   mais l'énoncé ne renvoie pas au graphique.
-8. tabsignes 2–3 : tableau de signes à compléter (cadre de la méthode).
-9. sys3 3 / parabole par trois points ou sommet + point (gen2, ch1c_sys) : repère gradué qui redit les points.
-10. Plongeuse (generators, défi f2) : esquisse de la trajectoire, situation à se représenter.
-11. Leçons (Retiens, `LESSON_FIGS`) : prioSteps (priorités), fractionBars, percentBar, scaling, numberLine — explicatives,
-    gardées.
+Retirés (deuxième lot) :
+1. Droite graduée sur « Calcule : (−1) + 7 » (rel 1 : generators, gen3, ch10_no « même signe / signes contraires »,
+   ch11_no2 « addition ») — calcul pur ; la droite reste dans la leçon et dans les énoncés qui parlent de la droite
+   graduée (reladd, relrep, ch10_no « droite »).
+3. solides 1 « Combien de faces / arêtes / sommets un pavé droit possède-t-il ? » (pavé) — le dessin fait compter.
+4. Arbres de choix de denombr 1 (menus, tenues, pizzas ; chemins, glaces) : aucun énoncé ne renvoie à l'arbre → retirés ;
+   pas à pas « Compte les branches au bout de l'arbre » remplacé par « Chaque choix de la 1re étape se combine avec
+   chaque choix de la 2e : on multiplie ».
+5. polyreg 2 (polygone découpé en triangles) — `FIG.polyTri` supprimé (plus aucune référence). Le cube de racprop 4
+   (d, D) est gardé.
+7. fref 2 « Résous x² ≤ 9 » (fr_2nde, ctx carre-inf) — l'énoncé ne renvoie pas au graphique.
+
+Gardés : 2. carré « aire → côté » (rac 1, exactes 1) ; 6. cercle trigo des valeurs exactes et angles associés ;
+8. tableau de signes ; 9. repère gradué de sys3 ; 10. plongeuse ; 11. figures des leçons.
 
 ## Captures et tests
 
