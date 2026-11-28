@@ -3314,7 +3314,7 @@ else if (state && state.profile && typeof window.packsOk === "function" && !wind
 else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenHome(); else if (state && state.placement) { toast("On reprend ton positionnement là où tu l'avais laissé."); startPlacement(); } else { state = null; screenWelcome(); } }
 /* 28.11 (commentaires de l'auteur : « au lancement, l'icône de pépite en gros, comme pour les grades, encerclée et pas dans un
    carré bleu, avec le slogan en dessous ») : écran d'ouverture, app installée seulement (lancement depuis
-   l'écran d'accueil du téléphone), 1,2 s au plus, un appui le ferme ; décoratif (aria-hidden), jamais pendant une séance. */
+   l'écran d'accueil du téléphone), 2 s, un appui le ferme ; décoratif (aria-hidden), jamais pendant une séance. */
 (() => {
   const standalone = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone;
   if (!standalone || typeof LOGO_NUGGET !== "string" || location.hash.length > 1) return;
@@ -3322,5 +3322,5 @@ else if (!showCode() && !restoreFromHash()) { if (state && state.placed) screenH
   d.innerHTML = `<div class="splash-ring">${LOGO_NUGGET.replace('viewBox="0 0 512 512"', 'viewBox="122 150 296 250"')}</div><div class="splash-name">${APP_NAME}</div><div class="splash-tag">${APP_TAGLINE_FUN}</div>`;
   document.body.appendChild(d);
   const bye = () => { d.classList.add("out"); setTimeout(() => d.remove(), 350); };
-  d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 700 : 1200);
+  d.onclick = bye; setTimeout(bye, matchMedia("(prefers-reduced-motion: reduce)").matches ? 1600 : 2000); /* 28.11 (enseignant) : assez longtemps pour lire le slogan */
 })();
