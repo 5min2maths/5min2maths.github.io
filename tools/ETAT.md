@@ -46,9 +46,9 @@ fusionné et validé ; dans la journée on fusionne et on teste sans pousser. Ex
    identités, factoriser, prouver).
    **Cause trouvée (28.11)** : grille « Je sais… » limitée à AT_MAX = 8 lignes (src/qcm.js, atRows) : avec tout un chapitre
    (8 notions), une seule ligne par notion, la compétence de base (« Factoriser par mise en évidence ») ; identités et
-   trinômes disparaissent. Piste recommandée : grille = TOUTES les compétences du chapitre ; test rapide court qui prend en
-   priorité les compétences jamais testées / ✗ / ~ (tout le chapitre en 2–3 passages) ; écran final « reste à tester
-   avant d'être prêt ». Alternative : test long (≈ 20 questions, ≈ 15 min) annoncé. À trancher avec l'enseignant.
+   trinômes disparaissent. Le 8 est une décision de l'enseignant (21.11) : le GARDER. Piste retenue : 8 lignes par test rapide, mais choisies en
+   rotation (jamais testées, puis ✗ / ~, puis les plus anciennes) → tout le chapitre en 2–3 tests ; écran final « N
+   compétences du chapitre pas encore testées : refais un test rapide avant le jour J ».
 2. **Couverture du Jour J = plan d'études** (règle générale) : pour chaque chapitre, le parcours Jour J (séances de
    préparation, test rapide, sujet, grille « Je sais… ») touche CHAQUE objectif du plan d'études ; contrôle automatique
    objectifs ↔ formes servies ; 11e d'abord (tests 7 et 8 : Calcul littéral 1 et 2), puis 1re Collège.
