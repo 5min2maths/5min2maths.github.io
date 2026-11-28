@@ -42,7 +42,7 @@ const COMPS = {
   aire2: ["Calculer l'aire d'un parallélogramme", "Calculer l'aire d'un losange", "Choisir la bonne hauteur"],
   aire3: ["Calculer une aire par décomposition", "Calculer une aire par décomposition", "Calculer une aire par différence"],
   volpave: ["Calculer le volume d'un pavé", "Calculer l'aire totale d'un cube ou d'un pavé", "Passer d'un volume à une contenance"],
-  solides: ["Décrire un cube ou un pavé", "Décrire un prisme droit", "Décrire un prisme droit"],
+  solides: ["Décrire un cube ou un pavé", "Décrire un prisme droit ou une pyramide", "Décrire un prisme droit ou une pyramide"] /* 28.11 : pyramide (10e) */,
   proptab: ["Trouver un coefficient de proportionnalité", "Trouver un coefficient de proportionnalité", "Compléter un tableau de proportionnalité"],
   change: ["Convertir des euros en francs", "Convertir des francs en euros", "Comparer des prix en deux monnaies"],
   agrand: ["Trouver le facteur d'agrandissement", "Agrandir ou réduire une longueur", "Agrandir ou réduire avec une fraction"],
