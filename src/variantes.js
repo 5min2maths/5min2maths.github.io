@@ -1608,6 +1608,134 @@ const PROBX = {}; /* défis (niveau 4) ajoutés, lus en plus de PROB et PROB_EXT
         { label: "c) Aire de l'allée pour un jardin de " + M(X0) + " m de long (m²)", spec: { kind: "value", value: cA * X0 + kA } }, { label: "d) Longueur du jardin si l'allée couvre " + M(A0) + " m² (m)", spec: { kind: "value", value: x0 } }],
       hints: ["a) Le grand rectangle mesure " + M("(x + " + 2 * w + ")") + " m sur " + M(Lt) + " m : son aire est " + M(Lt + "(x + " + 2 * w + ")") + ". Développe (simple distributivité).", "b) Aire de l'allée = aire du grand rectangle − aire du jardin (" + M(L + "x") + ").", "d) Résous " + M(cA + "x + " + kA + " = " + A0) + "."],
       sol: "a) " + M(Lt + "(x + " + 2 * w + ") = " + Lt + "x + " + Lt * 2 * w) + ". b) " + M(Lt + "x + " + Lt * 2 * w + " - " + L + "x = " + cA + "x + " + kA) + ". c) " + M(cA + " \\cdot " + X0 + " + " + kA + " = " + (cA * X0 + kA)) + " m². d) " + M(cA + "x + " + kA + " = " + A0) + ", " + M(cA + "x = " + (A0 - kA)) + ", " + M("x = " + x0) + " m." }; });
+  // ======================= 28.11 : nickel 10e, chapitre 9 Équations (archive/contenu_nickel10_ch9_28-11.md) =======================
+  // Formes réservées à la 10e (q.co = [10]), modelées sur le MER 10e (ch. 7 10FAC) et l'étalon E10-9-1 : « − » devant une
+  // parenthèse (FA198 j), équations impossibles et indéterminées (FA198 d, g ; FA199 e, h ; FA200 g, n), x² qui s'annulent
+  // par SIMPLE distributivité (FA198 i, FA226 h), décimaux et deux parenthèses (FA199 f), vérifier (FA191, FA192), têtes et
+  // pattes, billets (FA218, FA219), angles (FA208), âges (FA215), prix du billet (FA205), troupeau (FA216), partage (FA217).
+  // Rien de 11e : ni 2e degré à résoudre, ni double distributivité, ni formule à transformer.
+  const xb = (a, b) => cx(a, "x") + (b < 0 ? " - " + -b : b > 0 ? " + " + b : ""); /* ax + b, entiers (TeX) */
+  const xd = (a, b) => (a === 1 ? "x" : a === -1 ? "-x" : dec(a) + "x") + (b < 0 ? " - " + dec(-b) : b > 0 ? " + " + dec(b) : ""); /* décimaux */
+  const pa = (v) => (v < 0 ? "(" + v + ")" : String(v));
+  const ASKS = " Écris la solution, « aucune » s'il n'y en a pas, ou « tous » si tout nombre est solution.";
+  const QSet = (q, all, sol, o) => Object.assign({ q, spec: Object.assign({ kind: "set", values: [] }, all ? { all: true } : {}), sol }, o);
+  const ok = (v, s) => Number.isFinite(v) && Math.abs(v - s) > 1e-9;
+  const TR = (L) => L.filter((t, i) => ok(t.v, t.s) && L.findIndex((u) => Math.abs(u.v - t.v) < 1e-9) === i).map((t) => TRAP(t.v, t.m));
+  // --- eq1, niveau 2 ---
+  VA("eq1", 2, [10],
+    () => { let p, q, k, m, n, r, t, A, s; do { k = R.int(2, 4); m = R.int(1, 3); n = R.int(1, 5); r = R.int(1, 5); t = R.int(1, 9); p = R.int(1, 6); A = p - (k * m - r); s = R.pick([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6]); q = k * n - t - A * s; } while (Math.abs(A) < 2 || q === 0 || Math.abs(q) > 30);
+      const B = k * m - r, C = k * n - t;
+      return QV("Résous : " + M(xb(p, q) + " = " + k + "(" + xb(m, n) + ") - (" + xb(r, t) + ")") + ".", s,
+        "On développe le membre de droite : " + M(xb(k * m, k * n) + " - " + xb(r, t)) + " (le « − » change les deux signes) " + M("= " + xb(B, C)) + ". Puis " + M(xb(A, 0) + " = " + C + " - " + pa(q) + " = " + A * s) + ", donc " + M("x = " + s) + ".",
+        { ctx: "moins-paren", guide: [GS("Développe " + M(k + "(" + xb(m, n) + ") - (" + xb(r, t) + ")") + " : quel est le nombre seul ?", C, M(k * n + " - " + t + " = " + C) + " : le « − » devant la parenthèse change aussi le signe de " + t + "."), GS("Et le coefficient de " + M("x") + " ?", B, M(k * m + " - " + r + " = " + B) + "."), GS("Regroupe les " + M("x") + " à gauche, les nombres à droite : " + M(xb(A, 0) + " = \\ ?"), A * s, M(C + " - " + pa(q) + " = " + A * s) + "."), GS(M("x = \\ ?"), s, M("x = " + s) + ".")],
+          traps: TR([{ v: (k * n + t - q) / A, s, m: "Le « − » devant " + M("(" + xb(r, t) + ")") + " change le signe de <b>chaque</b> terme : " + M("-(" + xb(r, t) + ") = " + xb(-r, -t)) + "." }, { v: (n - t - q) / A, s, m: "Le facteur " + k + " multiplie aussi le " + n + " : " + M(k + "(" + xb(m, n) + ") = " + xb(k * m, k * n)) + "." }, { v: (C - q) / (p - k * m - r), s, m: M("-(" + xb(r, t) + ")") + " donne " + M(cx(-r, "x")) + " : le coefficient de " + M("x") + " à droite est " + M(B) + "." }]) }); },
+    () => { const imp = R.rand() < 0.5, k = R.int(2, 5), m = R.int(1, 6), e = R.int(2, 5), f = R.int(2, 6), n = k * m + R.pick([-3, -2, 2, 3, 5]);
+      if (imp) return QSet("Résous : " + M(k + "(x + " + m + ") - x = " + xb(k - 1, n)) + "." + ASKS, false,
+        M(xb(k, k * m) + " - x = " + xb(k - 1, k * m)) + " ; on soustrait " + M(xb(k - 1, 0)) + " des deux membres : " + M(k * m + " = " + n) + ", faux. Aucun nombre ne convient : " + M("S = \\varnothing") + ".",
+        { ctx: "impossible", guide: [GS("Développe et réduis le membre de gauche : quel est le nombre seul ?", k * m, M(k + "(x + " + m + ") - x = " + xb(k - 1, k * m)) + "."), GS("Soustrais " + M(xb(k - 1, 0)) + " des deux membres : il reste " + M(k * m + " = \\ ?") + " (le nombre du membre de droite)", n, M(k * m + " = " + n) + " : c'est faux."), { ask: "Solutions ?", spec: { kind: "set", values: [] }, sol: "Aucune : l'égalité est fausse pour tout " + M("x") + "." }],
+          traps: [{ all: true, m: "Il reste " + M(k * m + " = " + n) + ", une égalité <b>fausse</b> : aucun nombre ne convient." }, { s: [0], m: "Teste " + M("x = 0") + " : " + M(k * m) + " d'un côté, " + M(n) + " de l'autre. « Aucune solution » n'est pas « la solution 0 »." }] });
+      return QSet("Résous : " + M(e + "(x - " + f + ") + 2x = x - " + e * f + " + " + (e + 1) + "x") + "." + ASKS, true,
+        M(e + "x - " + e * f + " + 2x = " + xb(e + 2, -e * f)) + " et " + M("x - " + e * f + " + " + (e + 1) + "x = " + xb(e + 2, -e * f)) + " : les deux membres sont égaux, il reste " + M("0 = 0") + ". Tous les nombres sont solutions.",
+        { ctx: "indeterminee", guide: [GS("Développe et réduis le membre de gauche : coefficient de " + M("x") + " ?", e + 2, M(e + "x + 2x = " + (e + 2) + "x") + "."), GS("Réduis le membre de droite : coefficient de " + M("x") + " ?", e + 2, M("x + " + (e + 1) + "x = " + (e + 2) + "x") + " : les deux membres valent " + M(xb(e + 2, -e * f)) + "."), { ask: "Solutions ?", spec: { kind: "set", values: [], all: true }, sol: "Tous les nombres (écris « tous »)." }],
+          traps: [{ none: true, m: "Il reste " + M("0 = 0") + ", une égalité <b>vraie</b> pour tout " + M("x") + " : tous les nombres sont solutions." }, { s: [0], m: M("x = 0") + " convient, mais 1, 5, −3… aussi : teste-les." }] }); },
+    () => { let k, m, e, A, s; do { k = R.int(2, 5); m = R.int(1, 6); e = R.int(1, 9); A = k * m - e; s = R.pick([-5, -4, -3, -2, 2, 3, 4, 5, 6]); } while (Math.abs(A) < 2);
+      const n = A * s;
+      return QV("Résous : " + M(k + "x(x + " + m + ") - " + (e === 1 ? "" : e) + "x = " + k + "x^2" + (n < 0 ? " - " + -n : " + " + n)) + ".", s,
+        M(k + "x^2 + " + k * m + "x - " + (e === 1 ? "" : e) + "x = " + k + "x^2" + (n < 0 ? " - " + -n : " + " + n)) + " ; on soustrait " + M(k + "x^2") + " des deux membres : " + M(xb(A, 0) + " = " + n) + ", donc " + M("x = " + s) + ". L'équation avait l'air du 2e degré, mais les " + M("x^2") + " s'annulent.",
+        { ctx: "carres-simples", guide: [GS("Développe " + M(k + "x(x + " + m + ")") + " : coefficient de " + M("x") + " ?", k * m, M(k + "x \\cdot x + " + k + "x \\cdot " + m + " = " + k + "x^2 + " + k * m + "x") + "."), GS("Soustrais " + M(k + "x^2") + " des deux membres : coefficient de " + M("x") + " à gauche ?", A, M(k * m + " - " + e + " = " + A) + "."), GS(M("x = \\ ?"), s, M("x = " + n + " : " + pa(A) + " = " + s) + ".")],
+          traps: TR([{ v: n / (k * m + e), s, m: "Le terme " + M("-" + (e === 1 ? "" : e) + "x") + " est soustrait : " + M(k * m + " - " + e + " = " + A) + "." }, { v: n / (m - e), s, m: "Le facteur " + M(k + "x") + " multiplie aussi le " + m + " : " + M(k + "x \\cdot " + m + " = " + k * m + "x") + "." }]) }); },
+  );
+  // --- eq1, niveau 3 (VA niveau 3 = niveaux 3 et 4) ---
+  VA("eq1", 3, [10],
+    () => { let p, q, a, b, r, A, s, c; do { p = R.pick([0.5, 1.5, 2.5, 1.2]); q = R.pick([0.5, 1.5, 0.8, 2]); a = R.int(1, 6); b = R.int(1, 6); r = R.int(1, 4); A = r6(p - q - r); s = R.pick([-6, -4, -3, -2, 2, 3, 4, 5, 6, 8]); c = r6(A * s - p * a - q * b); } while (p === q || Math.abs(A) < 0.4 || Math.abs(Math.abs(A) - 1) < 1e-9 || Math.abs(c) < 0.5 || Math.abs(c * 100 - Math.round(c * 100)) > 1e-6);
+      const K = r6(-p * a - q * b);
+      return QV("Résous : " + M(dec(p) + "(x - " + a + ") - " + dec(q) + "(x + " + b + ") = " + xd(r, c)) + ".", s,
+        M(xd(p, r6(-p * a)) + " - " + xd(q, r6(q * b)).replace(/ \+ /, " - ") + " = " + xd(r, c)) + " (attention au « − » devant " + M(dec(q) + "(x + " + b + ")") + "), soit " + M(xd(r6(p - q), K) + " = " + xd(r, c)) + " ; " + M(xd(A, 0) + " = " + dec(r6(c - K))) + ", donc " + M("x = " + s) + ".",
+        { ctx: "dec-deuxparen", guide: [GS("Développe le membre de gauche : quel est le nombre seul (" + M("-" + dec(p) + " \\cdot " + a + " - " + dec(q) + " \\cdot " + b) + ") ?", K, M(dec(K)) + "."), GS("Coefficient de " + M("x") + " après avoir regroupé les " + M("x") + " à gauche (" + M(dec(p) + " - " + dec(q) + " - " + r) + ") ?", A, M(dec(A)) + "."), GS(M("x = \\ ?"), s, M(xd(A, 0) + " = " + dec(r6(c - K))) + ", " + M("x = " + s) + ".")],
+          traps: TR([{ v: (c + p * a - q * b) / A, s, m: "Le « − » devant " + M(dec(q) + "(x + " + b + ")") + " porte sur les deux termes : " + M("-" + dec(q) + " \\cdot " + b + " = -" + dec(r6(q * b))) + "." }, { v: (c + a + q * b) / A, s, m: "Le facteur " + M(dec(p)) + " multiplie aussi le " + a + "." }, { v: (c - K) / (p - q + r), s, m: "Pour regrouper les " + M("x") + ", on soustrait " + M(cx(r, "x")) + " des deux membres." }]) }); },
+    () => { const [a, b, c, d] = R.pick([[2, 3, 3, 2], [6, 1, 2, 3], [4, 3, 6, 2], [2, 6, 4, 3], [3, 4, 6, 2], [2, 5, 5, 2]]); const m = R.int(1, 5), n = R.int(1, 5), s = R.pick([-4, -3, -2, 2, 3, 4, 5]), D = -(a * m + c * n);
+      const E = D * s; /* a x(bx − m) = c x(dx + n) + E  ⟺  −am x = cn x + E  ⟺  D x = E */
+      return QV("Résous : " + M(a + "x(" + cx(b, "x") + " - " + m + ") = " + c + "x(" + cx(d, "x") + " + " + n + ")" + (E < 0 ? " - " + -E : " + " + E)) + ".", s,
+        M(a * b + "x^2 - " + a * m + "x = " + c * d + "x^2 + " + c * n + "x" + (E < 0 ? " - " + -E : " + " + E)) + " ; les " + M(a * b + "x^2") + " s'annulent : " + M("-" + a * m + "x - " + c * n + "x = " + E) + ", " + M(D + "x = " + E) + ", donc " + M("x = " + s) + ".",
+        { ctx: "carres-deux", guide: [GS("Développe le membre de gauche : coefficient de " + M("x^2") + " ?", a * b, M(a + "x \\cdot " + cx(b, "x") + " = " + a * b + "x^2") + " ; à droite aussi " + M(c * d + "x^2") + " : ils s'annulent."), GS("Regroupe les " + M("x") + " à gauche : coefficient ?", D, M("-" + a * m + " - " + c * n + " = " + D) + "."), GS(M("x = \\ ?"), s, M("x = " + E + " : (" + D + ") = " + s) + ".")],
+          traps: TR([{ v: E / (c * n - a * m), s, m: M(a + "x \\cdot (-" + m + ") = -" + a * m + "x") + " : le signe « − » reste." }, { v: -s, s, m: "Attention au signe en divisant par " + M(D) + "." }]) }); },
+  );
+  // --- eqverif, niveau 2 ---
+  VA("eqverif", 2, [10],
+    () => { const m = R.int(2, 6), n = R.int(2, 7), L = [R.pick([-5, -3, -2]), 0, R.pick([1.5, 2.5]), R.pick([4, 6, 10])];
+      return QV("Combien des nombres " + L.map((v) => M(dec(v))).join(" ; ") + " sont solutions de l'équation " + M(m + "(x - " + n + ") + x = " + (m + 1) + "x - " + m * n) + " ?", 4,
+        "En développant, " + M(m + "x - " + m * n + " + x = " + (m + 1) + "x - " + m * n) + " : les deux membres sont égaux pour tout " + M("x") + ". Les 4 nombres sont solutions.",
+        { ctx: "verif-tous", guide: [GS("Membre de gauche pour " + M("x = " + L[0]) + " ?", m * (L[0] - n) + L[0], M(m + " \\cdot " + pa(L[0] - n) + " + " + pa(L[0]) + " = " + (m * (L[0] - n) + L[0])) + "."), GS("Membre de droite pour " + M("x = " + L[0]) + " ?", (m + 1) * L[0] - m * n, M((m + 1) * L[0] - m * n) + " : égal. Développe le membre de gauche : il vaut toujours le membre de droite."), GS("Nombre de solutions parmi les quatre ?", 4, "Les 4 : tous les nombres sont solutions.")],
+          traps: [TRAP(1, "Teste les quatre nombres : ils conviennent tous (développe le membre de gauche)."), TRAP(3, "0 aussi est solution : " + M(m + " \\cdot (-" + n + ") + 0 = -" + m * n) + ".")] }); },
+    () => { let t, k, e, c; do { t = R.pick([-5, -4, -3, -2]); k = R.int(2, 6); e = R.int(1, 9); c = k * t + e - t; } while (Math.abs(c) < 2 || c === e);
+      return QV("Le nombre " + M(t) + " est solution de l'équation " + M(xb(k, e) + " = x + c") + ". Que vaut " + M("c") + " ?", c,
+        "On remplace " + M("x") + " par " + M(t) + " : " + M(k + " \\cdot (" + t + ") + " + e + " = " + (k * t + e)) + " et " + M("(" + t + ") + c") + ". Donc " + M("c = " + (k * t + e) + " - (" + t + ") = " + c) + ".",
+        { ctx: "verif-trouve", guide: [GS("Membre de gauche pour " + M("x = " + t) + " ?", k * t + e, M(k + " \\cdot (" + t + ") + " + e + " = " + (k * t + e)) + "."), GS("Il doit être égal à " + M("(" + t + ") + c") + ". Donc " + M("c") + " = ?", c, M((k * t + e) + " - (" + t + ") = " + c) + ".")],
+          traps: TR([{ v: k * t + e + t, s: c, m: "Soustraire " + M("(" + t + ")") + ", c'est ajouter " + -t + "." }, { v: -k * t + e - t, s: c, m: M(k + " \\cdot (" + t + ") = " + k * t) + " : le produit est négatif." }, { v: k * t + e, s: c, m: "C'est le membre de gauche ; il faut encore retirer " + M("x = " + t) + "." }]) }); },
+    () => { let t, E, nb; do { t = R.pick([-4, -3, -2, 2, 3, 5]); E = [0, 1, 2, 3].map(() => { let a, c; do { a = R.int(2, 7); c = R.int(-4, 5); } while (a === c || c === 0); const b = R.int(-9, 9), sat = R.rand() < 0.5, d = (a - c) * t + b + (sat ? 0 : R.pick([-3, -2, 2, 3])); return { a, b, c, d, sat }; }); nb = E.filter((x) => x.sat).length; } while (nb < 1 || nb > 3);
+      const tx = (x) => M(xb(x.a, x.b) + " = " + xb(x.c, x.d)), gl = (x) => x.a * t + x.b, dr = (x) => x.c * t + x.d;
+      return Object.assign(QV("Combien de ces équations ont pour solution " + M("x = " + t) + " ? " + E.map((x, i) => String.fromCharCode(97 + i) + ") " + tx(x)).join(" ; "), nb,
+        E.map((x, i) => String.fromCharCode(97 + i) + ") " + M(gl(x)) + " et " + M(dr(x)) + (x.sat ? " : oui" : " : non")).join(" ; ") + ". Réponse : " + nb + ".",
+        { ctx: "verif-combien", guide: [GS("Équation a) : membre de gauche pour " + M("x = " + t) + " ?", gl(E[0]), M(x0s(E[0].a, t) + (E[0].b < 0 ? " - " + -E[0].b : " + " + E[0].b) + " = " + gl(E[0])) + "."), GS("Équation a) : membre de droite ?", dr(E[0]), M(dr(E[0])) + (E[0].sat ? " : égal, oui." : " : différent, non.")), GS("Fais de même pour les autres. Combien d'équations sont vérifiées ?", nb, nb + ".")],
+          traps: [TRAP(4 - nb, "Tu as compté celles qui ne sont <b>pas</b> vérifiées."), TRAP(4, "Pour chaque équation, calcule les <b>deux</b> membres.")].filter((x) => x.v !== nb && x.v > 0) }), { shownOk: true }); },
+  );
+  function x0s(a, t) { return a + " \\cdot (" + t + ")"; }
+  // --- probeq, niveau 2 ---
+  VA("probeq", 2, [10],
+    () => { const C = R.pick([["ferme", "Dans une ferme, il y a des poules et des lapins : on compte %n têtes et %T pattes. Combien y a-t-il de poules ?", "poules", "lapins", 2, 4, 14, 30], ["tirelire", "Une tirelire contient %n pièces, des pièces de 2 CHF et des pièces de 5 CHF, pour un total de %T CHF. Combien y a-t-il de pièces de 2 CHF ?", "pièces de 2 CHF", "pièces de 5 CHF", 2, 5, 18, 36], ["entrees", "Un spectacle a accueilli %n spectateurs : des enfants à 15 CHF et des adultes à 25 CHF. La recette est de %T CHF. Combien y avait-il d'enfants ?", "enfants", "adultes", 15, 25, 40, 120]]);
+      const [ctx, txt, A, B, a, b, n0, n1] = C, n = R.int(n0, n1), x = R.int(3, n - 3), T = a * x + b * (n - x);
+      return QV(txt.replace("%n", n).replace("%T", mille(T)), x,
+        "Avec " + M("x") + " le nombre de " + A + " : " + M(a + "x + " + b + "(" + n + " - x) = " + mille(T)) + ", " + M(a + "x + " + mille(b * n) + " - " + b + "x = " + mille(T)) + ", " + M("-" + (b - a) + "x = " + (T - b * n)) + ", " + M("x = " + x) + " (et " + (n - x) + " " + B + ").",
+        { ctx, guide: [GS("Si " + M("x") + " est le nombre de " + A + ", il y a " + M(n + " - x") + " " + B + ". Équation : " + M(a + "x + " + b + "(" + n + " - x) = " + mille(T)) + ". En développant, quel est le nombre seul ?", b * n, M(b + " \\cdot " + n + " = " + mille(b * n)) + "."), GS("Coefficient de " + M("x") + " après réduction (" + M(a + " - " + b) + ") ?", a - b, M(a - b) + "."), GS(M("x = \\ ?"), x, M("(" + mille(T) + " - " + mille(b * n) + ") : (" + (a - b) + ") = " + x) + ".")],
+          traps: TR([{ v: n - x, s: x, m: "C'est le nombre " + (/^[aeiouéh]/.test(B) ? "d'" : "de ") + B + " ; on demande les " + A + "." }, { v: (T - b * n) / (a - 1), s: x, m: "Il faut des parenthèses : " + M(b + "(" + n + " - x) = " + mille(b * n) + " - " + b + "x") + ", pas " + M(mille(b * n) + " - x") + "." }]) }); },
+    () => { if (R.rand() < 0.5) { const k = R.pick([16, 20, 24, 28, 32, 36, 40]), x = (180 - k) / 4;
+        return QV("Dans un triangle " + M("ABC") + ", l'angle " + M("\\widehat{B}") + " mesure " + k + "° de plus que l'angle " + M("\\widehat{A}") + ", et l'angle " + M("\\widehat{C}") + " mesure le double de l'angle " + M("\\widehat{A}") + ". Combien mesure l'angle " + M("\\widehat{A}") + " (en degrés) ?", x,
+          M("x + (x + " + k + ") + 2x = 180") + ", " + M("4x = " + (180 - k)) + ", " + M("x = " + x) + "° (puis " + (x + k) + "° et " + 2 * x + "°).",
+          { ctx: "angles", guide: [GS("Avec " + M("x") + " la mesure de " + M("\\widehat{A}") + ", la somme des angles s'écrit " + M("x + (x + " + k + ") + 2x") + ". Coefficient de " + M("x") + " ?", 4, M("4x + " + k) + "."), GS(M("4x + " + k + " = 180") + " : " + M("x = \\ ?"), x, M("x = " + (180 - k) + " : 4 = " + x) + ".")],
+            traps: TR([{ v: (180 + k) / 4, s: x, m: "On soustrait " + k + " des deux membres : " + M("4x = 180 - " + k) + "." }, { v: (180 - k) / 3, s: x, m: "L'angle " + M("\\widehat{C}") + " vaut " + M("2x") + " : il y a " + M("4x") + " en tout." }]) }); }
+      const t = R.pick([2, 3, 4, 5]), x = 90 / (t + 1);
+      return QV("Dans un triangle rectangle, un angle aigu mesure " + ["", "", "le double", "le triple", "le quadruple", "le quintuple"][t] + " de l'autre. Combien mesure le plus petit angle (en degrés) ?", x,
+        "Les deux angles aigus font " + M("90°") + " : " + M("x + " + t + "x = 90") + ", " + M(t + 1 + "x = 90") + ", " + M("x = " + dec(x)) + "°.",
+        { ctx: "angles-rect", guide: [GS("Les deux angles aigus d'un triangle rectangle font ensemble combien de degrés ?", 90, "180° − 90° = 90°."), GS(M("x + " + t + "x = 90") + " : " + M("x = \\ ?"), x, M("x = 90 : " + (t + 1) + " = " + dec(x)) + "°.")],
+          traps: TR([{ v: 180 / (t + 1), s: x, m: "L'angle droit compte déjà 90° : les deux angles aigus font 90°." }, { v: 90 / t, s: x, m: M("x + " + t + "x = " + (t + 1) + "x") + "." }]) }); },
+  );
+  // --- probeq, niveau 3 ---
+  VA("probeq", 3, [10],
+    () => { const half = R.rand() < 0.5; let F, S, x; do { F = R.int(32, 50); S = R.int(4, 12); x = half ? F - 2 * S : (F - 3 * S) / 2; } while (!Number.isInteger(x) || x < 2 || x > 30);
+      const w = R.pick([["Un père", "son fils", "du fils", "du père"], ["Une mère", "sa fille", "de la fille", "de la mère"]]), fr = half ? "à la moitié" : "au tiers", d = half ? 2 : 3;
+      return QV(w[0] + " a " + F + " ans et " + w[1] + " " + S + " ans. Dans combien d'années l'âge " + w[2] + " sera-t-il égal " + fr + " de l'âge " + w[3] + " ?", x,
+        M("\\frac{" + F + " + x}{" + d + "} = " + S + " + x") + ", " + M(F + " + x = " + d * S + " + " + d + "x") + (d > 2 ? ", " + M((d - 1) + "x = " + (F - d * S)) : "") + ", " + M("x = " + x) + " : dans " + x + " ans (" + (F + x) + " ans et " + (S + x) + " ans).",
+        { ctx: "ages-capitaine", guide: [GS("Dans " + M("x") + " ans, l'équation est " + M("\\frac{" + F + " + x}{" + d + "} = " + S + " + x") + ". On multiplie les deux membres par " + d + " : coefficient de " + M("x") + " à droite ?", d, M(d + "(" + S + " + x) = " + d * S + " + " + d + "x") + "."), GS("Regroupe : " + M((d - 1) + "x = \\ ?"), F - d * S, M(F + " - " + d * S + " = " + (F - d * S)) + "."), GS(M("x = \\ ?"), x, M("x = " + x) + ".")],
+          traps: TR([{ v: F / d - S, s: x, m: "Dans " + M("x") + " ans, le parent aussi a vieilli : on ajoute " + M("x") + " aux <b>deux</b> âges." }, { v: F - d * S, s: x, m: "En multipliant par " + d + ", " + M(d + "(" + S + " + x) = " + d * S + " + " + d + "x") + " : il reste " + M((d - 1) + "x") + "." }]) }); },
+    () => { let a, b, p, r2; do { a = R.pick([2, 3, 4]); b = a + R.pick([2, 3]); p = R.pick([12.5, 14.5, 15.5, 17.5, 18.5]); r2 = R.pick([6, 8, 9.5, 11]); } while (r2 >= p);
+      const r1 = r6(r2 + (b - a) * p), [w, P1, P2] = R.pick([["Vincent et Joël", "Le premier", "le second"], ["Léa et Inès", "La première", "la seconde"], ["Sam et Tom", "Le premier", "le second"]]);
+      return QV(w + " ont la même somme d'argent. " + P1 + " achète " + a + " billets pour un match et il lui reste " + M(chf(r1)) + " CHF ; " + P2 + " en achète " + b + ", au même prix, et il lui reste " + M(chf(r2)) + " CHF. Combien coûte un billet (en CHF) ?", p,
+        M(a + "x + " + dec(r1) + " = " + b + "x + " + dec(r2)) + ", " + M(dec(r6(r1 - r2)) + " = " + (b - a) + "x") + ", " + M("x = " + dec(p)) + " CHF.",
+        { ctx: "billets", guide: [GS("Avec " + M("x") + " le prix d'un billet : " + M(a + "x + " + dec(r1) + " = " + b + "x + " + dec(r2)) + ". Combien de " + M("x") + " de plus à droite ?", b - a, M((b - a) + "x") + "."), GS("Nombres : " + M(dec(r1) + " - " + dec(r2)) + " = ?", r6(r1 - r2), M(dec(r6(r1 - r2))) + "."), GS(M("x = \\ ?"), p, M(dec(r6(r1 - r2)) + " : " + (b - a) + " = " + dec(p)) + ".")],
+          traps: TR([{ v: r6((r1 + r2) / (b - a)), s: p, m: "On soustrait " + M(dec(r2)) + " des deux membres : " + M(dec(r1) + " - " + dec(r2)) + "." }, { v: r6((r1 - r2) / (a + b)), s: p, m: "On soustrait " + M(a + "x") + " des deux membres : il reste " + M((b - a) + "x") + "." }]) }); },
+  );
+  // --- eqfrac, niveau 2 : le troupeau (MER FA216) ---
+  VA("eqfrac", 2, [10],
+    () => { const [p, q, ta, tb] = R.pick([[3, 2, "au tiers", "la moitié"], [4, 3, "au quart", "le tiers"], [6, 3, "au sixième", "le tiers"], [4, 2, "au quart", "la moitié"]]), k = R.pick([6, 7, 8, 9, 12, 15]), Lc = p % q === 0 ? p : p * q, x = (Lc * k) / (Lc / q - Lc / p);
+      const [who0, obj] = R.pick([["Un berger", "moutons"], ["Une apicultrice", "ruches"], ["Un collectionneur", "timbres"]]);
+      return QV(who0 + " dit : « Ajoutez " + k + " " + obj + " " + ta + " de mes " + obj + ", et vous obtiendrez " + tb + " de mes " + obj + ". » Combien a-t-" + (who0.startsWith("Une") ? "elle" : "il") + " de " + obj + " ?", x,
+        M("\\frac{x}{" + p + "} + " + k + " = \\frac{x}{" + q + "}") + " ; on multiplie chaque terme par " + Lc + " : " + M(cx(Lc / p, "x") + " + " + Lc * k + " = " + cx(Lc / q, "x")) + ", " + M("x = " + x) + ".",
+        { ctx: "troupeau", guide: [GS("L'équation est " + M("\\frac{x}{" + p + "} + " + k + " = \\frac{x}{" + q + "}") + ". Par quel nombre multiplier chaque terme pour supprimer les fractions (le plus petit) ?", Lc, M(Lc) + " est un multiple de " + p + " et de " + q + "."), GS("Que devient le terme " + M(k) + " ?", Lc * k, M(Lc + " \\cdot " + k + " = " + Lc * k) + " : on multiplie aussi le nombre seul."), GS(M("x = \\ ?"), x, M("x = " + x) + ".")],
+          traps: TR([{ v: k / (Lc / q - Lc / p), s: x, m: "Le nombre " + k + " doit aussi être multiplié par " + Lc + "." }, { v: x / p, s: x, m: "C'est " + ta.replace("au ", "le ") + " ; on demande le nombre total." }]) }); },
+  );
+  // --- défis (niveau 4) de 10e : le coffre (MER FA219) ; le partage (MER FA217) ---
+  PX("probeq", [10], () => { const [v1, v2] = R.pick([[20, 50], [10, 50], [50, 100]]), n = R.int(20, 45), x = R.int(5, n - 5), T = v1 * x + v2 * (n - x);
+    return { q: "Un coffre contient " + n + " billets, des billets de " + v1 + " CHF et des billets de " + v2 + " CHF, pour un total de " + M(mille(T)) + " CHF. On appelle " + M("x") + " le nombre de billets de " + v1 + " CHF.", ctx: "coffre",
+      parts: [{ label: "a) Nombre de billets de " + v2 + " CHF, en fonction de " + M("x"), spec: EXS(n + "-x") }, { label: "b) Nombre de billets de " + v1 + " CHF", spec: { kind: "value", value: x } },
+        { label: "c) Nombre de billets de " + v2 + " CHF", spec: { kind: "value", value: n - x } }, { label: "d) Somme en billets de " + v2 + " CHF (CHF)", spec: { kind: "value", value: v2 * (n - x) } }],
+      hints: ["a) Il y a " + n + " billets en tout.", "b) Écris " + M(v1 + "x + " + v2 + "(" + n + " - x) = " + mille(T)) + ", développe (le " + v2 + " multiplie les deux termes), puis résous.", "d) Multiplie le nombre de billets de " + v2 + " CHF par " + v2 + "."],
+      sol: "a) " + M(n + " - x") + ". b) " + M(v1 + "x + " + mille(v2 * n) + " - " + v2 + "x = " + mille(T)) + ", " + M("-" + (v2 - v1) + "x = " + mille(T - v2 * n)) + ", " + M("x = " + x) + ". c) " + M(n + " - " + x + " = " + (n - x)) + ". d) " + M(v2 + " \\cdot " + (n - x) + " = " + mille(v2 * (n - x))) + " CHF ; vérification : " + M(mille(v1 * x) + " + " + mille(v2 * (n - x)) + " = " + mille(T)) + "." }; });
+  PX("eqfrac", [10], () => { const a = R.pick([4, 6, 9, 12, 14]), x = R.int(8, 40), N0 = (a + 1) * x + a * a;
+    return { q: "On partage le nombre " + M(N0) + " en deux parties : la première, augmentée de " + a + ", est égale au quotient de la seconde par " + a + ". On appelle " + M("x") + " la première partie.", ctx: "partage",
+      parts: [{ label: "a) La seconde partie, en fonction de " + M("x"), spec: EXS(N0 + "-x") }, { label: "b) La première partie", spec: { kind: "value", value: x } },
+        { label: "c) La seconde partie", spec: { kind: "value", value: N0 - x } }, { label: "d) Le quotient de la seconde par " + a, spec: { kind: "value", value: x + a } }],
+      hints: ["a) Les deux parties font " + N0 + " ensemble.", "b) Équation : " + M("x + " + a + " = \\frac{" + N0 + " - x}{" + a + "}") + ". Multiplie <b>chaque terme</b> par " + a + ".", "d) C'est aussi la première partie augmentée de " + a + "."],
+      sol: "a) " + M(N0 + " - x") + ". b) " + M(a + "x + " + a * a + " = " + N0 + " - x") + ", " + M((a + 1) + "x = " + (N0 - a * a)) + ", " + M("x = " + x) + ". c) " + M(N0 - x) + ". d) " + M((N0 - x) + " : " + a + " = " + (x + a)) + " = " + M(x + " + " + a) + " ✓." }; });
 })();
 
 // ======================= 27.11 : variété (agent variete, tools/archive/variete_27-11.md) =======================

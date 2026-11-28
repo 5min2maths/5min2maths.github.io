@@ -527,8 +527,8 @@ try {
   ok(A && !/Double|\)\(|\) sur \(/.test(a10) && /\(x \+ 2\)\(x \+ 3\)/.test(a11), "leçon active distrib : en 10e, trois rectangles à simple distributivité et Retiens limité à ce qu'ils montrent ; (x + 2)(x + 3) gardé en 11e");
   /* sujet de préparation : banque de 10e */
   const ids = ["litelab", "valnum", "reduire", "monomes", "distrib", "litconv"], pr = (g) => st(g).profile;
-  ok(richChapter(ids, pr(10)) === "litt10" && richChapter(["distrib", "reduire"], pr(10)) === "litt10" && richChapter(ids, pr(11)) === "litt11" && richChapter(["litelab", "valnum"], pr(9)) === "litt11" && richChapter(["litelab", "valnum", "reduire", "distrib", "parenth", "idrem", "factor"], pr(11)) === "litt11",
-    "sujet de préparation : RICH.litt10 en 10e, RICH.litt11 en 11e (et en 9e, inchangé)");
+  ok(richChapter(ids, pr(10)) === "litt10" && richChapter(["distrib", "reduire"], pr(10)) === "litt10" && richChapter(ids, pr(11)) === "litt11" && richChapter(["litelab", "valnum"], pr(9)) === "litt9" && richChapter(["litelab", "valnum", "reduire", "distrib", "parenth", "idrem", "factor"], pr(11)) === "litt11",
+    "sujet de préparation : RICH.litt10 en 10e, RICH.litt11 en 11e, RICH.litt9 en 9e (28.11, nickel 10e ch. 9)");
   state = S10; let hors = []; for (const lev of ["facile", "standard", "exigeant"]) for (let k = 0; k < 6; k++) { const it = mockPlan(ids, lev); for (const x of it) if (x.rich && x.rich !== "litt10") hors.push(x.rich); }
   const T = []; for (const kind of ["ex", "raison"]) RICH.litt10[kind].forEach((f, k) => { for (let s = 1; s <= 40; s++) { R.seed(s * 31 + k); const x = f(); T.push(x.q + x.sol + x.parts.map((p) => p.label).join(" ")); } });
   /* produit de deux parenthèses à deux termes (double distributivité), factorisation, identités : 11e */
@@ -598,6 +598,76 @@ try {
   const T = []; for (const kind of ["ex", "raison"]) RICH.pyth10[kind].forEach((f, k) => { for (let s = 1; s <= 40; s++) { R.seed(s * 31 + k); const x = f(); T.push(x.q.replace(/<svg[\s\S]*?<\/svg>/g, "") + x.sol + x.parts.map((p) => p.label).join(" ")); } });
   const t11 = T.filter((t) => /réciproque|est-il rectangle|sont-ils rectangles|cône|(^|[^\d}^{_.,])\d+\s*\\sqrt\{/.test(t));
   ok(!hors.length && !t11.length && RICH.pyth10.ex.length >= 5 && RICH.pyth10.raison.length >= 4, "sujets de 10e : RICH.pyth10 seulement, sans réciproque, cône ni racine simplifiée " + (hors[0] || "") + " " + (t11[0] || "").slice(0, 120));
+} catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
+state = keep;
+document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");
+});
+Lot.section("nickel10_ch9", { html: `<main id="app" style="width:360px"></main><pre id="out">en cours</pre>` }, function () {
+/* 28.11 (/contenu nickel 10e, chapitre 9 Équations, tools/archive/contenu_nickel10_ch9_28-11.md) : liste de contrôle
+   « nickel » appliquée à eqverif, eq1, eqfrac, probeq en 10e (formes et défis q.co = [10], modelés sur le MER 10e), rappel
+   de 10e pour eq1 (TXT_CO : impossible, indéterminée, « − » devant une parenthèse), sujets de préparation RICH.eq10 (avant :
+   RICH.eq1c de 1re Collège, avec le 2e degré) et RICH.litt9 (correctif 9e : avant, RICH.litt11). Chaque contrôle échoue
+   sans la correction. Recalcul indépendant : équations relues dans l'énoncé et évaluées par Expr. */
+const out = [], fail = [], ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + m);
+const st = (g) => { const x = Engine.newState({ system: "CH", grade: g, track: "co", minutes: 5 }); Engine.autoInit(x); return x; };
+const txt = (q) => String(q.q || "").replace(/<[^>]+>/g, " ").replace(/\\\(|\\\)/g, "").replace(/\{,\}/g, ",").replace(/\\cdot/g, "*");
+const cnt = (S, id, d, n = 120) => { const c = {}; for (let k = 0; k < n; k++) { const q = Engine.make(S, id, d); c[q.ctx || "-"] = (c[q.ctx || "-"] || 0) + 1; } return c; };
+const keep = typeof state !== "undefined" ? state : null;
+const P = (s) => { try { return Expr.parse(s.replace(/,/g, ".").replace(/'/g, "")); } catch (er) { throw new Error(er.message + " « " + s + " »"); } }, E = (t, x) => Expr.evaluate(t, { x }), near = (a, b) => Math.abs(a - b) < 1e-6;
+const eqOf = (t) => { const m = /(?:Résous|équation)\s*:?\s*(.+?) = (.+?)(?:\.\s|\s\?|\.$)/.exec(t); return m ? [P(m[1]), P(m[2])] : null; };
+try {
+  const S10 = st(10), S11 = st(11);
+  const F = [["eq1", 2, ["moins-paren", "impossible", "indeterminee", "carres-simples"]], ["eq1", 3, ["dec-deuxparen", "carres-deux"]], ["eqverif", 2, ["verif-tous", "verif-trouve", "verif-combien"]], ["probeq", 2, ["ferme", "tirelire", "entrees", "angles", "angles-rect"]], ["probeq", 3, ["ages-capitaine", "billets"]], ["eqfrac", 2, ["troupeau"]], ["probeq", 4, ["coffre"]], ["eqfrac", 4, ["partage"]]];
+  for (const [id, d, cs] of F) { const c = cnt(S10, id, d, 240), c11 = cnt(S11, id, d, 60);
+    ok(cs.every((k) => c[k] >= 2) && cs.every((k) => !c11[k]), id + " " + d + " : formes de 10e tirées en 10e, jamais en 11e " + JSON.stringify(c)); }
+  const bad = [];
+  for (let s = 1; s <= 200; s++) try {
+    for (const d of [2, 3]) { const q = Engine.build("eq1", d, s), t = txt(q);
+      if (["moins-paren", "carres-simples", "dec-deuxparen", "carres-deux"].includes(q.ctx)) { const e = eqOf(t); if (!e || !near(E(e[0], q.spec.value), E(e[1], q.spec.value)) || near(E(e[0], q.spec.value + 1), E(e[1], q.spec.value + 1))) bad.push(q.code); }
+      if (q.ctx === "impossible" || q.ctx === "indeterminee") { const e = eqOf(t), D = e && [-3, 0, 2.5, 7].map((x) => E(e[0], x) - E(e[1], x));
+        if (!e || !D.every((v) => near(v, D[0])) || (q.ctx === "impossible" ? near(D[0], 0) || q.spec.all : !near(D[0], 0) || !q.spec.all) || q.spec.values.length) bad.push(q.code); } }
+    const v = Engine.build("eqverif", 2, s), tv = txt(v);
+    if (v.ctx === "verif-trouve") { const m = /nombre (-?\d+) est solution de l'équation (\d+)x \+ (\d+) = x \+ c/.exec(tv); if (!m || +m[2] * +m[1] + +m[3] !== +m[1] + v.spec.value) bad.push(v.code); }
+    if (v.ctx === "verif-tous") { const e = eqOf(tv.replace(/sont solutions de l'équation/, "équation :")); if (!e || ![-3, 0, 1.5, 6].every((x) => near(E(e[0], x), E(e[1], x))) || v.spec.value !== 4) bad.push(v.code); }
+    if (v.ctx === "verif-combien") { const t0 = +/solution x = (-?\d+)/.exec(tv)[1], L = tv.split(/\b[a-d]\) /).slice(1).map((z) => z.replace(/\s*;\s*$/, "").trim().split(" = ")); const n = L.filter((z) => near(E(P(z[0]), t0), E(P(z[1]), t0))).length; if (L.length !== 4 || n !== v.spec.value) bad.push(v.code); }
+    for (const d of [2, 3]) { const p = Engine.build("probeq", d, s), tp = txt(p), x = p.spec && p.spec.value;
+      if (p.ctx === "ferme") { const m = /(\d+) têtes et (\d+) pattes/.exec(tp); if (!m || 2 * x + 4 * (+m[1] - x) !== +m[2]) bad.push(p.code); }
+      if (p.ctx === "tirelire") { const m = /contient (\d+) pièces.* total de ([\d']+) CHF/.exec(tp); if (!m || 2 * x + 5 * (+m[1] - x) !== +m[2].replace(/'/g, "")) bad.push(p.code); }
+      if (p.ctx === "entrees") { const m = /accueilli (\d+) spectateurs.* recette est de ([\d']+) CHF/.exec(tp); if (!m || 15 * x + 25 * (+m[1] - x) !== +m[2].replace(/'/g, "")) bad.push(p.code); }
+      if (p.ctx === "angles") { const m = /mesure (\d+)° de plus/.exec(tp); if (!m || x + x + +m[1] + 2 * x !== 180) bad.push(p.code); }
+      if (p.ctx === "angles-rect") { const k = { double: 2, triple: 3, quadruple: 4, quintuple: 5 }[(/mesure le (\w+) de l'autre/.exec(tp) || [])[1]]; if (!k || !near(x + k * x, 90)) bad.push(p.code); }
+      if (p.ctx === "ages-capitaine") { const m = /a (\d+) ans et (?:son fils|sa fille) (\d+) ans.* égal (à la moitié|au tiers)/.exec(tp), dd = m && (m[3] === "au tiers" ? 3 : 2); if (!m || +m[1] + x !== dd * (+m[2] + x)) bad.push(p.code); }
+      if (p.ctx === "billets") { const m = /achète (\d+) billets .* reste ([\d,]+)\s*CHF\s*;.* en achète (\d+), .* reste ([\d,]+)\s*CHF/.exec(tp), n = (z) => +z.replace(",", "."); if (!m || !near(+m[1] * x + n(m[2]), +m[3] * x + n(m[4]))) bad.push(p.code); } }
+    const f = Engine.build("eqfrac", 2, s), tf = txt(f);
+    if (f.ctx === "troupeau") { const m = /Ajoutez (\d+) .* au (tiers|quart|sixième) .* obtiendrez (la moitié|le tiers)/.exec(tf), D = { tiers: 3, quart: 4, sixième: 6, "la moitié": 2, "le tiers": 3 }; if (!m || !near(f.spec.value / D[m[2]] + +m[1], f.spec.value / D[m[3]])) bad.push(f.code); }
+    const c = Engine.build("probeq", 4, s), tc = txt(c);
+    if (c.ctx === "coffre") { const m = /contient (\d+) billets, des billets de (\d+) CHF et des billets de (\d+) CHF, pour un total de ([\d']+) CHF/.exec(tc), x = c.parts[1].spec.value, n = m && +m[1];
+      if (!m || +m[2] * x + +m[3] * (n - x) !== +m[4].replace(/'/g, "") || c.parts[2].spec.value !== n - x || c.parts[3].spec.value !== +m[3] * (n - x) || !Expr.equivalent(Expr.parse(c.parts[0].spec.expr), Expr.parse(n + "-x"))) bad.push(c.code); }
+    const g = Engine.build("eqfrac", 4, s), tg = txt(g);
+    if (g.ctx === "partage") { const m = /partage le nombre ([\d']+) en deux parties : la première, augmentée de (\d+), est égale au quotient de la seconde par (\d+)/.exec(tg), x = g.parts[1].spec.value, N0 = m && +m[1].replace(/'/g, ""), a = m && +m[2];
+      if (!m || !near(x + a, (N0 - x) / a) || g.parts[2].spec.value !== N0 - x || g.parts[3].spec.value !== x + a) bad.push(g.code); }
+  } catch (er) { bad.push("graine " + s + " EXC " + er.message); }
+  ok(!bad.length, "recalcul des formes et défis de 10e du chapitre 9 (200 graines) : " + (bad.length ? bad.slice(0, 8).join(" ") : "tout juste"));
+  /* pièges : jamais la réponse ; ensemble vide / tous : pièges de l'autre cas */
+  const tb = []; for (let s = 1; s <= 120; s++) for (const [id, d] of [["eq1", 2], ["eq1", 3], ["eqverif", 2], ["probeq", 2], ["probeq", 3], ["eqfrac", 2]]) { const q = Engine.build(id, d, s); if (q.co && q.spec.kind === "value" && (q.traps || []).some((t) => near(t.v, q.spec.value))) tb.push(q.code); if (q.co && !(q.traps || []).length) tb.push(q.code + " sans piège"); }
+  ok(!tb.length, "formes de 10e : pièges présents et jamais égaux à la réponse " + tb.slice(0, 5).join(" "));
+  /* le « trouve l'erreur » de eq1 2 n'affiche plus « x = 11, donc x = 11 » (coefficient 1) */
+  const er = []; for (let s = 1; s <= 300; s++) { const q = Engine.build("eq1", 2, s); if (q.ctx === "erreur" && /ainsi : x = /.test(txt(q))) er.push(q.code); }
+  ok(!er.length, "eq1 2 « trouve l'erreur » : jamais « x = …, donc x = … » " + er.slice(0, 3).join(" "));
+  /* rappel de 10e (TXT_CO) */
+  state = S10; const e10 = LESSONS.eq1.exemple.join(" ") + LESSONS.eq1.piege; state = S11; const e11 = LESSONS.eq1.exemple.join(" "); state = S10;
+  ok(/aucune solution/.test(e10) && /- \(4x \+ 6\)/.test(e10) && !/aucune solution/.test(e11), "rappel eq1 : en 10e, impossible / indéterminée et « − » devant une parenthèse ; inchangé en 11e");
+  /* sujets de préparation */
+  const pr = (g) => st(g).profile, ids = ["eqverif", "eq1", "eqfrac", "probeq"];
+  ok(richChapter(ids, pr(10)) === "eq10" && richChapter(["eq1", "eqfrac", "probeq", "formule", "eq2", "eq2fact", "eq2disc", "probeq2"], pr(11)) === "eq1c" && richChapter(["litelab", "valnum"], pr(9)) === "litt9" && richChapter(["litelab", "valnum", "reduire", "monomes", "distrib", "litconv"], pr(10)) === "litt10",
+    "sujets : RICH.eq10 en 10e (avant eq1c), eq1c en 11e, RICH.litt9 en 9e (avant litt11), litt10 en 10e");
+  const T = (b) => { const L = []; for (const kind of ["ex", "raison"]) RICH[b][kind].forEach((f, k) => { for (let s = 1; s <= 40; s++) { R.seed(s * 31 + k); const x = f(); L.push((x.q + x.sol + x.parts.map((p) => p.label).join(" ")).replace(/<svg[\s\S]*?<\/svg>/g, "").replace(/\\\(|\\\)/g, " ")); } }); return L; };
+  const t10 = T("eq10").filter((t) => /discriminant|factoris|\\sqrt|bicarr|= 0\s*$|\([^()]*x\s[+-][^()]*\)\s*\(\s*[^()]*x/.test(t));
+  ok(!t10.length && RICH.eq10.ex.length >= 5 && RICH.eq10.raison.length >= 4, "RICH.eq10 : sans 2e degré à résoudre, factorisation, racine ni double distributivité " + (t10[0] || "").slice(0, 120));
+  const t9 = T("litt9").filter((t) => /\\cdot \(-|\(-\d+\)\s*\\cdot|\(\s*\d*[a-z]\s[+-]\s\d+\)\s*\(\s*\d*[a-z]\s[+-]|factoris|réduis|identit|développe/i.test(t));
+  ok(!t9.length && RICH.litt9.ex.length >= 5 && RICH.litt9.raison.length >= 3, "RICH.litt9 : sans produit de relatifs, double distributivité, réduction ni factorisation (9e) " + (t9[0] || "").slice(0, 120));
+  state = S10; const hors = []; for (const lev of ["facile", "standard", "exigeant"]) for (let k = 0; k < 6; k++) for (const x of mockPlan(ids, lev)) if (x.rich && x.rich !== "eq10") hors.push(x.rich);
+  ok(!hors.length, "sujets de 10e (ch. 9) : exercices de RICH.eq10 seulement " + (hors[0] || ""));
 } catch (e) { fail.push("EXC " + e.message + " " + (e.stack || "").split("\n").slice(0, 3).join(" ")); }
 state = keep;
 document.getElementById("out").textContent = fail.concat(out).join("\n") + "\n" + (fail.length ? fail.length + " ÉCHEC(S)" : "tout ok");

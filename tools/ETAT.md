@@ -128,11 +128,20 @@ puis « nickel » 10e (ch. 6 après décisions, 10, 11, 4, reprises 3-1-2, court
   `racine10`, engine.js) ; rappel, indice et leçon active de 10e sans a√b ni réciproque ; **sujet de préparation de 10e =
   `RICH.pyth10`** (6 exercices, 4 raisonnements ; avant : banque de 11e avec réciproque). Blocs séparés en fin de
   `variantes.js` et de `riche_10.js` (l'agent du ch. 9 écrit aux mêmes fichiers). Contrôle à faire : un sujet de 10e imprimé.
+- **« Nickel » 10e, ch. 9 Équations + correctif 9e** (28.11, `/contenu`, rapport `archive/contenu_nickel10_ch9_28-11.md`,
+  branche `agent/contenu8`, à fusionner) : eqverif, eq1, eqfrac, probeq : + 13 formes de 10e et 2 défis modelés sur le MER
+  10e (« − » devant une parenthèse, équations impossibles et indéterminées, x² qui s'annulent, vérifier, têtes et pattes,
+  angles, âges, billets, troupeau, coffre, partage), rappel eq1 de 10e (TXT_CO) ; **sujet de préparation de 10e =
+  `RICH.eq10`** (avant : `RICH.eq1c` de 1re Collège, avec le 2e degré) ; **sujet de 9e (9C10) = `RICH.litt9`** (avant :
+  `RICH.litt11`). Contrôle : `tests/parcours.html#section=nickel10_ch9`. Chapitres de 10e qui tirent encore une banque
+  d'une autre classe : 10C05 (prop11), 10C06 (no1c), 10C11 (fct11) [10C08 Pythagore : fait, pyth10]. Contrôle à faire : un sujet de 10e
+  « Équations » et un de 9e « Calcul littéral » imprimés et relus.
 
 ## À décider
 
 - **10e ch. 8 (28.11)** : réciproque exclue (plan) alors que les MER 10e la travaillent (GM53–GM61) : d'accord ? ; formes de 11e
   gardées en 10e : distance dans un repère, carré inscrit dans un cercle, triangle rectangle isocèle (x² = 8) ?
+- **10e ch. 9 (28.11)** : défis eqfrac « robinets, peintres, imprimantes » (1/a + 1/b) gardés en 10e ou réservés à la 11e ?
 - **10e ch. 7 (28.11)** : défis de calcul littéral qui font résoudre une équation simple (« x pour un périmètre de 38 cm ») avant le
   chapitre 9 : gardés ? ; monomes N3 « quotient » en 10e LS ?
 - **10e (28.11)** : arith, premiers (« CT » au plan, travaillés dans les MER 10e) gardés ou retirés de l'année ? ; dec10 et

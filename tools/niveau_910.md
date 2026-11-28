@@ -71,6 +71,12 @@ chapitre 4) : en 10e, leur niveau 1 n'est plus un automatisme de l'année (règl
 8. **Pythagore (LC/LS)** — dans le plan, dans l'espace (LS) ; **pas de réciproque** ; valeur exacte √n (a√b en 11e).
 9. **Équations (LC/LS)** — 1er degré, mise en équation. E10-9-1 (MER10 FA198 j, FA199 f) : 2x + 1 = 4(2x + 4) − (4x + 8) ;
    1,2(x + 6) = 4,8 + 3x ; 5(x − 4) − 4(x + 1) = 4(x − 3) + 9.
+   E10-9-2 (MER10 FA198 d, g ; FA199 e, h ; FA200 g, n) : équations impossibles et indéterminées (2x + 1 = 2x + 1 ;
+   7x − 3 = 2x + 1 + 5x) ; x² qui s'annulent par simple distributivité (2x + x² = x² − 8 ; 6x(3x − 5) = 2x(9x − 3)).
+   E10-9-3 (FA192, FA191) : tester des nombres, y compris dans x² + 6 = 5x (tester n'est pas résoudre : le 2e degré à
+   résoudre reste en 11e). E10-9-4 (FA205, FA208, FA215, FA216, FA218, FA219) : prix du billet, angles d'un triangle,
+   âge du capitaine, « au tiers ajoutez 8, vous aurez la moitié », têtes et pattes, billets de deux sortes.
+   Écartés (plan de 10e : pas de double distributivité) : FA221 (x + 2)² − x², FA226 g, FA228.
 10. **Proportionnalité** — échelle, pourcentages (augmentation, diminution), pente ; règle de trois en reprise (niveau 3
    de 9e au moins). E10-10-1 : carte 1:25'000 → 1:50'000 ; plan d'appartement ; maquette 1:87. (Aires × k², volumes × k³ : 11e.)
 11. **Fonctions (LC/LS)** — tableaux, x ↦ ax + b, ax² ; tracés ; lire un graphique, reconnaître une situation de
@@ -223,6 +229,7 @@ la 10e : vérifié en 11e (prio, valnum, distrib, eq1, fracadd, litelab : aucune
 |---|---|---|---|
 | 7 Calcul littéral | litelab, valnum, reduire, monomes, distrib, litconv | cases 1–9, 11, 12 ✓ ; test de préparation `RICH.litt10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch7_28-11.md` |
 | 8 Pythagore | pyth, pythfig | cases 1–9, 11, 12 ✓ ; test de préparation `RICH.pyth10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch8_28-11.md` |
+| 9 Équations | eqverif, eq1, eqfrac, probeq | cases 1–7, 9, 11, 12 ✓ (8 : rappel eq1 de 10e) ; test de préparation `RICH.eq10` (T1–T6 ✓) ; **contrôle par l'enseignant (15, T7) à faire** | `archive/contenu_nickel10_ch9_28-11.md` |
 | 6 Puissances et racines | carres, rac, racenc, sci, scicalc, puiss, ensco | attend les décisions § 5 n° 5 | — |
 
 Ch. 7 (28.11, branche `agent/contenu7`) : + 8 formes de 10e (`q.co = [10]`, `variantes.js`) et 2 défis (programme de
@@ -240,3 +247,10 @@ E10-8-1 (MER GM62) : échelle, fenêtre à 6 m, pied à 2 m → √40 ≈ 6,32 m
 oblique → hauteur → aire) ; losange de diagonales 15 et 20 cm → côté 12,5 cm. E10-8-3 (GM63, GM64, LS) : armoire
 236 × 60 cm à redresser sous 2,5 m ; casier 80 × 150 × 60 cm et skis de 1,70 m. E10-8-4 (GM70) : hauteur issue de
 l'angle droit (AC = 6, AB = 10 → 4,8 cm). Contrôle : `tests/parcours.html#section=nickel10_ch8`.
+Ch. 9 (28.11, branche `agent/contenu8`) : + 13 formes de 10e (`q.co = [10]`, `variantes.js`, section « nickel 10e, chapitre
+9 ») et 2 défis (coffre, partage) ; rappel eq1 de 10e (TXT_CO : impossible, indéterminée, « − » devant une parenthèse) ;
+sujet de préparation de 10e = `RICH.eq10` (avant : `RICH.eq1c` de 1re Collège, avec le 2e degré). Correctif 9e : le sujet
+de 9C10 = `RICH.litt9` (`riche_9.js`, avant : `RICH.litt11`). Contrôle : `tests/parcours.html#section=nickel10_ch9`.
+Chapitres de 9e–10e qui tirent encore la banque d'une autre classe : 10C05 Unités (prop11), 10C06 Puissances et racines
+(no1c, 1re Collège), 10C11 Fonctions (fct11) [10C08 Pythagore : fait, pyth10].
+
