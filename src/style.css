@@ -1053,3 +1053,12 @@ html.ecran-ordi { scrollbar-gutter: stable; }
 .door-sq.dc .S { fill: none; stroke: var(--c); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
 .door-sq.dc .F { fill: var(--c); }
 .door-sq.dc .G { fill: var(--gold); }
+/* 28.11 (agent pepite-ecrans) : pépites et Mathélo, deux lignes courtes (Mon trésor, Mes grades) ; nombre de pépites en
+   doré, avec parcimonie (Mes grades, bilan) : --gold-ink sur --gold-soft ≥ 9:1, clair et sombre. */
+.two-counts { display: flex; flex-direction: column; gap: 2px; color: var(--ink-soft); }
+.two-counts b { color: var(--ink); }
+.yp-gems, .yp-row .yp-n { color: var(--gold-ink); background: var(--gold-soft); padding: 0 4px; border-radius: 4px; font-weight: 700; }
+/* 28.11 (décision pépites seul score) : carte « Mon niveau » de Mon trésor ; jauge bleue (pas d'or : le niveau n'est pas un score) */
+.niv-card h3 { margin: 0; }
+.niv-card .spark { width: 100%; height: 48px; }
+.niv-num { white-space: nowrap; font-size: max(0.75rem, 12px); }

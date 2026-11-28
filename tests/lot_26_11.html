@@ -68,7 +68,7 @@ sec("B règles", () => {
 // ---------- C. Revue d'un testeur ----------
 sec("C", () => {
   const L = Badges.list({ profile: { system: "CH", grade: 11, track: "college" }, notions: {}, streak: { count: 0 } }), i1 = L.findIndex((b) => b.id === "premier"), i3 = L.findIndex((b) => b.id === "serie3");
-  if (i3 !== i1 + 1 || L[i3].fam !== "reg") fail("badge « 3 jours d'affilée » absent ou mal placé");
+  if (i3 !== i1 + 1 || L[i3].fam !== "reg") fail("badge « Filon de 3 jours » absent ou mal placé") /* 28.11 : badge renommé (enseignant) */;
   else {
     const st = Engine.newState({ system: "CH", grade: 11, track: "college", minutes: 5 }), d0 = "2026-11-02";
     const at = (d) => { const real = Date; window.Date = class extends real { constructor(...a) { super(...(a.length ? a : [d + "T10:00:00"])); } static now() { return new real(d + "T10:00:00").getTime(); } }; try { Engine.finishDay(st, 1, 1); } finally { window.Date = real; } };
@@ -179,7 +179,9 @@ sec("UI", () => {
   screenSummary(); const t = app.textContent;
   if (/défi du jour/.test(t) || !/interrompue/.test(t)) fail("bilan : message d'une séance interrompue");
   if (/Mathélo/.test(t)) fail("bilan : « Mathélo » visible");
-  fresh(); homeTab = "prog"; screenHome(); if (!/Mathélo = ton niveau/.test(app.textContent)) fail("Progrès : explication Mathélo / points de l'année absente");
+  fresh(); homeTab = "prog"; screenHome(); if (!/Mon niveau/.test(app.textContent) || !/(Niveau (à consolider|en construction|en bonne voie|solide|très solide)|Au niveau attendu)/.test(app.textContent) || !/ne se perdent jamais/.test(app.textContent)) fail("Mon trésor : carte « Mon niveau » (palier en mots) absente"); /* 28.11, décision pépites seul score : le Mathélo n'est plus qu'un indicateur de niveau, dans Mon trésor (avant : « Mathélo = ton niveau » dans Progrès) */
+  fresh(); screenGrades(); if (/Mathélo/.test(app.textContent)) fail("Mes grades : « Mathélo » visible"); /* 28.11, décision pépites seul score */
+  fresh(); screenPlacementDone(); if (/Mathélo/.test(app.textContent)) fail("fin du positionnement : « Mathélo » visible"); /* 28.11, décision pépites seul score */
   // 6. Semaine : le positionnement ne compte pas.
   fresh(); state.history = []; Engine.placementResult(state, "eq1", true, 2); Engine.placementResult(state, "prio", false, 2); if (Engine.week(state).n !== 0) fail("semaine : le positionnement est compté");
   // 7. Pas à pas : la valeur attendue est donnée quand l'explication ne la contient pas.

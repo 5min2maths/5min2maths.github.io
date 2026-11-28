@@ -73,10 +73,10 @@
     state.prep = { ids, date: addDays(day(), 1), start: addDays(day(), -1) }; state.autotest = null;
     const t = prepTask("tour"), n = tourPlan().plan.length;
     ok(new RegExp("^" + n + " question").test(t.text) && !/test rapide|ce test/.test(t.text) && /évaluation/.test(t.text), "J−1 : « " + t.text + " » (" + n + " questions au plan)");
-    ok(/Tes erreurs/.test(PREP_TASK.tour.label) && !/ce test|test rapide/.test(PREP_TASK.tour.text), "J−1 : texte par défaut sans « ce test » ni test rapide");
-    state.prep.date = addDays(day(), 2); ok(/Tes erreurs/.test(tomorrowLabel()), "bilan à J−2 : « Demain : " + tomorrowLabel() + " »");
+    ok(/Tes pépites à polir/.test(PREP_TASK.tour.label) && !/ce test|test rapide/.test(PREP_TASK.tour.text), "J−1 : texte par défaut sans « ce test » ni test rapide"); /* 28.11 : J−1 « Tes erreurs » → « Tes pépites à polir » (enseignant) */
+    state.prep.date = addDays(day(), 2); ok(/Tes pépites à polir/.test(tomorrowLabel()), "bilan à J−2 : « Demain : " + tomorrowLabel() + " »");
     state.prep.date = addDays(day(), 1); ok(/jour J/.test(tomorrowLabel()), "bilan à J−1 : « Demain : " + tomorrowLabel() + " »");
-    state.prep.date = day(); ok(!/jour J|Tes erreurs/.test(tomorrowLabel()), "bilan le jour J : format ordinaire (" + tomorrowLabel() + ")");
+    state.prep.date = day(); ok(!/jour J|Tes pépites à polir/.test(tomorrowLabel()), "bilan le jour J : format ordinaire (" + tomorrowLabel() + ")");
   } catch (e) { fail.push("EXC j1 " + e.message + " " + (e.stack || "").split("\n").slice(0, 2).join(" ")); }
 
   /* 3. Scènes : une par sujet ; une scène du sujet n'est pas reprise par les questions des jours suivants. */

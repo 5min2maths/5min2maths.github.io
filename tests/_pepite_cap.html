@@ -55,7 +55,7 @@ if (!FRAME) {
   const W = innerWidth, H = innerHeight, tag = W + "×" + H + (P.get("ecran") !== "auto" ? " (" + P.get("ecran") + ")" : "") + " : ";
   const out = [], fail = [];
   const ok = (c, m) => (c ? out : fail).push((c ? "ok " : "ÉCHEC ") + tag + m);
-  const newSt = (g) => { g = g || 11; for (const k of Object.keys(UI)) if (!["fs", "vib", "ecran"].includes(k)) delete UI[k]; uiSave(); homeTab = "today"; state = Engine.newState({ system: "CH", grade: g, track: g >= 12 ? "college" : "co", minutes: 5 }); Engine.autoInit(state); state.tourDone = true; state.placed = true; state.homeVisits = 9; save(); };
+  const newSt = (g) => { g = g || 11; for (const k of Object.keys(UI)) if (!["fs", "vib", "ecran"].includes(k)) delete UI[k]; uiSave(); homeTab = "today"; state = P.has("fr") ? Engine.newState({ system: "FR", grade: g === 11 ? 9 : g, track: "college", minutes: 5 }) /* 28.11 (agent pepite-ecrans) : profil France (#fr) */ : Engine.newState({ system: "CH", grade: g, track: g >= 12 ? "college" : "co", minutes: 5 }); Engine.autoInit(state); state.tourDone = true; state.placed = true; state.homeVisits = 9; save(); };
   const opt = (o) => Object.assign({ eyebrow: "Séance · question 2 sur 5", onDone: () => 3, onNext: () => 0, track: "" }, o || {});
   const qWith = (pred) => { for (const n of NOTIONS) for (const d of [2, 1, 3]) { let q = null; try { q = Engine.build(n.id, d, 11); } catch (e) {} if (q && pred(q)) return Engine.finalize(state, n.id, q); } return null; };
   const errs = () => { let k = 0; for (const n of NOTIONS) { if (k >= 3) break; let q = null; try { q = Engine.build(n.id, 1, 11); } catch (e) {} if (q && q.code && !q.parts && carnetAdd(n.id, 1, q.code, "", "")) k++; } save(); };
@@ -65,7 +65,7 @@ if (!FRAME) {
     pave: () => { newSt(); renderQuestion(qWith((q) => !q.fig && !q.parts && q.spec && q.spec.kind === "value"), opt({ onNotYet: () => 0, onEasy: () => 0 })); },
     probleme: () => { newSt(); session = { plan: ["x"], i: 0, score: 0, answered: 0, start: Date.now(), elo0: state.elo.r, ids: new Set(), weekly: true }; let q = null; for (const n of NOTIONS) { if (!hasProb(n.id)) continue; try { q = Engine.make(state, n.id, 4); } catch (e) { q = null; } if (q && q.parts && q.parts.length >= 3 && String(q.q).length > 120) break; } renderQuestion(q, opt({ eyebrow: "⛏️ La mine · problème de la semaine" /* 27.11 */ })); },
     lecon: () => { newSt(); screenLesson("fractout", () => {}); },
-    bilan: () => { newSt(); session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 4, score: 3, answered: 4, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]) }; screenSummary(); },
+    bilan: () => { newSt(); state.streak = { count: 1, last: day(), best: 1 } /* 28.11 : comme après une vraie séance (Engine.finishDay à chaque réponse) */; session = { fmt: "revision", plan: ["eq1|1|rev", "eq1|1|rev", "eq1|1|rev", "eq1|1|rev"], i: 4, score: 3, answered: 4, start: Date.now() - 300000, elo0: state.elo.r - 12, ids: new Set(["eq1"]) }; screenSummary(); },
     progres: () => { newSt(); homeTab = "prog"; screenHome(); },
     competences: () => { newSt(); screenComps(); },
     reglages: () => { newSt(); screenSettings(); },
@@ -83,10 +83,39 @@ if (!FRAME) {
     chercheurs: () => { newSt(); screenHistory(Histoire.pick(state).k, () => 0); },
     jourj: () => { newSt(); homeTab = "test"; screenHome(); },
     tresor: () => { newSt(); homeTab = "prog"; screenHome(); },
-    bilanmine: () => { newSt(); session = { plan: ["eq1|4"], i: 1, score: 1, answered: 1, start: Date.now() - 300000, elo0: state.elo.r - 8, ids: new Set(["eq1"]), weekly: true, ypg: 10 }; screenSummary(); },
+    bilanmine: () => { newSt(); state.streak = { count: 1, last: day(), best: 1 } /* 28.11 : comme après une vraie séance (Engine.finishDay à chaque réponse) */; session = { plan: ["eq1|4"], i: 1, score: 1, answered: 1, start: Date.now() - 300000, elo0: state.elo.r - 8, ids: new Set(["eq1"]), weekly: true, ypg: 10 }; screenSummary(); },
     parent: () => { newSt(); errs(); state.streak = { count: 3, last: day(), best: 3 }; state.history = [0, 1, 3, 4].map((k) => ({ date: addDays(day(), -k), n: 5, score: 4 })); save(); Backup.encode(state).then((code) => screenParentView(null, { code, preview: true, back: () => 0 })); },
   };
+  /* 28.11 (agent pepite-ecrans) : écrans hors accueil (question avec retour, grades, badges, sauvegarde, reprise,
+     page parent à envoyer, positionnement fini, bilans, confidentialité) ; #inv = textes visibles de tous les écrans. */
+  const feed = (wrong) => { const q = qWith((q) => !q.fig && !q.parts && q.spec && q.spec.kind === "value"); renderQuestion(q, opt({ onNotYet: () => 0, onEasy: () => 0 })); const inp = document.getElementById("ans"); inp.value = wrong ? "123457" : String(q.spec.value != null ? q.spec.value : q.a); inp.dispatchEvent(new Event("input")); document.getElementById("check").click(); };
+  Object.assign(SCR, {
+    faux: () => { newSt(); feed(true); },
+    juste: () => { newSt(); feed(false); },
+    grades: () => { newSt(); ypAdd(state, 37); save(); screenGrades(); },
+    badges: () => { newSt(); state.badges = { serie3: day(), first: day() }; save(); screenComps(); },
+    sauvegarde: () => { newSt(); screenBackup(); },
+    reprise: () => { newSt(); screenRestore(); },
+    envoyer: () => { newSt(); errs(); screenParentShare(); },
+    depart: () => { newSt(); screenPlacementDone(); },
+    bilanfaible: () => { newSt(); state.streak = { count: 1, last: day(), best: 1 } /* 28.11 : comme après une vraie séance (Engine.finishDay à chaque réponse) */; session = { plan: ["eq1|1", "eq1|1", "eq1|1", "eq1|1", "eq1|1"], i: 5, score: 1, answered: 5, start: Date.now() - 300000, elo0: state.elo.r + 14, ids: new Set(["eq1"]), ypg: 9 }; screenSummary(); },
+    bilanpolir: () => { newSt(); errs(); session = { carnet: true, plan: ["eq1|1|carnet", "eq1|1|carnet", "eq1|1|carnet"], i: 3, score: 2, answered: 3, start: Date.now() - 200000, elo0: state.elo.r - 5, ids: new Set(["eq1"]), fixedN: 2, ypg: 14 }; screenSummary(); },
+    perdu: () => { newSt(); state.streak = { count: 3, last: addDays(day(), -4), best: 3 }; state.history = [{ date: addDays(day(), -4), n: 5, score: 4 }]; save(); homeTab = "today"; screenHome(); },
+    joker: () => { newSt(); state.streak = { count: 4, last: addDays(day(), -2), best: 4 }; save(); homeTab = "today"; screenHome(); },
+    confid: () => { newSt(); screenPrivacy(() => 0); },
+    legal: () => { newSt(); screenLegal(() => 0); },
+    niveau: () => { newSt(); state = null; draft = {}; screenLevel(); },
+    /* 28.11 (décision pépites seul score) : Mon trésor avec 6 semaines d'historique du Mathélo (carte « Mon niveau ») */
+    tresorlog: () => { newSt(); state.elo.log = [42, 35, 28, 21, 14, 7, 2].map((k, i) => [addDays(day(), -k), 1210 + i * 18]); state.elo.r = 1318; state.elo.n = 140; save(); homeTab = "prog"; screenHome(); },
+  });
   const show = (k) => { reseed(); session = null; document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); SCR[k](); document.querySelectorAll("#tour, .collector-bg").forEach((t) => t.remove()); window.scrollTo(0, 0); };
+  if (P.has("inv")) {
+    const T = [], toasts = []; const t0 = window.toast; window.toast = (m, ms) => { toasts.push(m); return t0(m, ms); };
+    const ks = P.get("inv") ? P.get("inv").split(",") : Object.keys(SCR);
+    (async () => { for (const k of ks) { try { show(k); } catch (e) { T.push("## " + k + " EXC " + e.message); continue; } await new Promise((r) => setTimeout(r, 300)); T.push("## " + k + "\n" + app.innerText.replace(/\n{2,}/g, "\n") + (document.getElementById("tour") ? "\n[tour] " + document.getElementById("tour").innerText : "")); }
+      T.push("## toasts\n" + toasts.join("\n")); const pre = document.createElement("pre"); pre.id = "inv"; pre.textContent = T.join("\n"); document.body.appendChild(pre); })();
+    return;
+  }
   if (P.has("cap")) { try { show(P.get("cap")); } catch (e) { document.body.insertAdjacentHTML("afterbegin", "<pre>EXC " + e.message + "</pre>"); } return; }
   try {
     const H5 = document.documentElement;
