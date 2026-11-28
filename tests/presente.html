@@ -22,8 +22,10 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     ok(app.querySelectorAll(".pz-s").length >= 6, "sections élèves : " + app.querySelectorAll(".pz-s").length);
     ok(app.querySelector("#pztry .qtext") && app.querySelector("#pztry .qtext").textContent.trim(), "vraie question affichée");
     ok(app.querySelector(".pz-qr svg"), "QR code");
-    /* 28.11 (univers Pépite²) : pépites et Mathélo présentés côte à côte, chacun avec ce qu'il mesure ; ancien vocabulaire absent (l'adresse 5min2maths.github.io reste, elle). */
-    ok(/Pépites = ton travail de l'année, Mathélo = ton niveau/i.test(txt()), "pépites (travail) et Mathélo (niveau) distingués");
+    /* 28.11 (univers Pépite²) : ancien vocabulaire absent (l'adresse 5min2maths.github.io reste, elle).
+       28.11 après-midi (décision « pépites = seul score ») : les pépites sont le score à poursuivre ; le Mathélo n'est plus présenté comme un score (il est dans Mon trésor, carte Mon niveau). */
+    ok(/des pépites : ton travail de l'année, elles ne se perdent jamais/i.test(txt()) && /niveau, lui, se lit en mots dans Mon trésor/.test(txt()), "pépites = score, niveau dans Mon trésor");
+    ok(!/Mathélo/.test(txt()), "élèves : le Mathélo n'est plus présenté");
     { const m = txt().match(/.{0,40}(points de l'année|carnet d'erreurs|5 minutes de maths|5min2maths(?![-./])|\bsérie\b).{0,40}/i); ok(!m, "élèves : pas d'ancien vocabulaire" + (m ? " : " + m[0] : "")); }
     for (const g of [9, 10, 11, 12]) {
       app.querySelector(`#pzg1 button[data-v="${g}"]`).click();
@@ -40,8 +42,8 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     history.replaceState(null, "", "#parents"); ok(presentRoute() === true, "route #parents");
     ok(app.querySelectorAll(".pz-s").length >= 7, "sections parents");
     ok(/accompagner, pas surveiller/.test(txt()) && /ne verrez pas/.test(txt()), "ton : accompagner, ce qui n'est pas montré");
-    /* 28.11 : phrase validée « a trouvé N pépites et en a poli M », Mathélo non montré (plus « ni score »). */
-    ok(/a trouvé 38\spépites et en a poli 2/.test(txt()) && /ni Mathélo/.test(txt()), "parents : pépites trouvées et polies, Mathélo non montré");
+    /* 28.11 : phrase validée « a trouvé N pépites et en a poli M », niveau non montré (plus « ni score » ; « ni Mathélo » → « ni niveau » l'après-midi). */
+    ok(/a trouvé 38\spépites et en a poli 2/.test(txt()) && /ni niveau/.test(txt()) && !/Mathélo/.test(txt()), "parents : pépites trouvées et polies, niveau non montré");
     { const m = txt().match(/.{0,40}(points de l'année|carnet d'erreurs|5 minutes de maths|5min2maths(?![-./])|\bsérie\b).{0,40}/i); ok(!m, "parents : pas d'ancien vocabulaire" + (m ? " : " + m[0] : "")); }
     for (const g of [9, 11, 12]) {
       app.querySelector(`#pzg2 button[data-v="${g}"]`).click();
@@ -63,8 +65,8 @@ const txt = () => app.textContent.replace(/\s+/g, " ");
     ok(app.querySelectorAll(".pz-cov-r").length === cov.length, "barres de couverture");
     ok(app.querySelectorAll(".pz-loop-n").length === 5, "boucle d'une séance");
     ok(/ne fait pas/.test(txt()) && /plan d'études/i.test(txt()), "limites et programme présentés");
-    /* 28.11 : enseignants, pépites (travail) et Mathélo (niveau) distingués ; pas d'ancien vocabulaire. */
-    ok(/Pépites = le travail de l'année, Mathélo = le niveau/.test(txt()), "enseignants : pépites et Mathélo distingués");
+    /* 28.11 : enseignants, pépites = seul score, niveau en mots dans Mon trésor (décision de l'après-midi) ; pas d'ancien vocabulaire. */
+    ok(/pépites .{0,70}sont le seul score/.test(txt()) && /niveau est dit en mots/.test(txt()), "enseignants : pépites seul score, niveau en mots");
     { const m = txt().match(/.{0,40}(points de l'année|carnet d'erreurs|5 minutes de maths|5min2maths(?![-./])|\bsérie\b).{0,40}/i); ok(!m, "enseignants : pas d'ancien vocabulaire" + (m ? " : " + m[0] : "")); }
     for (const g of [9, 11, 12]) {
       app.querySelector(`#pzg3 button[data-v="${g}"]`).click();
