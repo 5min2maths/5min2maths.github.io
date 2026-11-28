@@ -45,3 +45,15 @@ Vérification : pages interface (section animations comprise), presente, fumee, 
 suite rapide : 43 pages vertes ; `poids.py ordre` en échec seulement parce que le docs/ suivi (10 h 14) est plus ancien
 que les générateurs de master (12 h 17, notions uvol, prop, pct…, sans rapport) : après `build.py` local (non commité,
 docs/ restauré), 0 échec.
+
+## Retours de l'enseignant sur les GIF (28.11)
+
+- « Parasite bleu » sur le bilan = la gerbe de symboles `burst()` (π √ ∞ empilés au départ). Remplacée par des
+  **étincelles dorées ✦** (--gold / --gold-deep, tailles variées, ≈ 0,8 s, aria-hidden, rien en mouvement réduit), en
+  éventail depuis la carte concernée, ou autour du titre du bilan quand la carte est sous le pli (cas courant à 360 × 640).
+  Réservées aux **grands moments** : nouveau grade, nouveau badge, « Ton niveau monte ! » (`bigMoment`). Plus de gerbe à
+  chaque bonne réponse ; `burst()` sans carte (leçons actives, QCM, sujet, exercices riches : src/active.js, qcm.js,
+  sujet.js, riche_11c.js, non modifiés) ne fait plus rien.
+- « Je n'ai pas vu la pépite qui s'envole » : pépite 46 × 30 px, « +N » 1,4 rem en gras doré cerclé (--gold-ink sur
+  --gold-soft), « pop » 0,6 → 1,15 → 1, montée en légère courbe et fondu, **0,7 s** ; GIF n° 1 à 35 ms par image (23 images).
+- Nouveaux GIF : `2_bilan_badge.gif`, `6_grand_moment_grade.gif` ; tous dans `voir_animations.html`.

@@ -2492,7 +2492,6 @@ function renderProblem(q, opt) {
     const frac = ok.filter(Boolean).length / q.parts.length, factor = [1, 1, 2 / 3, 1 / 3][Math.min(tries, 3)] || 1 / 3;
     const score = giveUp && tries === 0 ? 0 : Math.round(frac * factor * 100) / 100;
     if (S) { S.issue = frac === 1 ? (tries === 1 ? "ok1" : "ok2") : giveUp && tries === 0 ? "idk" : ok.some(Boolean) ? "partiel" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-    if (frac === 1) burst();
     buzz(frac === 1);
     const yp0 = ypPts(); /* 28.11 (animations, n° 1) */
     const delta = opt.onDone({ solved: frac === 1, tries, partial: score, dontKnow: !!(giveUp && tries === 0), parts: [ok.filter(Boolean).length, q.parts.length] });
@@ -2617,7 +2616,6 @@ function renderQuestion(q, opt) {
     setTimeout(() => { const f = document.getElementById("fb"); if (f && f.getBoundingClientRect().top > innerHeight * 0.75) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80);
     const res = { solved, tries, dontKnow, diag: solved ? null : lastDiag, ans: solved ? null : lastAns }; // 22.11 : diag et réponse pour le carnet (Ma fiche)
     if (S) { S.issue = solved ? (tries === 1 ? "ok1" : "ok2") : dontKnow ? "idk" : "faux"; S.essais = tries; S.sec = sigSec(S); }
-    if (solved) burst();
     const yp0 = ypPts(); /* 28.11 (animations, n° 1) : pépites gagnées par cette question → pépite qui s'envole */
     const delta = opt.onDone(res);
     if (solved) nugFly(inp, ypPts() - yp0);
@@ -2772,21 +2770,24 @@ function runGuide(q, box, done) {
    vécu comme une sanction). Style : celui de l'écran d'ouverture (.splash). GIF : tests/_shots/app/animations/. */
 const NUG_MINI = () => (typeof NUG_IC === "string" ? NUG_IC : '<i class="nug-dot"></i>'); /* même icône que les compteurs (NUG_IC, src/curriculum.js) */
 // n° 1 : bonne réponse → une petite pépite et « +N » partent de la zone de réponse vers le compteur de pépites s'il est
-// visible, sinon vers le haut, et s'effacent (≈ 0,45 s).
+// visible, sinon vers le haut, et s'effacent (≈ 0,7 s ; 28.11 : d'abord 0,45 s, pas assez visible).
 function nugFly(from, n) {
   if (!(n > 0) || reducedMotion()) return;
   const r = [from, document.getElementById("check"), app.querySelector(".card.pop")].map((e) => e && e.getBoundingClientRect && e.getBoundingClientRect()).find((b) => b && b.width && b.bottom > 0 && b.top < innerHeight);
   if (!r) return;
   const f = document.createElement("div"); f.className = "nugfly"; f.setAttribute("aria-hidden", "true");
   f.innerHTML = `<span class="nugfly-ic">${NUG_MINI()}</span><b>+${n}</b>`;
-  const x0 = Math.min(innerWidth - 70, Math.max(8, r.left + r.width / 2 - 30)), y0 = Math.max(8, r.top + Math.min(r.height, 60) / 2 - 16);
+  const x0 = Math.min(innerWidth - 108, Math.max(8, r.left + r.width / 2 - 50)), y0 = Math.max(8, r.top + Math.min(r.height, 60) / 2 - 20);
   f.style.left = x0 + "px"; f.style.top = y0 + "px";
   document.body.appendChild(f);
   const tg = [...document.querySelectorAll(".eb-unit, .yp-gems, .yp-row .yp-n")].map((e) => e.getBoundingClientRect()).find((b) => b.width && b.bottom > 0 && b.top < innerHeight);
-  const dx = tg ? tg.left + tg.width / 2 - (x0 + 30) : 0, dy = tg ? tg.top + tg.height / 2 - (y0 + 16) : -Math.min(130, y0 + 10);
-  const a = f.animate([{ transform: "translate(0,0) scale(.7)", opacity: 0 }, { transform: "translate(0,-10px) scale(1.12)", opacity: 1, offset: 0.25 },
-    { transform: `translate(${dx}px,${dy}px) scale(${tg ? 0.6 : 0.9})`, opacity: 0 }], { duration: 450, easing: "cubic-bezier(.3,.7,.4,1)", fill: "forwards" });
-  a.onfinish = () => f.remove(); setTimeout(() => f.remove(), 900);
+  /* 28.11 (enseignant : « je n'ai pas vu la pépite qui s'envole ») : plus grosse, « pop » au départ (0,6 → 1,15 → 1), puis
+     montée en légère courbe et fondu, 0,7 s en tout. */
+  const dx = tg ? tg.left + tg.width / 2 - (x0 + 50) : 26, dy = tg ? tg.top + tg.height / 2 - (y0 + 20) : -Math.min(150, y0 + 10);
+  const a = f.animate([{ transform: "translate(0,0) scale(.6)", opacity: 0 }, { transform: "translate(0,-4px) scale(1.15)", opacity: 1, offset: 0.16 },
+    { transform: "translate(0,-8px) scale(1)", opacity: 1, offset: 0.3 }, { transform: `translate(${dx * 0.35}px,${dy * 0.6}px) scale(1)`, opacity: 1, offset: 0.65 },
+    { transform: `translate(${dx}px,${dy}px) scale(${tg ? 0.6 : 0.92})`, opacity: 0 }], { duration: 700, easing: "cubic-bezier(.35,.6,.45,1)", fill: "forwards" });
+  a.onfinish = () => f.remove(); setTimeout(() => f.remove(), 1100);
 }
 // n° 2 : bilan → le nombre de pépites gagnées défile de 0 à N (0,6 s). Le texte réel reste « +N » dans le DOM : le chiffre
 // affiché pendant le défilement est un compteur CSS (@property --ypc, style.css) ; sans @property, rien ne défile.
@@ -2818,22 +2819,30 @@ function toast(msg, ms = 2200, cls) {
   setTimeout(() => t.remove(), ms);
 }
 
-function burst() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const b = document.createElement("div");
-  b.className = "burst";
-  const syms = ["π", "√", "∞", "Σ", "x²", "½", "Δ", "∫", "≈", "%", "θ", "+"];
-  const cx = window.innerWidth / 2, cy = window.innerHeight * 0.55;
-  for (let i = 0; i < 22; i++) {
-    const s = document.createElement("span"), a = Math.random() * Math.PI * 2, r = 120 + Math.random() * 180;
-    s.textContent = syms[i % syms.length];
-    s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.fontSize = 16 + Math.random() * 18 + "px";
-    s.style.setProperty("--dx", Math.cos(a) * r + "px"); s.style.setProperty("--dy", Math.sin(a) * r - 80 + "px"); s.style.setProperty("--r", (Math.random() * 120 - 60) + "deg");
+/* 28.11 (enseignant, GIF du bilan : la gerbe de symboles π √ ∞ partait en pile au centre et faisait une tache bleue) :
+   gerbe d'ÉTINCELLES DORÉES ✦ (style de l'écran d'ouverture), en éventail depuis le haut de la carte concernée, ≈ 0,8 s,
+   décorative, rien en mouvement réduit. Réservée aux GRANDS MOMENTS (nouveau grade, nouveau badge, « Ton niveau monte ! ») :
+   plus de gerbe à chaque bonne réponse (la pépite qui s'envole suffit). burst() sans carte (leçons actives, QCM, sujet,
+   exercices riches) ne fait plus rien. */
+function burst(el) {
+  if (!el || !el.getBoundingClientRect || reducedMotion()) return;
+  const r = el.getBoundingClientRect(); if (!r.width || r.bottom < 0 || r.top > innerHeight) return;
+  const b = document.createElement("div"); b.className = "burst"; b.setAttribute("aria-hidden", "true");
+  // carte : éventail vers le haut depuis son bord supérieur ; élément près du haut de l'écran (titre) : tout autour, aplati
+  const top = r.top < 140, cx = r.left + Math.min(r.width, 300) / 2 + (top ? 0 : (r.width - Math.min(r.width, 300)) / 2), cy = top ? r.top + r.height / 2 : Math.max(12, r.top + 18), N = 16;
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement("span"), a = top ? 2 * Math.PI * (i / N) + (Math.random() - 0.5) * 0.3 : Math.PI * (1.08 + 0.84 * (i / (N - 1))) + (Math.random() - 0.5) * 0.12, d = (70 + Math.random() * 90) * (top ? 1.1 : 1);
+    s.textContent = "✦"; s.className = i % 3 ? "" : "deep";
+    s.style.left = cx + (Math.random() - 0.5) * Math.min(r.width * 0.5, 160) + "px"; s.style.top = cy + "px"; s.style.fontSize = 10 + Math.random() * 14 + "px";
+    s.style.setProperty("--dx", Math.cos(a) * d + "px"); s.style.setProperty("--dy", Math.sin(a) * d * (top ? 0.55 : 1) + "px"); s.style.setProperty("--r", (Math.random() * 90 - 45) + "deg");
+    s.style.animationDelay = Math.round(Math.random() * 90) + "ms";
     b.appendChild(s);
   }
   document.body.appendChild(b);
   setTimeout(() => b.remove(), 1000);
 }
+// La carte est souvent sous le pli au téléphone (360 × 640) : sinon, les étincelles partent du titre du bilan.
+const bigMoment = () => { const c = app.querySelector(".grade-up, .bdg-new"), v = c && c.getBoundingClientRect(); burst(v && v.top < innerHeight - 40 && v.bottom > 0 ? c : app.querySelector("h2") || c); };
 
 // Identifiant anonyme de l'appareil (aléatoire, sans lien avec une personne) : sert uniquement à compter les testeurs.
 function deviceId() {
@@ -3255,7 +3264,7 @@ function screenSummary() {
     ${newGrade}${nivUp}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">✨ Continuer à polir</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
-    if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+    if (nb || newGrade || nivUp) setTimeout(bigMoment, 250); /* 28.11 : étincelles dorées, grands moments seulement */ { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
     updBanner("bilan"); /* 27.11 : nouvelle version prête */ ypCount(); /* 28.11 (animations, n° 2) */
     document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après « À polir », retour sur la page de l'onglet) */
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
@@ -3284,7 +3293,7 @@ function screenSummary() {
   ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
-  if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
+  if (nb || newGrade || nivUp) setTimeout(bigMoment, 250); /* 28.11 : étincelles dorées, grands moments seulement */ { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
   updBanner("bilan"); ypCount(); /* 28.11 (animations, n° 2) : pépites qui défilent */
   document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après le problème de la semaine, « Retour à l'accueil » rouvrait la page du problème) */
   const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };

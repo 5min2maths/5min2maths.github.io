@@ -37,6 +37,12 @@ addEventListener("load", () => setTimeout(() => {
     const b = app.querySelector(".card.streak"); if (b) b.scrollIntoView = null, window.scrollTo(0, 0);
   } else if (A === "chip") {
     state.streak = { count: 4, best: 5, last: day() }; flameChip = true; screenHome();
+  } else if (A === "badge") {
+    const id = ids()[0]; sessQ(id, 4, 4); session.ypg = ypAdd(state, 14); state.streak = { count: 3, best: 5, last: day() }; state.badgesNew = [Badges.list(state)[0].id]; screenSummary();
+    bigMoment();
+  } else if (A === "grade") {
+    const id = ids()[0]; ypSync(); state.yp.pts = 1790; sessQ(id, 4, 4); session.ypg = ypAdd(state, 14); state.streak = { count: 3, best: 5, last: day() }; screenSummary();
+    bigMoment();
   } else if (A === "home") {
     ypSync(); state.yp.pts = 1700; state.streak = { count: 4, best: 5, last: day() }; screenHome();
   } else if (A === "grades") {

@@ -80,7 +80,7 @@ puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11
   (sonde corrigée : elle comptait toutes les histoires comme pour un 9e). Reste : 1C grandeurs (`exactes`), 3e–4e Collège.
 - **`/app animations`** (validé 28.11, n° 1 à 5) : FAIT sur `agent/app2`, **GIF à valider** par l'enseignant
   (`tests/_shots/app/animations/*.gif`, régénérer : `tests/_gif_animations.py`), puis fusion. Pépite « +N » qui s'envole
-  de la réponse (0,45 s), pépites qui défilent au bilan (0,6 s), éclat doré sur « Polie » (0,45 s), flamme du filon qui
+  de la réponse (0,7 s, plus grosse depuis le retour du 28.11), pépites qui défilent au bilan (0,6 s), éclat doré sur « Polie » (0,45 s), flamme du filon qui
   grossit (bilan + en-tête, 0,45 s), barre de séance qui glisse (0,45 s) ; rien en mouvement réduit, rien ne bloque.
   Avec : emoji 🟡 remplacé partout par une mini-pépite dessinée (`NUG_IC`, src/curriculum.js ; captures
   `icone_avant_apres_*.png`). GIF validés (28.11) ; puis gerbe de symboles (burst) remplacée par des étincelles dorées ✦,

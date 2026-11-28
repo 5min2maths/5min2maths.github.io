@@ -390,6 +390,9 @@ try {
   ok(r.gain > 0 && r.f && r.f.getAttribute("aria-hidden") === "true" && r.f.textContent.trim() === "+" + r.gain, "1 pépite qui s'envole « +" + r.gain + " » : " + (r.f && r.f.textContent));
   ok(r.f && getComputedStyle(r.f).pointerEvents === "none", "1 pépite : pointer-events none");
   const nx = document.getElementById("nx"); ok(nx && !nx.disabled, "1 « Continuer » utilisable tout de suite");
+  // 28.11 (enseignant) : plus de gerbe à chaque bonne réponse (la pépite suffit) ; pépite plus visible (0,7 s)
+  ok(!document.querySelector(".burst"), "1 pas de gerbe à une bonne réponse");
+  ok(r.f && r.f.getAnimations().some((x) => x.effect.getTiming().duration === 700), "1 envol de 0,7 s");
   // 5. barre de séance : glisse jusqu'à la largeur « après la réponse »
   const bar = app.querySelector(".eyebrow .pbar > i"); ok(bar && bar.style.width === "50%" && /width/.test(getComputedStyle(bar).transitionProperty), "5 barre : 50 % avec transition (" + (bar && bar.style.width) + ")");
   // écran suivant de la même séance : part de 50 % (pas de saut en arrière, même pour « Refaire »)
@@ -402,7 +405,14 @@ try {
   ok(t && t.classList.contains("shine") && t.textContent === "✨ Polie ! Une pépite de plus ✓", "3 message « Polie » avec éclat");
   // 2. bilan : le texte réel reste « +N pépites » ; défilement par compteur CSS
   session = { fmt: "revision", plan: [ids[0] + "|1|rev", ids[0] + "|1|rev", ids[0] + "|1|rev"], i: 3, score: 2, answered: 3, start: Date.now() - 300000, elo0: state.elo.r, ids: new Set([ids[0]]), ypg: ypAdd(state, 9), filonUp: true };
-  state.streak = { count: 4, best: 5, last: day() }; screenSummary();
+  state.streak = { count: 4, best: 5, last: day() }; state.badgesNew = [Badges.list(state)[0].id]; document.querySelectorAll(".burst").forEach((e) => e.remove()); screenSummary();
+  // 28.11 : grand moment (badge) : étincelles dorées ✦ depuis la carte, décoratives ; rien en mouvement réduit
+  ok(app.querySelector(".bdg-new"), "badge : carte « Nouveau badge »");
+  bigMoment(); const bu = document.querySelector(".burst");
+  ok(bu && bu.getAttribute("aria-hidden") === "true" && bu.children.length >= 10 && [...bu.children].every((x) => x.textContent === "✦"), "grand moment : étincelles ✦");
+  document.querySelectorAll(".burst").forEach((e) => e.remove()); burst(); ok(!document.querySelector(".burst"), "burst() sans carte : rien");
+  window.matchMedia = (m) => (/reduced-motion/.test(m) ? { matches: true, addEventListener() {}, addListener() {} } : mm.call(window, m));
+  bigMoment(); ok(!document.querySelector(".burst"), "grand moment : rien en mouvement réduit"); window.matchMedia = mm;
   const c = app.querySelector(".yp-row .yp-cnt");
   ok(c && /^\+\d+ pépites?$/.test(c.parentNode.textContent.trim()) && c.textContent === String(session.ypg), "2 bilan : « +" + session.ypg + " pépites » dans le texte : " + (c && c.parentNode.textContent));
   ok(!(window.CSS && CSS.registerProperty) || c.classList.contains("cnt"), "2 bilan : défilement lancé");
