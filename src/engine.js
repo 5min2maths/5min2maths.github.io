@@ -182,6 +182,12 @@ const TXT_CO = {
         piege: "Le facteur multiplie tous les termes : \\(3(2x + 5)\\) n'est pas \\(6x + 5\\). Et devant une parenthèse, \\(-2(x - 4) = -2x + 8\\) : moins par moins donne plus.",
       },
     },
+    /* 28.11 (nickel 10e, ch. 9 Équations) : le MER 10e (FA198–FA200) travaille les équations impossibles et indéterminées
+       et le « − » devant une parenthèse ; les formes de 10e (variantes.js) en posent : le rappel les montre. */
+    eq1: { lesson: {
+      exemple: ["\\(6x - 7 = 2x + 5\\), \\(4x = 12\\), \\(x = 3\\). Contrôle : \\(11 = 11\\).", "\\(x + 7 = 4(2x + 1) - (4x + 6)\\) : \\(x + 7 = 4x - 2\\), \\(-3x = -9\\), \\(x = 3\\).", "\\(4x + 1 = 2x + 8\\), \\(2x = 7\\), \\(x = \\frac{7}{2}\\) : la solution peut être une fraction.", "\\(3(x + 2) - x = 2x + 5\\) donne \\(6 = 5\\), faux : aucune solution ; \\(2(x - 1) = 2x - 2\\) donne \\(0 = 0\\) : tous les nombres sont solutions."],
+      piege: "Un terme qui « change de côté » change de signe : c'est parce qu'on l'a soustrait (ou ajouté) des deux côtés. Un « − » devant une parenthèse change le signe de chaque terme : \\(-(4x + 6) = -4x - 6\\).",
+    } },
   },
 };
 function txtCO(profile, id) { const p = profile; return p && p.system === "CH" && p.track !== "mp" && TXT_CO[p.grade] && TXT_CO[p.grade][id] || null; }

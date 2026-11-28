@@ -80,7 +80,7 @@
           { ctx: "carres-elimines",
             guide: [GS("Développe le membre de gauche : coefficient de " + M("x") + " ?", a + b, M("(" + L(1, a) + ")(" + L(1, b) + ") = " + T2(1, a + b, a * b)) + "."), GS("Développe à droite (sans oublier " + M(e) + "), puis soustrais " + M("x^2") + " des deux côtés : " + M(L(k, 0) + " = \\ ?"), c * d + e - a * b, M(T2(1, c + d, c * d + e)) + " ; il reste " + M(L(k, 0) + " = " + (c * d + e - a * b)) + "."), GS(M("x = \\ ?"), s, M("x = " + s) + " : l'équation avait l'air du 2e degré, mais elle est du 1er degré.")],
             traps: [TV((c * d - a * b) / k, "N'oublie pas le terme " + M(e) + " du membre de droite.")] }); },
-      () => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a <= c); const s = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
+      () => { let a, c; do { a = R.int(3, 9); c = R.int(1, 8); } while (a - c < 2); /* 28.11 (nickel 10e) : a − c = 1 affichait « x = 11, donc x = 11 » */ const s = pk([-6, -5, -4, -3, -2, 2, 3, 4, 5, 6, 7, 8, 9]), b = nz(-9, 9), d = (a - c) * s + b, w = pk(WHO), wrong = (d + b) / (a - c);
         if (Math.abs(wrong - s) < 1e-9) return EQ1[2][3]();
         return Qv(w + " résout " + M(L(a, b) + " = " + L(c, d)) + " ainsi : " + M(L(a - c, 0) + " = " + (d + b)) + ", donc " + M("x = " + tn(wrong)) + ". Trouve l'erreur, puis donne la bonne solution.", s, "Erreur : " + M(b) + " change de membre, donc de signe : " + M(L(a - c, 0) + " = " + d + sgn(-b) + " = " + (d - b)) + ", et " + M("x = " + s) + ". Vérification : " + M(a + " \\cdot " + P(s) + sgn(b) + " = " + (a * s + b)) + " et " + M(c + " \\cdot " + P(s) + sgn(d) + " = " + (c * s + d)) + ".",
           { ctx: "erreur",
