@@ -73,7 +73,15 @@ tirés de 5, C. 2 raisonnements tirés de 5 (cases T1–T6 ✓ ; T7 : relecture 
   `richChapter`, fin de `riche.js`). `src/defis*.js` : pas touchés (les défis de 10e sont dans `variantes.js`).
 - Tests : `tests/parcours.html#section=nickel10_ch7` (nouvelle section : HORS_CO, formes et défis tirés en 10e et jamais
   en 9e ni 11e, recalcul, textes et leçon de 10e, sujet de 10e sans contenu de 11e) ; `tests/riche910.html` (10C07 →
-  litt10, chapitres jugés avec le profil de leur classe).
+  litt10, chapitres jugés avec le profil de leur classe) ; `tests/defis9.html`, `tests/pas_a_pas.html` : une partie de défi
+  peut attendre une expression (spec « expr », comme `defis_2c.js`).
+
+## Tests
+
+Pages de thème `parcours` (toutes sections), `variantes`, `riche910`, `manip`, `variete_niveaux`, `france`, `questions`,
+`recalcul` (4 morceaux), `corrige_valeur` (ch, defis), `defis9`, `pas_a_pas`, `guides`, `tools/test_nom.py` : vertes.
+Suite rapide (52 pages) : échecs corrigés (étape « x + 0 », parties littérales des défis) ; `poids.py ordre` : échec dû
+à docs/ non reconstruit, vert après un build local (19 profils), docs/ remis, rien de commité.
 
 ## Reste / à décider
 

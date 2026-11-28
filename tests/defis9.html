@@ -30,7 +30,10 @@ try {
     for (let s = 1; s <= 40; s++) {
       const q = Engine.build(id, 4, s);
       ok(q && q.parts && q.parts.length >= 2 && q.q && q.sol && q.hints && q.hints.length, id + " " + s + " : structure");
-      const vs = [].concat(...q.parts.map((p) => (p.spec.kind === "pair" ? p.spec.values : [p.spec.value])));
+      /* 28.11 (nickel 10e, ch. 7) : partie à réponse littérale (spec.kind « expr », comme dans defis_2c.js) : expression lisible par le correcteur */
+      const exOk = (e) => { try { Expr.parse(e); return true; } catch (er) { return false; } };
+      ok(q.parts.every((p) => p.spec.kind !== "expr" || exOk(p.spec.expr)), id + " " + s + " : expression illisible");
+      const vs = [].concat(...q.parts.filter((p) => p.spec.kind !== "expr").map((p) => (p.spec.kind === "pair" ? p.spec.values : [p.spec.value])));
       ok(vs.every((v) => Number.isFinite(v)), id + " " + s + " : valeur non finie " + vs);
       ok(!q.co || q.parts.filter((p) => p.spec.kind !== "pair").every((p) => p.spec.value !== 0 && p.spec.value !== 1), id + " " + s + " : valeur triviale " + vs);
       ok(!/undefined|NaN|Infinity/.test(q.q + q.sol + q.parts.map((p) => p.label).join()), id + " " + s + " : texte « undefined/NaN »");

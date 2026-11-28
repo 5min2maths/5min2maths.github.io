@@ -33,7 +33,7 @@ for (const id of ids) {
       const t = txt(q);
       { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
       if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
-      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.parts) { q.parts.forEach((p) => { if (p.spec.kind === "expr" ? !(() => { try { Expr.parse(p.spec.expr); return true; } catch (er) { return false; } })() : !isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); /* 28.11 : partie littérale (expr) permise */ }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
       if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
         const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
         if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
@@ -95,7 +95,7 @@ for (const id of ids) {
       { const plainTxt = t.replace(/\\\(.*?\\\)/g, " "); const dv = [...plainTxt.matchAll(/.{0,25}(\d|\)) : (\d|\().{0,10}/g)].map((m) => m[0]).find((s) => !/h \d{1,2} : \d/.test(s)); if (dv) fail(q.code + " division « : » en texte simple (écrire ÷) : " + dv); }
       { const pl = t.replace(/\\\(.*?\\\)/g, " "); const bad = pl.match(/.{0,30}(\{,\}|\\frac|\\cdot|\^\{).{0,10}/); if (bad) fail(q.code + " TeX hors formule : " + bad[0]); }
       if (/undefined|NaN|Infinity|\[object/.test(t)) fail(q.code + " texte : " + t.match(/.{0,40}(undefined|NaN|Infinity|\[object).{0,20}/)[0]);
-      if (q.parts) { q.parts.forEach((p) => { if (!isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
+      if (q.parts) { q.parts.forEach((p) => { if (p.spec.kind === "expr" ? !(() => { try { Expr.parse(p.spec.expr); return true; } catch (er) { return false; } })() : !isFinite(p.spec.value)) fail(q.code + " partie non finie " + p.label); /* 28.11 : partie littérale (expr) permise */ }); if (s <= 2) samples.push(q.q.replace(/<[^>]+>/g, "").slice(0, 90) + " → " + q.parts.map((p) => +(+p.spec.value).toFixed(4)).join(" ; ")); continue; }
       if (q.spec.kind === "expr") { // réponse littérale (calcul littéral, 15.11)
         const self = checkAnswer(q.spec, q.spec.expr); if (self.status !== "correct") fail(q.code + " la réponse attendue est refusée (" + self.status + " " + (self.message || "") + ") : " + q.spec.expr);
         if (!q.guide) fail(q.code + " sans guide"); else { g++; const last = q.guide[q.guide.length - 1].spec;
