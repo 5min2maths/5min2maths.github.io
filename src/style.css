@@ -1088,3 +1088,5 @@ html.ecran-ordi { scrollbar-gutter: stable; }
 @keyframes spUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes spSq { from { opacity: 0; transform: translateY(-14px) scale(.3); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .splash *, .splash ::before { animation: none !important; opacity: 1 !important; } .splash-circle circle { stroke-dasharray: none; } .splash-glint { display: none; } }
+
+.niv-elo { margin: 0; font-size: 1.05rem; font-weight: 700; } .niv-elo .mark { padding: 0 6px; font-size: 1.15rem; } /* 28.11 : Mathélo bien visible dans Mon niveau */

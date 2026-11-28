@@ -556,7 +556,7 @@ const NIVEAUX = [[-Infinity, "à consolider"], [-300, "en construction"], [-150,
 function niveauOf(st) {
   const p = st.profile, h = harmos(p.system, p.grade), ref = (ELO_REF.find((x) => x[0] === h) || ELO_REF[ELO_REF.length - 1])[1];
   const r = st.elo.r, gap = r - ref, mot = NIVEAUX.filter(([at]) => gap >= at).pop()[1];
-  return { r, mot, titre: /^au /.test(mot) ? "A" + mot.slice(1) : "Niveau " + mot /* « Au niveau attendu », « Niveau solide » */, pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
+  return { r, mot, i: NIVEAUX.findIndex(([, m]) => m === mot), ref, titre: /^au /.test(mot) ? "A" + mot.slice(1) : "Niveau " + mot /* « Au niveau attendu », « Niveau solide » */, pct: Math.max(4, Math.min(100, Math.round(((gap + 450) / 750) * 100))) };
 }
 function niveauCard() {
   const e = state.elo, nv = niveauOf(state), log = e.log || [], today = day();
@@ -572,10 +572,12 @@ function niveauCard() {
     spark = `<svg class="spark" viewBox="0 0 300 56" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="${line} L300,56 L0,56 Z"/><path class="l" d="${line}"/></svg>`;
   }
   const prov = Engine.isProvisional(state) ? ` <span class="badge">se précise</span>` : "";
-  return `<div class="card flat stack niv-card"><div class="eyebrow">📈 Mon niveau</div><h3>${esc(nv.titre)}${prov}</h3>
+  /* 28.11 (enseignant : Mathélo trop discret, « en fin de phrase en gris ») : ligne à part, nombre surligné en jaune */
+  return `<div class="card flat stack niv-card" id="mon-niveau"><div class="eyebrow">📈 Mon niveau</div><h3>${esc(nv.titre)}${prov}</h3>
+    <p class="niv-elo">Ton Mathélo actuel : <span class="mark">${e.r}</span></p>
     <span class="pbar niv-bar" role="img" aria-label="${esc(nv.titre)}"><i style="width:${nv.pct}%"></i></span>
     <p class="small">${evo}</p>${spark}
-    <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais. <span class="niv-num">Mathélo ${e.r}</span></p></div>`;
+    <p class="small muted">Ton niveau suit tes réponses : il monte et descend, c'est normal. Ton grade, lui, monte avec tes pépites, qui ne se perdent jamais.</p></div>`;
 }
 // Grades de l'année (25.11, décision de l'enseignant « Progrès de l'année ») : l'échelle de 🌱 Pousse à 🌟 Légende se
 // parcourt PAR CLASSE et RECOMMENCE CHAQUE ANNÉE (rentrée au 15 août, ou changement de classe). On monte avec des points
@@ -3173,6 +3175,10 @@ function screenSummary() {
   const yg = session.ypg || 0, ypt = ypPts(), g0 = gradeOf(ypt - yg), g1 = gradeOf(ypt);
   if (g1.i > g0.i) gradeNumbers();
   const newGrade = g1.i > g0.i ? `<div class="card stack grade-up"><div class="eyebrow">Nouveau grade !</div><div class="ic-row"><button type="button" class="ic grade-ic grade-open" data-g="${g1.name}" aria-label="Voir la carte du grade ${g1.name}">${g1.ic}</button><div><h3>Tu es maintenant ${esc(g1.title)}</h3><div class="small muted">${g1.next ? "Prochain grade : " + g1.next.ic + " " + g1.next.name + ", encore " + nbFmt(g1.next.at - ypt) + " pépites." /* 28.11 : points → pépites */ : "Le plus haut grade : bravo !"}</div></div></div></div>` : "";
+  /* 28.11 (enseignant) : le niveau n'apparaît au bilan que comme une bonne nouvelle : palier franchi vers le haut
+     (jamais à la baisse, jamais pendant le positionnement provisoire) ; la carte ouvre « Mon niveau » (Mon trésor). */
+  const hasE0 = Number.isFinite(session.elo0), nvA = hasE0 ? niveauOf({ profile: state.profile, elo: { r: session.elo0 } }) : null, nvB = niveauOf(state);
+  const nivUp = hasE0 && nvB.i > nvA.i && !Engine.isProvisional(state) ? `<div class="card stack grade-up niv-up"><div class="eyebrow">📈 Ton niveau monte !</div><h3>Ton niveau passe à « ${esc(nvB.mot)} »</h3><p class="small">Ton Mathélo actuel : <span class="mark">${nvB.r}</span></p><button type="button" class="btn-sec" id="nivup">Voir mon niveau</button></div>` : "";
   /* 26.11 (revue élèves : « Points de l'année +0 » après une bonne séance, plafond du jour déjà atteint) : on le dit. */
   const ypCapped = !yg && ((ypSync() || {}).dp || 0) >= YP.cap;
   const ypRow = ypCapped ? `<div class="spread yp-row"><span>🟡 Pépites</span><b class="small">plafond du jour atteint, reviens demain</b></div>` : `<div class="spread yp-row"><span>🟡 Pépites</span><b><span class="yp-n">+${yg} ${yg > 1 ? "pépites" : "pépite"}</span>${g1.next ? ` <span class="small muted">\u00a0· encore ${nbFmt(g1.next.at - ypt)} avant ${g1.next.name}</span>` : ""}</b></div>`;
@@ -3187,10 +3193,10 @@ function screenSummary() {
     const rule = left && fx < n ? `<div class="small muted">Pour polir une pépite : ${carnetRule()}.</div>` : "";
     h(`${brand}<h2>${esc(title)}</h2>
     <div class="card flat stack">${ypRow}<div class="spread"><span>À polir</span><b>${left ? carnetLeft(state.carnet) : "rien : bravo !"}</b></div>${rule}</div>
-    ${newGrade}${nb}
+    ${newGrade}${nivUp}${nb}
     ${left ? '<button class="btn-primary btn-big" id="carnetagain">✨ Continuer à polir</button>' : ""}
     <button class="${left ? "btn-sec" : "btn-primary btn-big"}" id="home">Retour à l'accueil</button>`);
-    if (nb || newGrade) setTimeout(burst, 250);
+    if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
     updBanner("bilan"); /* 27.11 : nouvelle version prête */
     document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après « À polir », retour sur la page de l'onglet) */
     if (document.getElementById("carnetagain")) document.getElementById("carnetagain").onclick = () => startCarnet();
@@ -3209,7 +3215,7 @@ function screenSummary() {
   <div class="card stack">${scoreRow(n, sc)}
   ${ypRow}${session.rebuilt ? `<p class="small">🪜 Tu as reconstruit ${session.rebuilt > 1 ? session.rebuilt + " solutions" : "une solution"} pas à pas : ça compte aussi.</p>` : ""}</div>
   ${session.ctest ? (() => { const a = ctestNote(session.ctest), b = session.ctest.before; return `<div class="card flat"><div class="spread"><span>${esc(session.ctest.label)}</span><span class="note ${noteCls(a)}">${noteTxt(a)}</span></div><div class="small muted">${a === null ? (isFR() ? "Le niveau apparaît après 3 réponses sur cette compétence." : "La note apparaît après 3 réponses sur cette compétence.") : b === null ? (isFR() ? "Premier positionnement pour cette compétence." : "Première note pour cette compétence.") : a > b ? "En progrès : " + noteTxt(b) + " → " + noteTxt(a) + "." : a < b ? "Avant : " + noteTxt(b) + ". " + (isFR() ? "Il remontera" : "Elle remontera") + " avec la pratique." : isFR() ? "Niveau stable." : "Note stable."}</div><button id="backcomps" class="btn-big">Retour à mes compétences</button></div>`; })() : ""}
-  ${newGrade}${nb}
+  ${newGrade}${nivUp}${nb}
   ${(state.carnet || []).length ? `<div class="card flat stack"><div class="spread"><span>✨ À polir</span><b>${carnetLeft(state.carnet)}</b></div><span class="small muted">${carnetWeekN() ? carnetWeekTxt() + " · " : ""}Pour polir une pépite : ${carnetRule()}.</span><button class="btn-primary" id="carnetagain">${session.carnet ? "Continuer à polir" : "✨ Polir mes pépites maintenant"}</button></div>` : session.carnet ? '<div class="card flat"><p>✨ Rien à polir : bravo !</p></div>' : ""}
   ${returnCard()}
   ${xReady() ? curBonus() : '<span id="curslot" hidden></span>'}
@@ -3219,7 +3225,7 @@ function screenSummary() {
   ecranCols(); bindComment(app, "app"); bindInstall(screenHome);
   /* 24.11 (retour testeur : « séance très courte, l'élève peut croire qu'il a fini trop vite ») */
   if (document.getElementById("again")) document.getElementById("again").onclick = () => { if (n === 1) Engine.otherFormat(state); session = null; save(); startSession(); };
-  if (nb || newGrade) setTimeout(burst, 250);
+  if (nb || newGrade || nivUp) setTimeout(burst, 250); { const nu = document.getElementById("nivup"); if (nu) nu.onclick = () => { homeTab = "prog"; screenHome(); const c = document.getElementById("mon-niveau"); if (c) c.scrollIntoView({ block: "center" }); }; }
   updBanner("bilan");
   document.getElementById("home").onclick = () => { homeTab = "today"; screenHome(); }; /* 28.11 (testeur : après le problème de la semaine, « Retour à l'accueil » rouvrait la page du problème) */
   const bindCur = () => { if (document.getElementById("curbonus")) document.getElementById("curbonus").onclick = () => screenCurious(Curieux.pick(state), screenHome, "bilan"); };
