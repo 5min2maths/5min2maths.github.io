@@ -1505,11 +1505,59 @@ const Engine = {
     return plan;
   },
 
-  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée pour la semaine.
+  /* ================= Problème de la semaine et « Creuser encore » (28.11, décision de l'enseignant) =================
+     « Le grand problème de la semaine, parfois je ne le trouve pas si grand ; et ne pouvoir en faire qu'un donne une
+     impression de rubrique un peu faiblarde. »
+     (1) Un VRAI grand problème : tiré parmi les problèmes riches (isGrand : au moins GRAND.parts parties, un énoncé en
+         situation d'au moins GRAND.prose caractères hors formules, au programme de la classe), environ 10–15 minutes.
+         Élève faible : le MÊME problème, avec plus d'aide (weeklyAid : plan, coup de pouce par partie, 4 essais), jamais
+         raccourci (la règle n° 24 du 26.11, shortProb, reste valable pour le défi du jour).
+     (2) « Creuser encore » (digMore) une fois le problème fait : problèmes des semaines passées et autres grands problèmes
+         des chapitres récents ; pépites ordinaires (l'app : plafond du jour), bonus YP.weekly pour le seul problème de la
+         semaine ; facultatif, hors séance. API documentée dans tools/ETAT.md (section « Problème de la semaine »).
+     Repli explicite (weeklyPick.g) : chapitre en classe (grand → riche, 3 parties en situation → court, 2–3 parties), puis
+     autres notions de l'année (même ordre), puis reprises (grand → court) ; la classe et le chapitre avant la taille. */
+  GRAND: { parts: 4, prose: 70, seeds: 40 },
+  probProse(q) { return String((q && q.q) || "").replace(/\\\(.*?\\\)|\\\[.*?\\\]/g, " ").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim(); },
+  /* sorte d'un problème de niveau 4 pour ce profil : "grand", "riche" (3 parties en situation), "court", ou null (pas un problème) */
+  probKind(state, id, q) {
+    if (!q || q.d !== 4 || !Array.isArray(q.parts) || q.parts.length < 2 || (state && horsCO(state, id, q))) return null;
+    const ctx = this.probProse(q).length >= this.GRAND.prose;
+    return q.parts.length >= this.GRAND.parts && ctx ? "grand" : q.parts.length >= 3 && ctx ? "riche" : "court";
+  },
+  isGrand(state, id, q) { return this.probKind(state, id, q) === "grand"; },
+  /* durée estimée (min) : lecture + 2 min par partie ; un grand problème ≈ 10–15 min */
+  probMinutes(q) { return Math.round(1.5 + this.probProse(q).length / 250 + 2 * ((q && q.parts) || []).length); },
+  /* problèmes distincts (un code par forme : contexte, sinon début de l'énoncé) d'une notion, par sorte, pour ce profil ; mis en cache */
+  probCodes(state, id, kind) {
+    const p = state.profile, c = (this._pc = this._pc || {}), k = [p.system, p.grade, p.track, p.niv, id].join("|");
+    if (!(k in c)) {
+      const out = { grand: [], riche: [], court: [] }, seen = new Set();
+      for (let s = 1; s <= this.GRAND.seeds; s++) {
+        let q; try { q = this.build(id, 4, s); } catch (e) { break; }
+        const kd = this.probKind(state, id, q); if (!kd) continue;
+        const f = q.ctx || qForm(q).slice(0, 60); if (seen.has(kd + f)) continue; seen.add(kd + f);
+        out[kd].push(q.code);
+      }
+      c[k] = out;
+    }
+    return kind ? c[k][kind] : c[k];
+  },
+  weekId() { const d = new Date(); return d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5); },
+  /* historique (state.weeklyHist, champ facultatif : migration douce, aucune clé de stockage changée) :
+     [{ w: semaine, id, c: code, g: sorte, done }] ; done = fait (state.weeklyDone de cette semaine-là) */
+  weeklySync(state) {
+    const H = (state.weeklyHist = Array.isArray(state.weeklyHist) ? state.weeklyHist : []);
+    if (!H.length && state.weeklyPick && state.weeklyPick.id) H.push({ w: state.weeklyPick.week, id: state.weeklyPick.id, c: state.weeklyPick.code || null, g: state.weeklyPick.g || null, done: false }); /* état d'avant le 28.11 */
+    for (const e of H) if (!e.done && state.weeklyDone && e.w === state.weeklyDone) e.done = true;
+    return H;
+  },
+  // Problème de la semaine : une notion « à problème » parmi celles vues, fixée pour la semaine (renvoie la notion ; le
+  // problème lui-même, un code fixe, est dans state.weeklyPick.code et se lit par weeklyQuestion).
   // Calé sur le Mathélo (22.11 : un seul problème par semaine, il doit être à la bonne hauteur) :
   // les 3 notions dont le défi (niveau 4) est le plus proche du Mathélo, une notion pas encore travaillée (m < 0,3) en dernier recours.
   weeklyProblem(state) {
-    const d = new Date(), week = d.getFullYear() + "-" + Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 6048e5);
+    const week = this.weekId(), H = this.weeklySync(state);
     /* 26.11 (revue p6, n° 2 : Hugo 6e, leçon « 0,5 × 0,5 » puis un problème de niveau 4 sur une notion jamais travaillée) :
        seulement une notion déjà travaillée (seen, maîtrise > 0) ou du chapitre « en classe » ; jamais de leçon avant. */
     const worked = (id) => { const s = state.notions[id]; return this.nowHas(state, id) || (s && s.seen > 0 && s.m > 0); };
@@ -1517,35 +1565,123 @@ const Engine = {
     if (!ids.length) return null;
     /* revue p6, n° 1 (Yanis, Emma : problème tiré à l'accueil avant le choix du chapitre « en classe ») : le choix de la semaine
        est refait si le chapitre en classe change, tant que le problème n'est pas fait */
-    const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = typeof weekKey === "function" && state.weeklyDone === weekKey();
-    if (state.weeklyPick && state.weeklyPick.week === week && state.weeklyPick.v === 4 && ids.includes(state.weeklyPick.id) && (done || (state.weeklyPick.now || "") === nowSig)) return state.weeklyPick.id; /* v2 (24.11), v3 (26.11, revue p4), v4 (26.11, revue p6) : nouveau choix */
+    const nowSig = this.nowActive(state) ? state.now.ids.join(",") : "", done = state.weeklyDone === week;
+    const wp = state.weeklyPick;
+    if (wp && wp.week === week && (wp.v === 5 || (wp.v === 4 && done)) && ids.includes(wp.id) && (done || (wp.now || "") === nowSig)) return wp.id; /* v5 (28.11) : un code fixe ; un v4 déjà fait cette semaine reste */
     const r = state.elo.r, m = (id) => (state.notions[id] || {}).m || 0;
     // 24.11 (auteur en 4e : « une factorisation vraiment simple ») : un vrai défi. Notions de l'année ou de l'année
     // précédente d'abord (les plus anciennes pénalisées) ; difficulté visée au-dessus du Mathélo (+150), plus faciles pénalisées.
     const g = state.profile.grade, yr = (id) => { try { const p = placeOf(NOTIONS.find((n) => n.id === id), state.profile); return p ? p[0] : g; } catch (e) { return g; } };
-    /* 26.11 (revue p4, n° 7 : Tle → parabole de 1re, MP 3e → fonctions trigonométriques de MP 2e) : notion de l'année
-       (catalogue, current) avant toute autre ; une notion d'avant ne vient que s'il n'y a rien dans l'année. */
+    /* 26.11 (revue p4, n° 7) : notion de l'année (catalogue, current) avant toute autre. Rangs (revue p6, n° 1) : 0 = notion de
+       l'année (placeOf = classe) du chapitre « en classe », 1 = autre notion de l'année, 2 = reprise du chapitre en classe,
+       3 = reprise du catalogue de l'année, 4 = autre. L'écart d'année est pénalisé dès 1 an. */
     const yearSet = new Set(this.catalog(state.profile).filter((c) => c.current).map((c) => c.id));
-    /* 26.11 (revue p6, n° 1 : Emma 10e → arith@9, Yanis 11e → vol@10, Théo 2nde → pctvar@3e) : le catalogue « current »
-       contient aussi les reprises. Rangs : 0 = notion de l'année (placeOf = classe) du chapitre « en classe », 1 = autre
-       notion de l'année, 2 = reprise du chapitre en classe, 3 = reprise du catalogue de l'année, 4 = autre ; on ne prend
-       que le meilleur rang qui donne un vrai problème. L'écart d'année est pénalisé dès 1 an. */
     const tier = (id) => { const own = yr(id) === g, ch = this.nowHas(state, id); return own && ch ? 0 : own ? 1 : ch ? 2 : yearSet.has(id) ? 3 : 4; };
     const score = (id) => { const it = itemRating(state.profile, id, 4), gap = g - yr(id);
       return Math.abs(it - (r + 150)) + (it < r ? 150 : 0) + (gap >= 1 ? 250 * gap : 0) + (m(id) < 0.3 ? 400 : 0); };
-    /* 26.11 (revue p4, n° 6 : 3e FR, « Problème de la semaine » d'une seule question, rac niveau 3, sous la porte « un problème
-       en plusieurs étapes ») : seulement une notion dont le niveau 4 donne, pour ce profil, un vrai problème en plusieurs parties. */
-    /* (rac en 3e FR : les 200 premiers problèmes de niveau 4 sont hors programme, racine cubique ; make retombait au niveau 3) */
-    const real = (id) => { for (let k = 1; k <= 12; k++) { try { const q = this.build(id, 4, k); if (q && q.d === 4 && Array.isArray(q.parts) && q.parts.length >= 2 && !horsCO(state, id, q)) return true; } catch (e) { return false; } } return false; };
-    let best = [];
-    for (let t = 0; t <= 4 && !best.length; t++)
-      for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (real(id)) best.push(id); if (best.length >= 3) break; }
+    /* 28.11 : passes successives (sorte de problème × rangs) ; dans une passe, le meilleur rang qui donne au moins un problème
+       de la sorte, puis les 3 notions les mieux placées (score). « court » = l'ancien critère (26.11, revue p4, n° 6 : un vrai
+       problème en plusieurs parties). */
+    /* chapitre « en classe » d'abord (règle du 26.11, revue p6, n° 1), puis le reste de l'année, puis les reprises */
+    const PASSES = [["grand", [0]], ["riche", [0]], ["court", [0]], ["grand", [1]], ["riche", [1]], ["court", [1]], ["grand", [2, 3, 4]], ["court", [2, 3, 4]]];
+    const has = (id, kd) => kd === "court" ? this.probCodes(state, id, "grand").length + this.probCodes(state, id, "riche").length + this.probCodes(state, id, "court").length > 0 : this.probCodes(state, id, kd).length > 0;
+    /* le problème : une forme pas encore donnée en problème de la semaine (historique) ; d'abord les notions qui en ont encore */
+    const poolOf = (id, kd) => kd === "court" ? [...this.probCodes(state, id, "grand"), ...this.probCodes(state, id, "riche"), ...this.probCodes(state, id, "court")] : this.probCodes(state, id, kd);
+    const used = new Set(H.filter((e) => e.w !== week).map((e) => e.c)), freshOf = (id, kd) => poolOf(id, kd).filter((c) => !used.has(c));
+    let best = [], kind = null;
+    /* sorte par sorte : une forme jamais donnée, sinon (toutes données) une forme déjà donnée, avec d'autres nombres */
+    for (const [kd, tiers] of PASSES) {
+      for (const newOnly of [true, false]) {
+        for (const t of tiers) {
+          for (const id of ids.filter((x) => tier(x) === t).sort((a, b) => score(a) - score(b))) { if (has(id, kd) && (!newOnly || freshOf(id, kd).length)) best.push(id); if (best.length >= 3) break; }
+          if (best.length) break;
+        }
+        if (best.length) break;
+      }
+      if (best.length) { kind = kd; break; }
+    }
     if (!best.length) return null;
     const n = +week.split("-")[1], id = best[n % best.length];
-    state.weeklyPick = { week, id, v: 4, now: nowSig };
+    const pool = poolOf(id, kind), fresh = freshOf(id, kind), L = fresh.length ? fresh : pool;
+    let code = L[n % L.length];
+    if (used.has(code)) { const q0 = this.fromCode(code), f0 = q0 && (q0.ctx || qForm(q0).slice(0, 60)), kd0 = q0 && this.probKind(state, id, q0);
+      for (let s = this.GRAND.seeds + 1 + n; s <= this.GRAND.seeds + 400; s += 7) { let q; try { q = this.build(id, 4, s); } catch (e) { break; }
+        if (q && !used.has(q.code) && this.probKind(state, id, q) === kd0 && (q.ctx || qForm(q).slice(0, 60)) === f0) { code = q.code; break; } } }
+    state.weeklyPick = { week, id, v: 5, now: nowSig, code, g: kind };
+    const e = H.find((x) => x.w === week); if (e) Object.assign(e, { id, c: code, g: kind }); else H.push({ w: week, id, c: code, g: kind, done: false });
+    if (H.length > 60) H.splice(0, H.length - 60);
     return id;
   },
+  /* La question du problème de la semaine (code fixe de la semaine), avec l'aide des élèves faibles ; null sans problème.
+     L'app l'utilise à la place de make(state, id, 4) dans la séance « weekly ». */
+  weeklyQuestion(state) {
+    const id = this.weeklyProblem(state); if (!id) return null;
+    const c = state.weeklyPick && state.weeklyPick.code;
+    let q = c ? this.fromCode(c) : null;
+    if (!q) { q = this.make(state, id, 4, undefined, false); return q && q.d === 4 ? this.weeklyAid(state, q) : q; } /* choix v4 d'avant le 28.11 */
+    return this.weeklyAid(state, this.finalize(state, id, q));
+  },
+  /* 28.11 : aide pour un élève faible (weak4 : sous la moyenne de sa classe ou en grande difficulté), sans raccourcir :
+     q.aid = { plan, parts: [coup de pouce par partie | null] }, q.maxTries = 4 (au lieu de 3). Les coups de pouce viennent
+     des indices du problème (segments « a) … », « b) … »), sinon l'indice d'outil pour a) et l'indice de calcul pour la
+     dernière partie, sinon l'indice de la notion. Jamais la réponse : rien n'est tiré du corrigé. force : pour les tests. */
+  weeklyAid(state, q, force) {
+    if (!q || !Array.isArray(q.parts) || !(force || this.weak4(state))) return q;
+    const H = (q.hints || []).map((x) => String(x)), seg = {}, free = [];
+    for (const h of H) {
+      const bits = h.split(/(?:^|\s)(?=[a-h]\)\s)/);
+      for (const b of bits) { const m = /^([a-h])\)\s*([\s\S]*)$/.exec(b.trim()); if (m) (seg[m[1]] = seg[m[1]] || []).push(m[2].trim()); else if (b.trim()) free.push(b.trim()); }
+    }
+    const nH = typeof HINTS !== "undefined" && HINTS[q.id] ? plainTeX(HINTS[q.id]) : "";
+    const n = q.parts.length, parts = q.parts.map((p, i) => { const L = String.fromCharCode(97 + i);
+      if (seg[L]) return seg[L].join(" ");
+      if (i === 0 && free[0]) return free[0];
+      if (i === n - 1 && free.length > 1) return free[free.length - 1];
+      return i === 0 && nH ? nH : null; });
+    const plan = "Un grand problème en " + n + " parties : lis tout l'énoncé et repère les données. Fais les parties dans l'ordre : chaque réponse sert souvent à la suivante. Tu as 4 essais et un coup de pouce par partie.";
+    return { ...q, aid: { plan, parts }, maxTries: 4, helped: true };
+  },
 
+  /* ---------- « Creuser encore » (dans la mine, une fois le problème de la semaine fait) ----------
+     digOpen(state) : le problème de cette semaine est fait.
+     digMore(state, n = 8, opt) : liste de problèmes à creuser, [{ code, id, kind: "semaine" | "chapitre", week?, done?, label,
+       parts, minutes }] : d'abord les problèmes des semaines passées pas faits, puis les grands problèmes des chapitres
+       récents (notions de l'année travaillées, chapitre en classe d'abord), puis les problèmes des semaines passées déjà
+       faits ; jamais celui de la semaine, jamais un problème creusé dans les 14 derniers jours. opt.force : sans digOpen (tests).
+     digQuestion(state, code) : la question (avec l'aide des élèves faibles), q.dig = true ; null si le code est invalide.
+     digNote(state, code) : à appeler quand l'élève a fini ce problème (state.digLog = { code: jour }, 80 au plus).
+     Pépites : ordinaires (plafond du jour), jamais YP.weekly : c'est l'app qui les compte. */
+  digOpen(state) { return !!state && state.weeklyDone === this.weekId(); },
+  digMore(state, n = 8, opt) {
+    if (!state || !(opt && opt.force) && !this.digOpen(state)) return [];
+    const H = this.weeklySync(state), week = this.weekId(), cur = state.weeklyPick && state.weeklyPick.week === week ? state.weeklyPick.code : null;
+    const log = state.digLog || {}, lim = addDays(day(), -14), recentDug = (c) => !!(log[c] && log[c] >= lim);
+    const lab = (id) => { const x = NOTIONS.find((k) => k.id === id); return x ? x.label : id; };
+    const item = (code, kind, extra) => { let q = null; try { q = this.fromCode(code); } catch (e) { q = null; } if (!q || !this.probKind(state, q.id, q)) return null;
+      return { code, id: q.id, kind, label: lab(q.id), parts: q.parts.length, minutes: this.probMinutes(q), ...(extra || {}) }; };
+    const out = [], seen = new Set(cur ? [cur] : []), push = (x) => { if (x && !seen.has(x.code) && !recentDug(x.code)) { seen.add(x.code); out.push(x); } };
+    const past = H.filter((e) => e.w !== week && e.c).reverse(), histC = new Set(H.map((e) => e.c));
+    for (const e of past.filter((e) => !e.done)) push(item(e.c, "semaine", { week: e.w, done: false }));
+    /* grands problèmes des chapitres récents : notions de l'année (placeOf = classe) travaillées, chapitre en classe puis
+       notions récentes, une forme par notion à tour de rôle */
+    const g = state.profile.grade, own = (id) => { const p = placeOf(NOTIONS.find((k) => k.id === id), state.profile); return !!p && p[0] === g; };
+    const s = (id) => state.notions[id] || {}, worked = (id) => this.nowHas(state, id) || (s(id).seen > 0 && s(id).m > 0);
+    const ids = this.eligible(state).filter((id) => hasProb(id) && own(id) && worked(id) && (this.nowHas(state, id) || this.isRecent(state, id)))
+      .sort((a, b) => (this.nowHas(state, b) ? 1 : 0) - (this.nowHas(state, a) ? 1 : 0) || (s(b).last || "").localeCompare(s(a).last || ""));
+    const lists = ids.map((id) => this.probCodes(state, id, "grand").slice());
+    for (let k = 0; out.length < n && lists.some((l) => l.length); k++) for (const l of lists) { if (out.length >= n) break; const c = l.shift(); if (c && !histC.has(c)) push(item(c, "chapitre")); }
+    for (const e of past.filter((e) => e.done)) push(item(e.c, "semaine", { week: e.w, done: true }));
+    return out.slice(0, n);
+  },
+  digQuestion(state, code) {
+    let q = null; try { q = this.fromCode(code); } catch (e) { q = null; }
+    if (!q || q.d !== 4 || !q.parts) return null;
+    return { ...this.weeklyAid(state, this.finalize(state, q.id, q)), dig: true };
+  },
+  digNote(state, code) {
+    const L = (state.digLog = state.digLog || {}); L[code] = day();
+    const ks = Object.keys(L).sort((a, b) => L[a].localeCompare(L[b])); while (ks.length > 80) delete L[ks.shift()];
+  },
   isProvisional(state) { return state.elo.n < 20; },
 
   themeLevels(state) {

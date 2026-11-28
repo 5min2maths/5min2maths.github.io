@@ -2092,6 +2092,9 @@ function nextQuestion(redo) {
     used.push(key(q));
   }
   /* 26.11 (revue p4, n° 6) : problème de la semaine : un vrai problème (niveau 4), quitte à retirer plusieurs fois */
+  /* 28.11 (décision de l'enseignant) : le problème de la semaine est un code fixe (un grand problème), avec l'aide des
+     élèves faibles (Engine.weeklyQuestion) ; repli sur l'ancien tirage si le moteur n'en donne pas. */
+  if (!redo && session.weekly) { const wq = Engine.weeklyQuestion(state); if (wq && wq.id === id) q = wq; }
   if (!redo && session.weekly) for (let k = 0; k < 20 && q && q.d !== 4; k++) q = Engine.make(state, id, 4, undefined, false);
   /* 25.11 : pas les nombres de la leçon. 27.11 (test instable, réciproque de Pythagore : peu de triplets au niveau 1) : toute
      question de la notion qui suit sa leçon dans la séance, et 40 essais au lieu de 12. */
@@ -2431,7 +2434,8 @@ function renderProblem(q, opt) {
   <div class="qtext">${boldData(q.q)}</div>${q.fig ? `<div class="figwrap">${q.fig}</div>` : ""}
   ${scratchHtml()}
   ${lessonDetails(q.id)}
-  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>
+  ${q.aid ? `<p class="small aid-plan">🪜 ${escT(q.aid.plan)}</p>` /* 28.11 : aide des élèves faibles (Engine.weeklyAid) */ : ""}
+  ${q.parts.map((p, i) => `<div class="answer part" data-i="${i}"><label for="p${i}"><b>${p.label}</b>${exactNote(p.spec, p.label) ? ` <span class="small muted">${p.spec.kind === "set" ? "(« ; » entre les solutions, ∅ s'il n'y en a pas)" : "(valeur exacte)"}</span>` : ""} <span class="mk" id="mk${i}"></span></label>${q.aid && q.aid.parts[i] ? `<details class="aid small"><summary>Coup de pouce</summary>${escT(q.aid.parts[i])}</details>` : ""}
     <input id="p${i}" class="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ta réponse…" enterkeyhint="${i < q.parts.length - 1 ? "next" : "done"}"><div class="preview" id="pv${i}"></div>${i < q.parts.length - 1 ? `<button type="button" class="btn-ghost small next-part" data-i="${i}">partie suivante ↓</button>` : ""}</div>`).join("")}
   ${keypadHtml(q.parts[0].spec)}
   <div id="fb" aria-live="polite"></div></div>
@@ -2521,7 +2525,7 @@ function renderProblem(q, opt) {
       document.getElementById("mk" + i).textContent = ok[i] ? "✓" : "✗";
       if (ok[i]) document.getElementById("p" + i).disabled = true;
     });
-    if (ok.every(Boolean) || tries >= 3) return end(false);
+    if (ok.every(Boolean) || tries >= (q.maxTries || 3)) return end(false); /* 28.11 : 4 essais avec l'aide (Engine.weeklyAid) */
     const nx = ok.findIndex((v) => !v); if (nx >= 0) { active = document.getElementById("p" + nx); placeKp(active); }
     /* 25.11 soir (revue d'un testeur : indice de la partie c alors que la partie a était fausse) : indice de la première partie
        fausse s'il est marqué « a) », « b) »… ; un indice non marqué n'est donné que pour la dernière partie ; sinon, relance. */
