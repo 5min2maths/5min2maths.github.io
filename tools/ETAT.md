@@ -101,6 +101,8 @@ puis deux dépôts GitHub (+ domaine pepite-carre.ch, avant l'ouverture à la 11
 
 ## Décisions de l'enseignant
 
+- **28.11 : +20 questions curieuses et +15 histoires validées** par l'enseignant (relecture des histoires faite).
+
 - **28.11 : MP en suspens** (« pas public cible ») : plus de travail ciblé MP (contenu, grands problèmes, curieux,
   histoires, audits) ; l'existant reste. Grand problème : 4 essais pour les faibles (gardé) ; chapitre en classe sans grand
   problème → problème riche du chapitre (gardé) ; grands problèmes à écrire : 11e et 1re Collège d'abord (4e partie
